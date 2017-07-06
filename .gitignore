@@ -18,3 +18,4 @@ atlassian-ide-plugin.xml
 out/
 *.ipr
 *.iws
+jmh-result*.csv

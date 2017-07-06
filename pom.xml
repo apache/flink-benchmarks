@@ -200,22 +200,25 @@ under the License.
 				<executions>
 					<execution>
 						<id>run-benchmarks</id>
-						<phase>integration-test</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
-						<configuration>
-							<classpathScope>test</classpathScope>
-							<executable>java</executable>
-							<arguments>
-								<argument>-classpath</argument>
-								<classpath/>
-								<argument>org.openjdk.jmh.Main</argument>
-								<argument>.*</argument>
-							</arguments>
-						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<classpathScope>test</classpathScope>
+					<executable>java</executable>
+					<arguments>
+						<argument>-classpath</argument>
+						<classpath/>
+						<argument>org.openjdk.jmh.Main</argument>
+						<argument>-f</argument>
+						<argument>1</argument>
+						<argument>-rf</argument>
+						<argument>csv</argument>
+						<argument>.*</argument>
+					</arguments>
+				</configuration>
 			</plugin>
 
 			<!-- We use the maven-shade plugin to create a fat jar that contains all dependencies
