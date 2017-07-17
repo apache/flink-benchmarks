@@ -37,6 +37,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
+import java.io.IOException;
+
 public class KeyByBenchmark extends BenchmarkBase {
 
 	public static void main(String[] args)
@@ -70,7 +72,7 @@ public class KeyByBenchmark extends BenchmarkBase {
 
 		@Setup
 		@Override
-		public void setUp() {
+		public void setUp() throws IOException {
 			super.setUp();
 
 			source = env.addSource(new IntegerLongSource(numberOfElements, RECORDS_PER_INVOCATION));
