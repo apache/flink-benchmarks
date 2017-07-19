@@ -86,7 +86,7 @@ public class KeyByBenchmark extends BenchmarkBase {
 		}
 	}
 
-	private class SumReduce implements ReduceFunction<Record> {
+	private static class SumReduce implements ReduceFunction<Record> {
 		@Override
 		public Record reduce(Record var1, Record var2) throws Exception {
 			return Record.of(var1.key, var1.value + var2.value);
