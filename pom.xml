@@ -35,6 +35,7 @@ under the License.
 		<log4j.version>1.2.17</log4j.version>
 		<scala.binary.version>2.11</scala.binary.version>
 		<jmh.version>1.19</jmh.version>
+		<junit.version>4.12</junit.version>
 	</properties>
 
 	<repositories>
@@ -100,6 +101,14 @@ under the License.
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<type>jar</type>
+		</dependency>
+
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>

@@ -18,12 +18,11 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
+import org.apache.flink.benchmark.functions.LongSource;
+import org.apache.flink.benchmark.functions.MultiplyByTwo;
+import org.apache.flink.benchmark.functions.SumReduce;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.runner.Runner;
@@ -57,49 +56,5 @@ public class SumLongsBenchmark extends BenchmarkBase {
 				.print();
 
 		env.execute();
-	}
-
-	private static class MultiplyByTwo implements MapFunction<Long, Long> {
-		@Override
-		public Long map(Long value) throws Exception {
-			return value * 2;
-		}
-	}
-
-	private static class SumReduce implements ReduceFunction<Long> {
-		@Override
-		public Long reduce(Long value1, Long value2) throws Exception {
-			return value1 + value2;
-		}
-	}
-
-	public class LongSource extends RichParallelSourceFunction<Long> {
-
-		private volatile boolean running = true;
-		private long maxValue;
-
-		public LongSource(long maxValue) {
-			this.maxValue = maxValue;
-		}
-
-		@Override
-		public void run(SourceFunction.SourceContext<Long> ctx) throws Exception {
-			long counter = 0;
-
-			while (running) {
-				synchronized (ctx.getCheckpointLock()) {
-					ctx.collect(counter);
-					counter++;
-					if (counter >= maxValue) {
-						cancel();
-					}
-				}
-			}
-		}
-
-		@Override
-		public void cancel() {
-			running = false;
-		}
 	}
 }
