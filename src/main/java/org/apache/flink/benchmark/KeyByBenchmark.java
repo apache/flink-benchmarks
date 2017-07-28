@@ -25,7 +25,6 @@ import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunctio
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
 
 import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -61,8 +60,7 @@ public class KeyByBenchmark extends BenchmarkBase {
 	}
 
 	public static class KeyByContext extends Context {
-		@Param({"10", "1000"})
-		public int numberOfElements;
+		public final int numberOfElements = 1000;
 
 		public DataStreamSource<Record> source;
 

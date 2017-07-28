@@ -116,9 +116,8 @@ public class StateBackendBenchmark {
 
 		public DataStreamSource<Record> source;
 
-		@Param({"1"})
-		private int parallelism = 1;
-		private boolean objectReuse = true;
+		private final int parallelism = 1;
+		private final boolean objectReuse = true;
 
 		public StateBackendContext() {
 			try {
