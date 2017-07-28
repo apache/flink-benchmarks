@@ -18,26 +18,19 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
-import org.apache.flink.runtime.state.AbstractStateBackend;
-import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.util.FileUtils;
+
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
@@ -60,28 +53,10 @@ public class BenchmarkBase {
 
 	@State(Thread)
 	public static class Context {
-
-		@Param({"1"})
-		private int parallelism = 1;
-
-		@Param({"true", "false"})
-		private boolean objectReuse = true;
-
-//		@Param({"memory", "fs", "fsAsync", "rocks", "rocksIncremental"})
-		@Param({"memory", "rocks"})
-		private String stateBackend = "memory";
-
-		private final File checkpointDir;
-
 		public final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-		public Context() {
-			try {
-				checkpointDir = Files.createTempDirectory("bench-").toFile();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+		private final int parallelism = 1;
+		private final boolean objectReuse = true;
 
 		@Setup
 		public void setUp() throws IOException {
@@ -92,34 +67,7 @@ public class BenchmarkBase {
 				env.getConfig().enableObjectReuse();
 			}
 
-			final AbstractStateBackend stateBackend;
-			String checkpointDataUri = "file://" + checkpointDir.getAbsolutePath();
-			switch (this.stateBackend) {
-				case "memory":
-					stateBackend = new MemoryStateBackend();
-					break;
-				case "fs":
-					stateBackend = new FsStateBackend(checkpointDataUri, false);
-					break;
-				case "fsAsync":
-					stateBackend = new FsStateBackend(checkpointDataUri, true);
-					break;
-				case "rocks":
-					stateBackend = new RocksDBStateBackend(checkpointDataUri, false);
-					break;
-				case "rocksIncremental":
-					stateBackend = new RocksDBStateBackend(checkpointDataUri, true);
-					break;
-				default:
-					throw new IllegalArgumentException("Unknown state backend: " + this.stateBackend);
-			}
-
-			env.setStateBackend(stateBackend);
-		}
-
-		@TearDown
-		public void tearDown() throws IOException {
-			FileUtils.deleteDirectory(checkpointDir);
+			env.setStateBackend(new MemoryStateBackend());
 		}
 
 		public void execute() throws Exception {
