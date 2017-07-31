@@ -221,8 +221,6 @@ under the License.
 						<argument>-classpath</argument>
 						<classpath/>
 						<argument>org.openjdk.jmh.Main</argument>
-						<argument>-f</argument>
-						<argument>1</argument>
 						<argument>-rf</argument>
 						<argument>csv</argument>
 						<argument>.*</argument>
