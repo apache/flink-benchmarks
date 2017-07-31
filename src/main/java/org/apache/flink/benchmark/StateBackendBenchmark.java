@@ -61,13 +61,13 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
 @State(Thread)
 @OutputTimeUnit(MILLISECONDS)
 @BenchmarkMode(Throughput)
-@Fork(value = 1, jvmArgsAppend = {
+@Fork(value = 3, jvmArgsAppend = {
 		"-Djava.rmi.server.hostname=127.0.0.1",
 		"-Dcom.sun.management.jmxremote.authenticate=false",
 		"-Dcom.sun.management.jmxremote.ssl=false"})
 @OperationsPerInvocation(value = StateBackendBenchmark.RECORDS_PER_INVOCATION)
-@Warmup(iterations = 4)
-@Measurement(iterations = 4)
+@Warmup(iterations = 10)
+@Measurement(iterations = 10)
 public class StateBackendBenchmark {
 
 	public static final int RECORDS_PER_INVOCATION = 1_000_000;
