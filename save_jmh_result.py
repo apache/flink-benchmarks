@@ -72,14 +72,6 @@ def readData(args):
                 for paramIndex in paramIndexes:
                     name += "." + line[paramIndex]
 
-            coef = 1.0
-            #coef = random.uniform(0.99, 1.01)
-            #if name.find("bigint") > 0:
-            #    coef *= 0.8
-
-            #if name.find("with_hash") > 0:
-            #    coef *= 0.8
-
             results.append({
                 'commitid': args.commit,
                 'branch': args.branch,
@@ -88,8 +80,8 @@ def readData(args):
                 'benchmark': name,
                 'environment': args.environment,
                 'lessisbetter': False,
-                #'result_value': float(line[scoreIndex]),
-                'result_value': float(line[scoreIndex]) * coef,
+                'units': 'records/ms',
+                'result_value': float(line[scoreIndex]),
 
                 'revision_date': str(modificationDate),
                 'result_date': str(modificationDate),
