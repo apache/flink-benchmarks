@@ -29,6 +29,7 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindo
 import org.apache.flink.streaming.api.windowing.time.Time;
 
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -38,7 +39,10 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.IOException;
 
+@OperationsPerInvocation(value = WindowBenchmarks.RECORDS_PER_INVOCATION)
 public class WindowBenchmarks extends BenchmarkBase {
+
+	public static final int RECORDS_PER_INVOCATION = 7_000_000;
 
 	public static void main(String[] args)
 			throws RunnerException {

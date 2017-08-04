@@ -28,32 +28,11 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.FileUtils;
 
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Warmup;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.openjdk.jmh.annotations.Mode.Throughput;
-import static org.openjdk.jmh.annotations.Scope.Thread;
-
-@SuppressWarnings("MethodMayBeStatic")
-@State(Thread)
-@OutputTimeUnit(MILLISECONDS)
-@BenchmarkMode(Throughput)
-@Fork(value = 3, jvmArgsAppend = {
-		"-Djava.rmi.server.hostname=127.0.0.1",
-		"-Dcom.sun.management.jmxremote.authenticate=false",
-		"-Dcom.sun.management.jmxremote.ssl=false"})
-@Warmup(iterations = 10)
-@Measurement(iterations = 10)
-public class StateBackendBenchmarkBase {
+public class StateBackendBenchmarkBase extends BenchmarkBase {
 	public enum StateBackend {
 		MEMORY,
 		FS,

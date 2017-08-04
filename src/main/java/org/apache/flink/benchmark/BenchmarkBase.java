@@ -24,7 +24,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -44,13 +43,9 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
 		"-Djava.rmi.server.hostname=127.0.0.1",
 		"-Dcom.sun.management.jmxremote.authenticate=false",
 		"-Dcom.sun.management.jmxremote.ssl=false"})
-@OperationsPerInvocation(value = BenchmarkBase.RECORDS_PER_INVOCATION)
 @Warmup(iterations = 10)
 @Measurement(iterations = 10)
 public class BenchmarkBase {
-
-	public static final int RECORDS_PER_INVOCATION = 7_000_000;
-
 	@State(Thread)
 	public static class Context {
 		public final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
