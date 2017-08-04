@@ -18,7 +18,6 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.benchmark.functions.IntLongApplications;
 import org.apache.flink.benchmark.functions.IntegerLongSource;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.runtime.state.AbstractStateBackend;
@@ -27,26 +26,14 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.FileUtils;
 
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,15 +51,9 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
 		"-Djava.rmi.server.hostname=127.0.0.1",
 		"-Dcom.sun.management.jmxremote.authenticate=false",
 		"-Dcom.sun.management.jmxremote.ssl=false"})
-@OperationsPerInvocation(value = StateBackendBenchmark.RECORDS_PER_INVOCATION)
 @Warmup(iterations = 10)
 @Measurement(iterations = 10)
-public class StateBackendBenchmark {
-
-	// This value is too small for MEMORY, FS and FS_ASYNC since startup overhead is quite significant. However
-	// it is a compromise to keep one benchmark for comparison of both the ROCKS and MEMORY backends.
-	public static final int RECORDS_PER_INVOCATION = 2_000_000;
-
+public class StateBackendBenchmarkBase {
 	public enum StateBackend {
 		MEMORY,
 		FS,
@@ -81,27 +62,7 @@ public class StateBackendBenchmark {
 		ROCKS_INC
 	}
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + StateBackendBenchmark.class.getSimpleName() + ".*")
-				.build();
-
-		new Runner(options).run();
-	}
-
-	@Benchmark
-	public void stateBackends(StateBackendContext context) throws Exception {
-		IntLongApplications.reduceWithWindow(context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
-		context.execute();
-	}
-
-	@State(Thread)
 	public static class StateBackendContext {
-		@Param
-		public StateBackend stateBackend = StateBackend.MEMORY;
-
 		public final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
 		public final File checkpointDir;
@@ -121,8 +82,7 @@ public class StateBackendBenchmark {
 			}
 		}
 
-		@Setup
-		public void setUp() throws IOException {
+		public void setUp(StateBackend stateBackend, long recordsPerInvocation) throws IOException {
 			// set up the execution environment
 			env.setParallelism(parallelism);
 			env.getConfig().disableSysoutLogging();
@@ -155,10 +115,9 @@ public class StateBackendBenchmark {
 			env.setStateBackend(backend);
 
 			env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-			source = env.addSource(new IntegerLongSource(numberOfElements, RECORDS_PER_INVOCATION));
+			source = env.addSource(new IntegerLongSource(numberOfElements, recordsPerInvocation));
 		}
 
-		@TearDown
 		public void tearDown() throws IOException {
 			FileUtils.deleteDirectory(checkpointDir);
 		}
