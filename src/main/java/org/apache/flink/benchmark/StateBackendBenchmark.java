@@ -27,7 +27,7 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.FileUtils;
 
@@ -69,7 +69,9 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
 @Measurement(iterations = 10)
 public class StateBackendBenchmark {
 
-	public static final int RECORDS_PER_INVOCATION = 1_000_000;
+	// This value is too small for MEMORY, FS and FS_ASYNC since startup overhead is quite significant. However
+	// it is a compromise to keep one benchmark for comparison of both the ROCKS and MEMORY backends.
+	public static final int RECORDS_PER_INVOCATION = 2_000_000;
 
 	public enum StateBackend {
 		MEMORY,
@@ -91,7 +93,7 @@ public class StateBackendBenchmark {
 
 	@Benchmark
 	public void stateBackends(StateBackendContext context) throws Exception {
-		IntLongApplications.reduceWithWindow(context.source, EventTimeSessionWindows.withGap(Time.seconds(500)));
+		IntLongApplications.reduceWithWindow(context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
 		context.execute();
 	}
 
