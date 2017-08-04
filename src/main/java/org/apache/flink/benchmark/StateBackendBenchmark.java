@@ -18,8 +18,8 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
+import org.apache.flink.benchmark.functions.IntLongApplications;
+import org.apache.flink.benchmark.functions.IntegerLongSource;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.runtime.state.AbstractStateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
@@ -27,7 +27,6 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.FileUtils;
@@ -92,14 +91,7 @@ public class StateBackendBenchmark {
 
 	@Benchmark
 	public void stateBackends(StateBackendContext context) throws Exception {
-
-		context.source
-				.map(new MultiplyByTwo())
-				.keyBy(record -> record.key)
-				.window(EventTimeSessionWindows.withGap(Time.seconds(500)))
-				.reduce(new SumReduce())
-				.addSink(new CollectSink());
-
+		IntLongApplications.reduceWithWindow(context.source, EventTimeSessionWindows.withGap(Time.seconds(500)));
 		context.execute();
 	}
 
@@ -114,7 +106,7 @@ public class StateBackendBenchmark {
 
 		public final int numberOfElements = 1000;
 
-		public DataStreamSource<Record> source;
+		public DataStreamSource<IntegerLongSource.Record> source;
 
 		private final int parallelism = 1;
 		private final boolean objectReuse = true;
@@ -171,80 +163,6 @@ public class StateBackendBenchmark {
 
 		public void execute() throws Exception {
 			env.execute();
-		}
-	}
-
-	private static class MultiplyByTwo implements MapFunction<Record, Record> {
-		@Override
-		public Record map(Record value) throws Exception {
-			return Record.of(value.key, value.value * 2);
-		}
-	}
-
-	private static class SumReduce implements ReduceFunction<Record> {
-		@Override
-		public Record reduce(Record var1, Record var2) throws Exception {
-			return Record.of(var1.key, var1.value + var2.value);
-		}
-	}
-
-	public static class Record {
-
-		public final int key;
-		public final long value;
-
-		public Record() {
-			this(0, 0);
-		}
-
-		public Record(int key, long value) {
-			this.key = key;
-			this.value = value;
-		}
-
-		public static Record of(int key, long value) {
-			return new Record(key, value);
-		}
-
-		public int getKey() {
-			return key;
-		}
-
-		@Override
-		public String toString() {
-			return String.format("(%s, %s)", key, value);
-		}
-	}
-
-	public static class IntegerLongSource extends RichParallelSourceFunction<Record> {
-
-		private volatile boolean running = true;
-		private int numberOfKeys;
-		private long numberOfElements;
-
-		public IntegerLongSource(int numberOfKeys, long numberOfElements) {
-			this.numberOfKeys = numberOfKeys;
-			this.numberOfElements = numberOfElements;
-		}
-
-		@Override
-		public void run(SourceContext<Record> ctx) throws Exception {
-			long counter = 0;
-
-			while (running) {
-				synchronized (ctx.getCheckpointLock()) {
-					ctx.collectWithTimestamp(Record.of((int) (counter % numberOfKeys), counter), counter);
-					counter++;
-					if (counter >= numberOfElements) {
-						cancel();
-					}
-				}
-			}
-		}
-
-		@Override
-		public void cancel() {
-			running = false;
 		}
 	}
 }

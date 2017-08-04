@@ -16,21 +16,13 @@
  * limitations under the License.
  */
 
-package org.apache.flink.benchmark;
+package org.apache.flink.benchmark.functions;
 
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.api.common.functions.ReduceFunction;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Created by pnowojski on 7/5/17.
- */
-public class CollectSink<T> implements SinkFunction<T> {
-	public final List<T> result = new ArrayList<>();
-
-	@Override
-	public void invoke(T value) throws Exception {
-		result.add(value);
-	}
+public class SumReduceIntLong implements ReduceFunction<IntegerLongSource.Record> {
+    @Override
+    public IntegerLongSource.Record reduce(IntegerLongSource.Record var1, IntegerLongSource.Record var2) throws Exception {
+        return IntegerLongSource.Record.of(var1.key, var1.value + var2.value);
+    }
 }

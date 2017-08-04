@@ -16,21 +16,22 @@
  * limitations under the License.
  */
 
-package org.apache.flink.benchmark;
+package org.apache.flink.benchmark.functions;
 
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.benchmark.CollectSink;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.windowing.assigners.WindowAssigner;
+import org.apache.flink.streaming.api.windowing.windows.Window;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Created by pnowojski on 7/5/17.
- */
-public class CollectSink<T> implements SinkFunction<T> {
-	public final List<T> result = new ArrayList<>();
-
-	@Override
-	public void invoke(T value) throws Exception {
-		result.add(value);
-	}
+public class IntLongApplications {
+    public static <W extends Window> void reduceWithWindow(
+            DataStreamSource<IntegerLongSource.Record> source,
+            WindowAssigner<Object, W> windowAssigner) {
+        source
+                .map(new MultiplyIntLongByTwo())
+                .keyBy(record -> record.key)
+                .window(windowAssigner)
+                .reduce(new SumReduceIntLong())
+                .addSink(new CollectSink());
+    }
 }

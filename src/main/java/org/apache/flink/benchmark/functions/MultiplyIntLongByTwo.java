@@ -16,21 +16,13 @@
  * limitations under the License.
  */
 
-package org.apache.flink.benchmark;
+package org.apache.flink.benchmark.functions;
 
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Created by pnowojski on 7/5/17.
- */
-public class CollectSink<T> implements SinkFunction<T> {
-	public final List<T> result = new ArrayList<>();
-
-	@Override
-	public void invoke(T value) throws Exception {
-		result.add(value);
-	}
+public class MultiplyIntLongByTwo implements MapFunction<IntegerLongSource.Record, IntegerLongSource.Record> {
+    @Override
+    public IntegerLongSource.Record map(IntegerLongSource.Record record) throws Exception {
+        return IntegerLongSource.Record.of(record.key, record.value * 2);
+    }
 }
