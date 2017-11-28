@@ -78,7 +78,7 @@ public class WindowBenchmarks extends BenchmarkBase {
 		context.execute();
 	}
 
-	public static class TimeWindowContext extends Context {
+	public static class TimeWindowContext extends FlinkEnvironmentContext {
 		public final int numberOfElements = 1000;
 
 		public DataStreamSource<IntegerLongSource.Record> source;

@@ -48,7 +48,7 @@ public class SumLongsBenchmark extends BenchmarkBase {
 	}
 
 	@Benchmark
-	public void benchmarkCount(Context context) throws Exception {
+	public void benchmarkCount(FlinkEnvironmentContext context) throws Exception {
 
 		StreamExecutionEnvironment env = context.env;
 		DataStreamSource<Long> source = env.addSource(new LongSource(RECORDS_PER_INVOCATION));
