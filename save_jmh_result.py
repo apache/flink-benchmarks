@@ -70,7 +70,8 @@ def readData(args):
             name = line[benchmarkIndex].split(".")[-1]
             if len(paramIndexes) > 0:
                 for paramIndex in paramIndexes:
-                    name += "." + line[paramIndex]
+                    if len(line[paramIndex]) > 0:
+                        name += "." + line[paramIndex]
 
             results.append({
                 'commitid': args.commit,
