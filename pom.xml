@@ -36,6 +36,7 @@ under the License.
 		<scala.binary.version>2.11</scala.binary.version>
 		<jmh.version>1.19</jmh.version>
 		<junit.version>4.12</junit.version>
+		<avro.version>1.8.2</avro.version>
 	</properties>
 
 	<repositories>
@@ -131,6 +132,11 @@ under the License.
 			<artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
 			<version>${flink.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-avro</artifactId>
+			<version>${flink.version}</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>
@@ -221,6 +227,8 @@ under the License.
 						<argument>-classpath</argument>
 						<classpath/>
 						<argument>org.openjdk.jmh.Main</argument>
+						<argument>-e</argument>
+						<argument>org.apache.flink.benchmark.full.*</argument>
 						<argument>-rf</argument>
 						<argument>csv</argument>
 						<argument>.*</argument>
@@ -362,6 +370,25 @@ under the License.
 					<source>1.8</source> <!-- If you want to use Java 8, change this to "1.8" -->
 					<target>1.8</target> <!-- If you want to use Java 8, change this to "1.8" -->
 				</configuration>
+			</plugin>
+
+			<!-- Generate MyPojo class from avro schema -->
+			<plugin>
+				<groupId>org.apache.avro</groupId>
+				<artifactId>avro-maven-plugin</artifactId>
+				<version>${avro.version}</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>schema</goal>
+						</goals>
+						<configuration>
+							<sourceDirectory>${project.basedir}/src/main/resources/avro</sourceDirectory>
+							<!--<outputDirectory>${project.basedir}/src/main/java/</outputDirectory>-->
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 

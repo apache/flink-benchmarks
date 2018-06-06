@@ -35,10 +35,15 @@ abstract public class BaseSourceWithKeyRange<T> implements ParallelSourceFunctio
 		this.numKeys = numKeys;
 	}
 
+	protected void init() {
+	}
+
 	protected abstract T getElement(int keyId);
 
 	@Override
 	public void run(SourceContext<T> out) {
+		init();
+
 		int keyId = 0;
 		while (--remainingEvents >= 0) {
 			T element = getElement(keyId);
