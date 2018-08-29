@@ -19,10 +19,10 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.benchmark.functions.BaseSourceWithKeyRange;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
-import org.apache.flink.streaming.api.functions.source.ParallelSourceFunction;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
@@ -76,24 +76,7 @@ public class KeyByBenchmarks extends BenchmarkBase {
 		env.execute();
 	}
 
-	private abstract static class IncreasingBaseSource<T> implements ParallelSourceFunction<T> {
-		private static final long serialVersionUID = 8318018060123048234L;
-
-		final int numKeys;
-		int remainingEvents;
-
-		IncreasingBaseSource(int numEvents, int numKeys) {
-			this.remainingEvents = numEvents;
-			this.numKeys = numKeys;
-		}
-
-		@Override
-		public void cancel() {
-			this.remainingEvents = 0;
-		}
-	}
-
-	private static class IncreasingTupleSource extends IncreasingBaseSource<Tuple2<Integer, Integer>> {
+	private static class IncreasingTupleSource extends BaseSourceWithKeyRange<Tuple2<Integer, Integer>> {
 		private static final long serialVersionUID = 2941333602938145526L;
 
 		IncreasingTupleSource(int numEvents, int numKeys) {
@@ -101,21 +84,13 @@ public class KeyByBenchmarks extends BenchmarkBase {
 		}
 
 		@Override
-		public void run(SourceContext<Tuple2<Integer, Integer>> out) {
-			int keyId = 0;
-			while (--remainingEvents >= 0) {
-				synchronized (out.getCheckpointLock()) {
-					out.collect(new Tuple2<>(keyId++, 1));
-				}
-				if (keyId >= numKeys) {
-					keyId = 0;
-				}
-			}
+		protected Tuple2<Integer, Integer> getElement(int keyId) {
+			return new Tuple2<>(keyId, 1);
 		}
 
 	}
 
-	private static class IncreasingArraySource extends IncreasingBaseSource<int[]> {
+	private static class IncreasingArraySource extends BaseSourceWithKeyRange<int[]> {
 		private static final long serialVersionUID = -7883758559005221998L;
 
 		IncreasingArraySource(int numEvents, int numKeys) {
@@ -123,16 +98,8 @@ public class KeyByBenchmarks extends BenchmarkBase {
 		}
 
 		@Override
-		public void run(SourceContext<int[]> out) {
-			int keyId = 0;
-			while (--remainingEvents >= 0) {
-				synchronized (out.getCheckpointLock()) {
-					out.collect(new int[] {keyId++, 1});
-				}
-				if (keyId >= numKeys) {
-					keyId = 0;
-				}
-			}
+		protected int[] getElement(int keyId) {
+			return new int[] {keyId, 1};
 		}
 	}
 }
