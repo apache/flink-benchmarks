@@ -65,7 +65,7 @@ public class StreamNetworkThroughputBenchmarkExecutor extends BenchmarkBase {
 	public static class MultiEnvironment extends StreamNetworkThroughputBenchmark {
 
 		//Ideally we would like to run 1,100ms, 1000,1ms, 1000,100ms. However 1000,1ms is too slow to execute.
-		@Param({"1,100ms", "100,1ms", "1000,100ms"})
+		@Param({"1,100ms", "100,1ms", "1000,1ms", "1000,100ms"})
 		public String channelsFlushTimeout = "100,100ms";
 
 		//Do not spam continuous benchmarking with number of writers parameter.
