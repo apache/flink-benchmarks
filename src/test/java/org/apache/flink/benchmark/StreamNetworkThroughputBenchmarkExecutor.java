@@ -18,6 +18,8 @@
 
 package org.apache.flink.benchmark;
 
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.runtime.net.SSLUtilsTest;
 import org.apache.flink.streaming.runtime.io.benchmark.StreamNetworkThroughputBenchmark;
 
 import org.openjdk.jmh.annotations.Benchmark;
@@ -31,6 +33,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
+
+import java.util.Arrays;
 
 import static org.apache.flink.util.Preconditions.checkArgument;
 import static org.openjdk.jmh.annotations.Scope.Thread;
@@ -64,8 +68,7 @@ public class StreamNetworkThroughputBenchmarkExecutor extends BenchmarkBase {
 	@State(Thread)
 	public static class MultiEnvironment extends StreamNetworkThroughputBenchmark {
 
-		//Ideally we would like to run 1,100ms, 1000,1ms, 1000,100ms. However 1000,1ms is too slow to execute.
-		@Param({"1,100ms", "100,1ms", "1000,1ms", "1000,100ms"})
+		@Param({"100,100ms", "100,100ms,SSL", "1000,1ms", "1000,100ms", "1000,100ms,SSL"})
 		public String channelsFlushTimeout = "100,100ms";
 
 		//Do not spam continuous benchmarking with number of writers parameter.
@@ -76,7 +79,23 @@ public class StreamNetworkThroughputBenchmarkExecutor extends BenchmarkBase {
 		public void setUp() throws Exception {
 			int channels = parseChannels(channelsFlushTimeout);
 			int flushTimeout = parseFlushTimeout(channelsFlushTimeout);
-			super.setUp(writers, channels, flushTimeout);
+			boolean useSSL = parseEnableSSL(channelsFlushTimeout);
+
+			setUp(
+					writers,
+					channels,
+					flushTimeout,
+					false,
+					false,
+					-1,
+					-1,
+					useSSL ? SSLUtilsTest.createInternalSslConfigWithKeyAndTrustStores() : new Configuration()
+			);
+		}
+
+		private static boolean parseEnableSSL(String channelsFlushTimeout) {
+			String[] parameters = channelsFlushTimeout.split(",");
+			return Arrays.asList(parameters).contains("SSL");
 		}
 
 		private static int parseFlushTimeout(String channelsFlushTimeout) {
