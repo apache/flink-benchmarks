@@ -46,6 +46,8 @@ parser.add_argument('--environment', dest='environment', required=True)
 parser.add_argument('--dry', dest='dry', action='store_true')
 parser.add_argument('--codespeed', dest='codespeed', default=DEFAULT_CODESPEED_URL,
                     help='codespeed url, default: %s' % DEFAULT_CODESPEED_URL)
+parser.add_argument('--project', dest='project', default="Flink")
+parser.add_argument('--exec', dest='executable', default="Flink")
 
 def readData(args):
     results = []
@@ -76,8 +78,8 @@ def readData(args):
             results.append({
                 'commitid': args.commit,
                 'branch': args.branch,
-                'project': 'Flink',
-                'executable': 'Flink',
+                'project': args.project,
+                'executable': args.executable,
                 'benchmark': name,
                 'environment': args.environment,
                 'lessisbetter': False,
