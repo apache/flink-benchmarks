@@ -45,6 +45,7 @@ under the License.
 		<maven.compiler.version>3.1</maven.compiler.version>
 		<chill.version>0.7.6</chill.version>
 		<thrift.version>0.13.0</thrift.version>
+		<protobuf.version>3.11.4</protobuf.version>
 	</properties>
 
 	<repositories>
@@ -220,6 +221,24 @@ under the License.
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- Protobuf -->
+		<dependency>
+			<groupId>com.twitter</groupId>
+			<artifactId>chill-protobuf</artifactId>
+			<version>${chill.version}</version>
+			<!-- exclusions for dependency conversion -->
+			<exclusions>
+				<exclusion>
+					<groupId>com.esotericsoftware.kryo</groupId>
+					<artifactId>kryo</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>${protobuf.version}</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>
@@ -381,6 +400,14 @@ under the License.
 	</profiles>
 
 	<build>
+		<extensions>
+			<!-- required for getting the correct protoc binary for protobuf -->
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>1.6.2</version>
+			</extension>
+		</extensions>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -407,6 +434,25 @@ under the License.
 							<sourceDirectory>${project.basedir}/src/main/resources/avro</sourceDirectory>
 							<!--<outputDirectory>${project.basedir}/src/main/java/</outputDirectory>-->
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Generate MyPojo class from protobuf schema -->
+			<plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>0.6.1</version>
+				<configuration>
+					<protoSourceRoot>${project.basedir}/src/main/resources/protobuf</protoSourceRoot>
+					<protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>test-compile</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
