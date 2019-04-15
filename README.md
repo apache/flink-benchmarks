@@ -23,3 +23,15 @@ and only wrap them here, in this repository, into executor classes.
 
 Such code structured is due to using GPL2 licensed [jmh](http://openjdk.java.net/projects/code-tools/jmh/) library
 for the actual execution of the benchmarks. Ideally we would prefer to have all of the code moved to [Apache Flink](https://github.com/apache/flink)
+
+## General remarks
+
+- If you can not measure the performance difference, then just don't bother (avoid premature optimisations).
+- Make sure that you are not disturbing the benchmarks. While benchmarking, you shouldn't be touching the machine that's running the benchmarks. Scrolling web page in a browser or changing windows (alt/cmd + tab) can seriously affect the results.
+- If in doubt, verify the results more then once, like:
+  1. measure the base line
+  2. measure the change, for example +5% performance improvement
+  3. switch back to the base line, make sure that the result is worse
+  4. go back to the change and verify +5% performance improvement
+  5. if something doesn't show the results that you were expecting, investigate and don't ignore this! Maybe there is some larger performance instability and your previous results were just lucky/unlucky flukes.
+- Some results can show up over the benchmarking noise only in long term trends.
