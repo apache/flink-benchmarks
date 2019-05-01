@@ -17,7 +17,7 @@ below command:
 
 ```
 mvn -Dflink.version=1.5.0 clean package exec:exec \
- -Dexec.executable=java -Dexec.args=-jar target/benchmarks.jar -rf csv org.apache.flink.state.benchmark.*
+ -Dexec.executable=java -Dexec.args="-jar target/benchmarks.jar -rf csv org.apache.flink.state.benchmark.*"
 ```
 
 If you want to execute just one benchmark, the best approach is to execute selected main function manually.
@@ -29,7 +29,7 @@ There're mainly two ways:
 2. From command line, using command like:
    ```
    mvn -Dflink.version=1.5.0 clean package exec:exec \
-    -Dexec.executable=java -Dexec.args=-jar target/benchmarks.jar <benchmark_class>
+    -Dexec.executable=java -Dexec.args="-jar target/benchmarks.jar <benchmark_class>"
    ```
 
 ## Code structure
