@@ -163,7 +163,7 @@ under the License.
 						<classpath/>
 						<argument>org.openjdk.jmh.Main</argument>
 						<argument>-e</argument>
-						<argument>org.apache.flink.benchmark.full.*</argument>
+						<argument>org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*</argument>
 						<argument>-rf</argument>
 						<argument>csv</argument>
 						<argument>.*</argument>
