@@ -40,6 +40,7 @@ under the License.
 		<jmh.version>1.19</jmh.version>
 		<junit.version>4.12</junit.version>
 		<avro.version>1.8.2</avro.version>
+		<mockito.version>2.21.0</mockito.version>
 	</properties>
 
 	<repositories>
@@ -140,6 +141,13 @@ under the License.
 			<artifactId>flink-avro</artifactId>
 			<version>${flink.version}</version>
 		</dependency>
+                <dependency>
+                        <groupId>org.mockito</groupId>
+                        <artifactId>mockito-core</artifactId>
+                        <version>${mockito.version}</version>
+                        <type>jar</type>
+                        <scope>test</scope>
+                </dependency>
 	</dependencies>
 
 	<build>
