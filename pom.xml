@@ -180,6 +180,42 @@ under the License.
 			</plugin>
 
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>test-benchmarks</id>
+						<phase>test</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<classpathScope>test</classpathScope>
+					<executable>java</executable>
+					<arguments>
+						<argument>-classpath</argument>
+						<classpath/>
+						<argument>org.openjdk.jmh.Main</argument>
+						<!--shouldFailOnError-->
+						<argument>-foe</argument>
+						<argument>true</argument>
+						<!--speed up tests-->
+						<argument>-f</argument>
+						<argument>1</argument>
+						<argument>-i</argument>
+						<argument>1</argument>
+						<argument>-wi</argument>
+						<argument>0</argument>
+						<argument>-rf</argument>
+						<argument>csv</argument>
+						<argument>.*</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.2.0</version>
