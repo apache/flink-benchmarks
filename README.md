@@ -32,6 +32,12 @@ There're mainly two ways:
     -Dexec.executable=java -Dexec.args="-jar target/benchmarks.jar <benchmark_class>"
    ```
 
+We also support to run each benchmark once (with only one fork and one iteration) for testing, with below command:
+
+```
+mvn test -P test
+```
+
 ## Code structure
 
 Recommended code structure is to define all benchmarks in [Apache Flink](https://github.com/apache/flink)

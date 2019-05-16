@@ -41,6 +41,8 @@ under the License.
 		<junit.version>4.12</junit.version>
 		<avro.version>1.8.2</avro.version>
 		<mockito.version>2.21.0</mockito.version>
+		<maven.exec.version>1.6.0</maven.exec.version>
+		<maven.compiler.version>3.1</maven.compiler.version>
 	</properties>
 
 	<repositories>
@@ -150,105 +152,130 @@ under the License.
                 </dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>test</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>${maven.exec.version}</version>
+						<executions>
+							<execution>
+								<id>test-benchmarks</id>
+								<phase>test</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<skip>${skipTests}</skip>
+							<classpathScope>test</classpathScope>
+							<executable>java</executable>
+							<arguments>
+								<argument>-classpath</argument>
+								<classpath/>
+								<argument>org.openjdk.jmh.Main</argument>
+								<!--shouldFailOnError-->
+								<argument>-foe</argument>
+								<argument>true</argument>
+								<!--speed up tests-->
+								<argument>-f</argument>
+								<argument>1</argument>
+								<argument>-i</argument>
+								<argument>1</argument>
+								<argument>-wi</argument>
+								<argument>0</argument>
+								<argument>-rf</argument>
+								<argument>csv</argument>
+								<argument>.*</argument>
+							</arguments>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>benchmark</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>${maven.exec.version}</version>
+						<executions>
+							<execution>
+								<id>run-benchmarks</id>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<classpathScope>test</classpathScope>
+							<executable>java</executable>
+							<arguments>
+								<argument>-classpath</argument>
+								<classpath/>
+								<argument>org.openjdk.jmh.Main</argument>
+								<argument>-e</argument>
+								<argument>org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*</argument>
+								<argument>-rf</argument>
+								<argument>csv</argument>
+								<argument>.*</argument>
+							</arguments>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<version>3.2.0</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+								<configuration>
+									<finalName>benchmarks</finalName>
+									<transformers>
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+											<mainClass>org.openjdk.jmh.Main</mainClass>
+										</transformer>
+		                                                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+		                                                                        <resource>reference.conf</resource>
+		                                                                </transformer>
+		                                                                <!-- The service transformer is needed to merge META-INF/services files -->
+		                                                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+		                                                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+		                                                                        <projectName>Apache Flink</projectName>
+		                                                                </transformer>
+									</transformers>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>run-benchmarks</id>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<classpathScope>test</classpathScope>
-					<executable>java</executable>
-					<arguments>
-						<argument>-classpath</argument>
-						<classpath/>
-						<argument>org.openjdk.jmh.Main</argument>
-						<argument>-e</argument>
-						<argument>org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*</argument>
-						<argument>-rf</argument>
-						<argument>csv</argument>
-						<argument>.*</argument>
-					</arguments>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>test-benchmarks</id>
-						<phase>test</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<classpathScope>test</classpathScope>
-					<executable>java</executable>
-					<arguments>
-						<argument>-classpath</argument>
-						<classpath/>
-						<argument>org.openjdk.jmh.Main</argument>
-						<!--shouldFailOnError-->
-						<argument>-foe</argument>
-						<argument>true</argument>
-						<!--speed up tests-->
-						<argument>-f</argument>
-						<argument>1</argument>
-						<argument>-i</argument>
-						<argument>1</argument>
-						<argument>-wi</argument>
-						<argument>0</argument>
-						<argument>-rf</argument>
-						<argument>csv</argument>
-						<argument>.*</argument>
-					</arguments>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.0</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<finalName>benchmarks</finalName>
-							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.openjdk.jmh.Main</mainClass>
-								</transformer>
-                                                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                                                        <resource>reference.conf</resource>
-                                                                </transformer>
-                                                                <!-- The service transformer is needed to merge META-INF/services files -->
-                                                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
-                                                                        <projectName>Apache Flink</projectName>
-                                                                </transformer>
-							</transformers>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>${maven.compiler.version}</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
