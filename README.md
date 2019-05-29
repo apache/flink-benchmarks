@@ -57,18 +57,23 @@ for the actual execution of the benchmarks. Ideally we would prefer to have all 
   4. go back to the change and verify +5% performance improvement
   5. if something doesn't show the results that you were expecting, investigate and don't ignore this! Maybe there is some larger performance instability and your previous results were just lucky/unlucky flukes.
 - Some results can show up over the benchmarking noise only in long term trends.
+- Please tune the length of the benchmark (usually by number of processed records). The less records, the faster the benchmark, the more iterations can be executed, however the higher chance of one of setup overheads skewing the results. Rule of thumb is that you should increase the number of processed records up to a point where results stop improving visibly, while trying to keep the single benchmark execution under 1 second.
 
 ### Naming convention
 
 Regarding naming the benchmark methods, there is one important thing.
 When uploading the results to the [codespeed web UI](http://codespeed.dak8s.net:8000),
-uploader is using just the benchmark method name combined with the parameters
-to generate benchmark name. Because of that it is important to:
+uploader is using just the benchmark's method name combined with the parameters
+to generate visible name of the benchmark in the UI. Because of that it is important to:
 1. Have the method name explanatory enough so we can quickly recognize what the given benchmark is all about, using just the benchmark's method name.
-2. Be as short as possible to not bloat the web UI (so we must drop all of the redundant suffixes/prefixes)
+2. Be as short as possible to not bloat the web UI (so we must drop all of the redundant suffixes/prefixes, like `benchmark`, `test`, ...)
 3. Class name is completely ignored by the uploader.
 4. Method names should be unique across the project.
 
 Good example of how to name benchmark methods are:
 - `networkThroughput`
 - `sessionWindow`
+
+### Submitting a pull request
+
+Please attach the results of your benchmarks.
