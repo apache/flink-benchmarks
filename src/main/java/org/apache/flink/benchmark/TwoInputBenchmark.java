@@ -38,7 +38,7 @@ public class TwoInputBenchmark extends BenchmarkBase {
 
 	public static final int RECORDS_PER_INVOCATION = 25_000_000;
 
-	public static final int ONEIDLE_RECORDS_PER_INVOCATION = 15_000_000;
+	public static final int ONE_IDLE_RECORDS_PER_INVOCATION = 15_000_000;
 
 	private static final long CHECKPOINT_INTERVAL_MS = 100;
 
@@ -73,7 +73,7 @@ public class TwoInputBenchmark extends BenchmarkBase {
 	}
 
 	@Benchmark
-	@OperationsPerInvocation(value = TwoInputBenchmark.ONEIDLE_RECORDS_PER_INVOCATION)
+	@OperationsPerInvocation(value = TwoInputBenchmark.ONE_IDLE_RECORDS_PER_INVOCATION)
 	public void twoInputOneIdleMapSink(FlinkEnvironmentContext context) throws Exception {
 
 		StreamExecutionEnvironment env = context.env;
@@ -81,7 +81,7 @@ public class TwoInputBenchmark extends BenchmarkBase {
 		env.setParallelism(1);
 
 		QueuingLongSource.reset();
-		DataStreamSource<Long> source1 = env.addSource(new QueuingLongSource(1, ONEIDLE_RECORDS_PER_INVOCATION - 1));
+		DataStreamSource<Long> source1 = env.addSource(new QueuingLongSource(1, ONE_IDLE_RECORDS_PER_INVOCATION - 1));
 		DataStreamSource<Long> source2 = env.addSource(new QueuingLongSource(2, 1));
 
 		source1
