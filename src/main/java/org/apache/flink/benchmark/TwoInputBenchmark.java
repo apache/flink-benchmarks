@@ -20,6 +20,7 @@ package org.apache.flink.benchmark;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.benchmark.functions.LongSource;
+import org.apache.flink.benchmark.functions.QueuingLongSource;
 import org.apache.flink.benchmark.operators.MultiplyByTwoCoStreamMap;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -33,10 +34,12 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-@OperationsPerInvocation(value = TwoInputBenchmark.RECORDS_PER_INVOCATION)
 public class TwoInputBenchmark extends BenchmarkBase {
 
 	public static final int RECORDS_PER_INVOCATION = 25_000_000;
+
+	public static final int ONEIDLE_RECORDS_PER_INVOCATION = 15_000_000;
+
 	private static final long CHECKPOINT_INTERVAL_MS = 100;
 
 	public static void main(String[] args)
@@ -50,6 +53,7 @@ public class TwoInputBenchmark extends BenchmarkBase {
 	}
 
 	@Benchmark
+	@OperationsPerInvocation(value = TwoInputBenchmark.RECORDS_PER_INVOCATION)
 	public void twoInputMapSink(FlinkEnvironmentContext context) throws Exception {
 
 		StreamExecutionEnvironment env = context.env;
@@ -64,6 +68,26 @@ public class TwoInputBenchmark extends BenchmarkBase {
 			.connect(source2)
 			.transform("custom operator", TypeInformation.of(Long.class), new MultiplyByTwoCoStreamMap())
 			.addSink(new DiscardingSink<>());
+
+		env.execute();
+	}
+
+	@Benchmark
+	@OperationsPerInvocation(value = TwoInputBenchmark.ONEIDLE_RECORDS_PER_INVOCATION)
+	public void twoInputOneIdleMapSink(FlinkEnvironmentContext context) throws Exception {
+
+		StreamExecutionEnvironment env = context.env;
+		env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
+		env.setParallelism(1);
+
+		QueuingLongSource.reset();
+		DataStreamSource<Long> source1 = env.addSource(new QueuingLongSource(1, ONEIDLE_RECORDS_PER_INVOCATION - 1));
+		DataStreamSource<Long> source2 = env.addSource(new QueuingLongSource(2, 1));
+
+		source1
+				.connect(source2)
+				.transform("custom operator", TypeInformation.of(Long.class), new MultiplyByTwoCoStreamMap())
+				.addSink(new DiscardingSink<>());
 
 		env.execute();
 	}
