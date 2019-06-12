@@ -57,8 +57,14 @@ public class TwoInputBenchmark extends BenchmarkBase {
 	public void twoInputMapSink(FlinkEnvironmentContext context) throws Exception {
 
 		StreamExecutionEnvironment env = context.env;
+
 		env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
 		env.setParallelism(1);
+
+		// Setting buffer timeout to 1 is an attempt to improve twoInputMapSink benchmark stability.
+		// Without 1ms buffer timeout, some JVM forks are much slower then others, making results
+		// unstable and unreliable.
+		env.setBufferTimeout(1);
 
 		long numRecordsPerInput = RECORDS_PER_INVOCATION / 2;
 		DataStreamSource<Long> source1 = env.addSource(new LongSource(numRecordsPerInput));
