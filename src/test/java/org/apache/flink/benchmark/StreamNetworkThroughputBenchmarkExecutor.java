@@ -19,6 +19,7 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.SecurityOptions;
 import org.apache.flink.runtime.net.SSLUtilsTest;
 import org.apache.flink.streaming.runtime.io.benchmark.StreamNetworkThroughputBenchmark;
 
@@ -89,7 +90,8 @@ public class StreamNetworkThroughputBenchmarkExecutor extends BenchmarkBase {
 					false,
 					-1,
 					-1,
-					useSSL ? SSLUtilsTest.createInternalSslConfigWithKeyAndTrustStores() : new Configuration()
+					useSSL ? SSLUtilsTest.createInternalSslConfigWithKeyAndTrustStores(
+							SecurityOptions.SSL_PROVIDER.defaultValue()) : new Configuration()
 			);
 		}
 
