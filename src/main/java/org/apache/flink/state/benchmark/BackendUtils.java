@@ -52,8 +52,7 @@ import static org.apache.flink.state.benchmark.StateBenchmarkConstants.rootDirNa
  * Utils to create keyed state backend.
  */
 public class BackendUtils {
-    static RocksDBKeyedStateBackend<Long> createRocksDBKeyedStateBackend() throws IOException {
-        File rootDir = prepareDirectory(rootDirName, null);
+    static RocksDBKeyedStateBackend<Long> createRocksDBKeyedStateBackend(File rootDir) throws IOException {
         File recoveryBaseDir = prepareDirectory(recoveryDirName, rootDir);
         File dbPathFile = prepareDirectory(dbDirName, rootDir);
         DBOptions dbOptions = new DBOptions().setCreateIfMissing(true);
@@ -86,8 +85,7 @@ public class BackendUtils {
         }
     }
 
-    static HeapKeyedStateBackend<Long> createHeapKeyedStateBackend() throws IOException {
-        File rootDir = prepareDirectory(rootDirName, null);
+    static HeapKeyedStateBackend<Long> createHeapKeyedStateBackend(File rootDir) throws IOException {
         File recoveryBaseDir = prepareDirectory(recoveryDirName, rootDir);
         KeyGroupRange keyGroupRange = new KeyGroupRange(0, 1);
         int numberOfKeyGroups = keyGroupRange.getNumberOfKeyGroups();
@@ -112,7 +110,7 @@ public class BackendUtils {
         return backendBuilder.build();
     }
 
-    private static File prepareDirectory(String prefix, File parentDir) throws IOException {
+    public static File prepareDirectory(String prefix, File parentDir) throws IOException {
         File target = File.createTempFile(prefix, "", parentDir);
         if (target.exists() && !target.delete()) {
             throw new IOException("Target dir {" + target.getAbsolutePath() + "} exists but failed to clean it up");
