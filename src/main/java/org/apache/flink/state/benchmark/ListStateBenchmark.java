@@ -20,10 +20,13 @@ package org.apache.flink.state.benchmark;
 
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
+import org.apache.flink.contrib.streaming.state.RocksDBKeyedStateBackend;
 import org.apache.flink.runtime.state.VoidNamespace;
 import org.apache.flink.runtime.state.VoidNamespaceSerializer;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -42,6 +45,8 @@ import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyC
  * Implementation for list state benchmark testing.
  */
 public class ListStateBenchmark extends StateBenchmarkBase {
+    private final String STATE_NAME = "listState";
+    private final ListStateDescriptor<Long> STATE_DESC = new ListStateDescriptor<>(STATE_NAME, Long.class);
     private ListState<Long> listState;
     private List<Long> dummyLists;
 
@@ -60,16 +65,46 @@ public class ListStateBenchmark extends StateBenchmarkBase {
         listState = keyedStateBackend.getPartitionedState(
                 VoidNamespace.INSTANCE,
                 VoidNamespaceSerializer.INSTANCE,
-                new ListStateDescriptor<>("listState", Long.class));
+                STATE_DESC);
         dummyLists = new ArrayList<>(listValueCount);
         for (int i = 0; i < listValueCount; ++i) {
             dummyLists.add(random.nextLong());
         }
+        keyIndex = new AtomicInteger();
+    }
+
+    @Setup(Level.Iteration)
+    public void setUpPerIteration() throws Exception {
         for (int i = 0; i < setupKeyCount; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
             listState.add(random.nextLong());
         }
-        keyIndex = new AtomicInteger();
+        // make sure only one sst file left, so all get invocation will access this single file,
+        // to prevent the spike caused by different key distribution in multiple sst files,
+        // the more access to the older sst file, the lower throughput will be.
+        if (keyedStateBackend instanceof RocksDBKeyedStateBackend) {
+            ((RocksDBKeyedStateBackend<Long>) keyedStateBackend).compactState(STATE_DESC);
+        }
+    }
+
+    @TearDown(Level.Iteration)
+    public void tearDownPerIteration() throws Exception {
+        keyedStateBackend.applyToAllKeys(
+                VoidNamespace.INSTANCE,
+                VoidNamespaceSerializer.INSTANCE,
+                STATE_DESC,
+                (k, state) -> {
+                    keyedStateBackend.setCurrentKey(k);
+                    state.clear();
+                });
+        // make the clearance effective, trigger compaction for RocksDB, and GC for heap.
+        if (keyedStateBackend instanceof RocksDBKeyedStateBackend) {
+            ((RocksDBKeyedStateBackend<Long>) keyedStateBackend).compactState(STATE_DESC);
+        } else {
+            System.gc();
+        }
+        // wait a while for the clearance to take effect.
+        Thread.sleep(1000);
     }
 
     @Benchmark
