@@ -102,6 +102,12 @@ public class MapStateBenchmark extends StateBenchmarkBase {
     }
 
     @Benchmark
+    public boolean mapIsEmpty(KeyValue keyValue) throws Exception {
+        keyedStateBackend.setCurrentKey(keyValue.setUpKey);
+        return mapState.isEmpty();
+    }
+
+    @Benchmark
     @OperationsPerInvocation(mapKeyCount)
     public void mapKeys(KeyValue keyValue, Blackhole bh) throws Exception {
         keyedStateBackend.setCurrentKey(keyValue.setUpKey);
