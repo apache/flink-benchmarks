@@ -67,8 +67,8 @@ public class DataSkewStreamNetworkThroughputBenchmarkExecutor extends BenchmarkB
 		// 1000 num of channels (subpartitions)
 		private final int channels = 1000;
 
-		// 4 writer threads
-		private final int writers = 4;
+		// 10 writer threads, to increase the load on the machine
+		private final int writers = 10;
 
 		@Setup
 		public void setUp() throws Exception {
