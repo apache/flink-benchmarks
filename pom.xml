@@ -208,6 +208,7 @@ under the License.
 							<classpathScope>test</classpathScope>
 							<executable>java</executable>
 							<arguments>
+								<argument>-Xmx6g</argument>
 								<argument>-classpath</argument>
 								<classpath/>
 								<argument>org.openjdk.jmh.Main</argument>
