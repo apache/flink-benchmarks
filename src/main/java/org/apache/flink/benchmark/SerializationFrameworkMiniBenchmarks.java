@@ -25,6 +25,7 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple8;
 import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.benchmark.functions.BaseSourceWithKeyRange;
+import org.apache.flink.benchmark.full.StringSerializationBenchmark;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
@@ -39,6 +40,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Benchmark for serializing POJOs and Tuples with different serialization frameworks.
@@ -66,6 +69,22 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
 		executionConfig.registerPojoType(MyOperation.class);
 
 		env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
+				.rebalance()
+				.addSink(new DiscardingSink<>());
+
+		env.execute();
+	}
+
+	@Benchmark
+	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
+	public void serializerHeavyString() throws Exception {
+		LocalStreamEnvironment env =
+				StreamExecutionEnvironment.createLocalEnvironment(1);
+		ExecutionConfig executionConfig = env.getConfig();
+		executionConfig.registerPojoType(MyPojo.class);
+		executionConfig.registerPojoType(MyOperation.class);
+
+		env.addSource(new LongStringSource(RECORDS_PER_INVOCATION, 12))
 				.rebalance()
 				.addSink(new DiscardingSink<>());
 
@@ -126,6 +145,40 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
 				.addSink(new DiscardingSink<>());
 
 		env.execute();
+	}
+
+	/**
+	 * Source emitting a long String.
+	 */
+	public static class LongStringSource extends BaseSourceWithKeyRange<String> {
+		private static final long serialVersionUID = 3746240885982877398L;
+		private String[] templates;
+
+		public LongStringSource(int numEvents, int numKeys) {
+			super(numEvents, numKeys);
+		}
+
+		@Override
+		protected void init() {
+			super.init();
+			templates = new String[] {
+					makeString(StringSerializationBenchmark.asciiChars, 1024),
+					makeString(StringSerializationBenchmark.russianChars, 1024),
+					makeString(StringSerializationBenchmark.chineseChars, 1024)
+			};
+		}
+
+		private String makeString(char[] symbols, int length) {
+			char[] buffer = new char[length];
+			Random random = ThreadLocalRandom.current();
+			Arrays.fill(buffer, symbols[random.nextInt(symbols.length)]);
+			return new String(buffer);
+		}
+
+		@Override
+		protected String getElement(int keyId) {
+			return templates[keyId % templates.length];
+		}
 	}
 
 	/**
