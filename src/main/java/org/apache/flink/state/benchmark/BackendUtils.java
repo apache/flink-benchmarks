@@ -24,6 +24,7 @@ import org.apache.flink.api.common.typeutils.base.LongSerializer;
 import org.apache.flink.contrib.streaming.state.PredefinedOptions;
 import org.apache.flink.contrib.streaming.state.RocksDBKeyedStateBackend;
 import org.apache.flink.contrib.streaming.state.RocksDBKeyedStateBackendBuilder;
+import org.apache.flink.contrib.streaming.state.RocksDBResourceContainer;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.core.fs.CloseableRegistry;
 import org.apache.flink.metrics.groups.UnregisteredMetricsGroup;
@@ -37,8 +38,8 @@ import org.apache.flink.runtime.state.heap.HeapKeyedStateBackendBuilder;
 import org.apache.flink.runtime.state.heap.HeapPriorityQueueSetFactory;
 import org.apache.flink.runtime.state.ttl.TtlTimeProvider;
 import org.apache.flink.util.IOUtils;
+
 import org.rocksdb.ColumnFamilyOptions;
-import org.rocksdb.DBOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +47,6 @@ import java.util.Collections;
 
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.dbDirName;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.recoveryDirName;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.rootDirName;
 
 /**
  * Utils to create keyed state backend.
@@ -55,14 +55,16 @@ public class BackendUtils {
     static RocksDBKeyedStateBackend<Long> createRocksDBKeyedStateBackend(File rootDir) throws IOException {
         File recoveryBaseDir = prepareDirectory(recoveryDirName, rootDir);
         File dbPathFile = prepareDirectory(dbDirName, rootDir);
-        DBOptions dbOptions = new DBOptions().setCreateIfMissing(true);
+        RocksDBResourceContainer resourceContainer = new RocksDBResourceContainer();
+        resourceContainer.getDbOptions().setCreateIfMissing(true);
+
         ColumnFamilyOptions columnOptions = new ColumnFamilyOptions();
         ExecutionConfig executionConfig = new ExecutionConfig();
         RocksDBKeyedStateBackendBuilder<Long> builder = new RocksDBKeyedStateBackendBuilder<>(
                 "Test",
                 Thread.currentThread().getContextClassLoader(),
                 dbPathFile,
-                dbOptions,
+                resourceContainer,
                 stateName -> PredefinedOptions.DEFAULT.createColumnOptions(),
                 null,
                 LongSerializer.INSTANCE,
@@ -80,7 +82,7 @@ public class BackendUtils {
             return builder.build();
         } catch (Exception e) {
             IOUtils.closeQuietly(columnOptions);
-            IOUtils.closeQuietly(dbOptions);
+            IOUtils.closeQuietly(resourceContainer);
             throw e;
         }
     }
