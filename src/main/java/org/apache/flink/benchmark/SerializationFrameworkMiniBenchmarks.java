@@ -26,7 +26,6 @@ import org.apache.flink.api.java.tuple.Tuple8;
 import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.benchmark.functions.BaseSourceWithKeyRange;
 import org.apache.flink.benchmark.full.StringSerializationBenchmark;
-import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.types.Row;
@@ -61,9 +60,9 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
 
 	@Benchmark
 	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-	public void serializerPojo() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void serializerPojo(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 		ExecutionConfig executionConfig = env.getConfig();
 		executionConfig.registerPojoType(MyPojo.class);
 		executionConfig.registerPojoType(MyOperation.class);
@@ -77,9 +76,9 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
 
 	@Benchmark
 	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-	public void serializerHeavyString() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(1);
+	public void serializerHeavyString(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(1);
 		ExecutionConfig executionConfig = env.getConfig();
 		executionConfig.registerPojoType(MyPojo.class);
 		executionConfig.registerPojoType(MyOperation.class);
@@ -93,9 +92,9 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
 
 	@Benchmark
 	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-	public void serializerTuple() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void serializerTuple(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 
 		env.addSource(new TupleSource(RECORDS_PER_INVOCATION, 10))
 				.rebalance()
@@ -106,9 +105,9 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
 
 	@Benchmark
 	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-	public void serializerKryo() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void serializerKryo(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 		ExecutionConfig executionConfig = env.getConfig();
 		executionConfig.enableForceKryo();
 		executionConfig.registerKryoType(MyPojo.class);
@@ -123,9 +122,9 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
 
 	@Benchmark
 	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-	public void serializerAvro() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void serializerAvro(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 
 		env.addSource(new AvroPojoSource(RECORDS_PER_INVOCATION, 10))
 				.rebalance()
@@ -136,9 +135,9 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
 
 	@Benchmark
 	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-	public void serializerRow() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void serializerRow(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 
 		env.addSource(new RowSource(RECORDS_PER_INVOCATION, 10))
 				.rebalance()

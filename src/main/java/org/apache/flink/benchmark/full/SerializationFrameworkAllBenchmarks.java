@@ -18,8 +18,8 @@
 
 package org.apache.flink.benchmark.full;
 
+import org.apache.flink.benchmark.FlinkEnvironmentContext;
 import org.apache.flink.benchmark.SerializationFrameworkMiniBenchmarks;
-import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 
@@ -47,9 +47,9 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
 
 	@Benchmark
 	@OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
-	public void serializerPojoWithoutRegistration() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void serializerPojoWithoutRegistration(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 
 		env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
 				.rebalance()
@@ -60,9 +60,9 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
 
 	@Benchmark
 	@OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
-	public void serializerKryoWithoutRegistration() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void serializerKryoWithoutRegistration(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 		env.getConfig().enableForceKryo();
 
 		env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
@@ -74,9 +74,9 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
 
 	@Benchmark
 	@OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
-	public void serializerAvroReflect() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void serializerAvroReflect(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 		env.getConfig().enableForceAvro();
 
 		env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))

@@ -20,7 +20,6 @@ package org.apache.flink.benchmark;
 
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.benchmark.functions.BaseSourceWithKeyRange;
-import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 
@@ -52,9 +51,9 @@ public class KeyByBenchmarks extends BenchmarkBase {
 
 	@Benchmark
 	@OperationsPerInvocation(value = KeyByBenchmarks.TUPLE_RECORDS_PER_INVOCATION)
-	public void tupleKeyBy() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void tupleKeyBy(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 
 		env.addSource(new IncreasingTupleSource(TUPLE_RECORDS_PER_INVOCATION, 10))
 				.keyBy(0)
@@ -65,9 +64,9 @@ public class KeyByBenchmarks extends BenchmarkBase {
 
 	@Benchmark
 	@OperationsPerInvocation(value = KeyByBenchmarks.ARRAY_RECORDS_PER_INVOCATION)
-	public void arrayKeyBy() throws Exception {
-		LocalStreamEnvironment env =
-				StreamExecutionEnvironment.createLocalEnvironment(4);
+	public void arrayKeyBy(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
 
 		env.addSource(new IncreasingArraySource(ARRAY_RECORDS_PER_INVOCATION, 10))
 				.keyBy(0)
