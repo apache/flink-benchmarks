@@ -25,7 +25,6 @@ import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.FileUtils;
 
 import java.io.File;
@@ -41,17 +40,13 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
 		ROCKS_INC
 	}
 
-	public static class StateBackendContext {
-		public final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+	public static class StateBackendContext extends FlinkEnvironmentContext {
 
 		public final File checkpointDir;
 
 		public final int numberOfElements = 1000;
 
 		public DataStreamSource<IntegerLongSource.Record> source;
-
-		private final int parallelism = 1;
-		private final boolean objectReuse = true;
 
 		public StateBackendContext() {
 			try {
@@ -62,12 +57,7 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
 		}
 
 		public void setUp(StateBackend stateBackend, long recordsPerInvocation) throws IOException {
-			// set up the execution environment
-			env.setParallelism(parallelism);
-			env.getConfig().disableSysoutLogging();
-			if (objectReuse) {
-				env.getConfig().enableObjectReuse();
-			}
+			super.setUp();
 
 			final AbstractStateBackend backend;
 			String checkpointDataUri = "file://" + checkpointDir.getAbsolutePath();
@@ -99,10 +89,6 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
 
 		public void tearDown() throws IOException {
 			FileUtils.deleteDirectory(checkpointDir);
-		}
-
-		public void execute() throws Exception {
-			env.execute();
 		}
 	}
 }

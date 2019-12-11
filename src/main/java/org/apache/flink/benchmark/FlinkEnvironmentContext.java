@@ -32,8 +32,8 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
 public class FlinkEnvironmentContext {
     public final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-    private final int parallelism = 1;
-    private final boolean objectReuse = true;
+    protected final int parallelism = 1;
+    protected final boolean objectReuse = true;
 
     @Setup
     public void setUp() throws IOException {
