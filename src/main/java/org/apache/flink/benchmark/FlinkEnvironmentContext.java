@@ -33,7 +33,7 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
 @State(Thread)
 public class FlinkEnvironmentContext {
 
-    public static final int NUM_NETWORK_BUFFERS = 16035; // this value is temporally set to the same as before flip49
+    public static final int NUM_NETWORK_BUFFERS = 32768; // this value is temporally set to the same as before flip49
 
     public final StreamExecutionEnvironment env = getStreamExecutionEnvironment();
 
