@@ -98,7 +98,7 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
 			Configuration configuration = super.createConfiguration();
 
 			configuration.setBoolean(NettyShuffleEnvironmentOptions.BLOCKING_SHUFFLE_COMPRESSION_ENABLED, compressionEnabled);
-			configuration.setString(NettyShuffleEnvironmentOptions.NETWORK_BOUNDED_BLOCKING_SUBPARTITION_TYPE, subpartitionType);
+			configuration.setString(NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, subpartitionType);
 			return configuration;
 		}
 	}
