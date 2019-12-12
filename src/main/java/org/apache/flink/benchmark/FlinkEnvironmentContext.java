@@ -56,9 +56,13 @@ public class FlinkEnvironmentContext {
         env.execute();
     }
 
-    private StreamExecutionEnvironment getStreamExecutionEnvironment() {
+    protected Configuration createConfiguration() {
         final Configuration configuration = new Configuration();
         configuration.setInteger(NettyShuffleEnvironmentOptions.NETWORK_NUM_BUFFERS, NUM_NETWORK_BUFFERS);
-        return StreamExecutionEnvironment.createLocalEnvironment(1, configuration);
+        return configuration;
+    }
+
+    private StreamExecutionEnvironment getStreamExecutionEnvironment() {
+        return StreamExecutionEnvironment.createLocalEnvironment(1, createConfiguration());
     }
 }
