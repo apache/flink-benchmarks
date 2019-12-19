@@ -20,8 +20,7 @@ package org.apache.flink.state.benchmark;
 
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
-import org.apache.flink.runtime.state.VoidNamespace;
-import org.apache.flink.runtime.state.VoidNamespaceSerializer;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.Setup;
@@ -37,6 +36,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.createKeyedStateBackend;
+import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getMapState;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeyCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeys;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
@@ -59,10 +60,9 @@ public class MapStateBenchmark extends StateBenchmarkBase {
 
     @Setup
     public void setUp() throws Exception {
-        keyedStateBackend = createKeyedStateBackend();
-        mapState = keyedStateBackend.getPartitionedState(
-                VoidNamespace.INSTANCE,
-                VoidNamespaceSerializer.INSTANCE,
+        keyedStateBackend = createKeyedStateBackend(backendType);
+        mapState = getMapState(
+                keyedStateBackend,
                 new MapStateDescriptor<>("mapState", Long.class, Double.class));
         dummyMaps = new HashMap<>(mapKeyCount);
         for (int i = 0; i < mapKeyCount; ++i) {

@@ -18,8 +18,9 @@
 package org.apache.flink.state.benchmark;
 
 import org.apache.flink.benchmark.BenchmarkBase;
-import org.apache.flink.core.fs.Path;
+import org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils;
 import org.apache.flink.runtime.state.KeyedStateBackend;
+
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
@@ -27,13 +28,13 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.cleanUp;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeyCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeys;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapValues;
@@ -41,7 +42,6 @@ import static org.apache.flink.state.benchmark.StateBenchmarkConstants.newKeyCou
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.newKeys;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.randomValueCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.randomValues;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.rootDirName;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeys;
 
@@ -52,33 +52,13 @@ public class StateBenchmarkBase extends BenchmarkBase {
     KeyedStateBackend<Long> keyedStateBackend;
 
     @Param({"HEAP", "ROCKSDB"})
-    private BackendType backendType = BackendType.HEAP;
+    protected StateBackendBenchmarkUtils.StateBackendType backendType;
 
     final ThreadLocalRandom random = ThreadLocalRandom.current();
 
-    private File rootDir;
-
     @TearDown
     public void tearDown() throws IOException {
-        keyedStateBackend.dispose();
-        Path path = Path.fromLocalFile(rootDir);
-        path.getFileSystem().delete(path, true);
-    }
-
-    KeyedStateBackend<Long> createKeyedStateBackend() throws Exception {
-        switch (backendType) {
-            case HEAP:
-                rootDir = BackendUtils.prepareDirectory(rootDirName, null);
-                keyedStateBackend = BackendUtils.createHeapKeyedStateBackend(rootDir);
-                break;
-            case ROCKSDB:
-                rootDir = BackendUtils.prepareDirectory(rootDirName, null);
-                keyedStateBackend = BackendUtils.createRocksDBKeyedStateBackend(rootDir);
-                break;
-            default:
-                break;
-        }
-        return keyedStateBackend;
+        cleanUp(keyedStateBackend);
     }
 
     static AtomicInteger keyIndex;

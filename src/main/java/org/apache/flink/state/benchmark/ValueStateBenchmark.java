@@ -20,8 +20,7 @@ package org.apache.flink.state.benchmark;
 
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
-import org.apache.flink.runtime.state.VoidNamespace;
-import org.apache.flink.runtime.state.VoidNamespaceSerializer;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.runner.Runner;
@@ -33,6 +32,8 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.createKeyedStateBackend;
+import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getValueState;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
 
 /**
@@ -52,10 +53,9 @@ public class ValueStateBenchmark extends StateBenchmarkBase {
 
     @Setup
     public void setUp() throws Exception {
-        keyedStateBackend = createKeyedStateBackend();
-        valueState = keyedStateBackend.getPartitionedState(
-                VoidNamespace.INSTANCE,
-                VoidNamespaceSerializer.INSTANCE,
+        keyedStateBackend = createKeyedStateBackend(backendType);
+        valueState = getValueState(
+                keyedStateBackend,
                 new ValueStateDescriptor<>("kvState", Long.class));
         for (int i = 0; i < setupKeyCount; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
