@@ -121,6 +121,12 @@ public class ListStateBenchmark extends StateBenchmarkBase {
     }
 
     @Benchmark
+    public void listAppend(KeyValue keyValue) throws Exception {
+        keyedStateBackend.setCurrentKey(keyValue.setUpKey);
+        listState.add(keyValue.value);
+    }
+
+    @Benchmark
     public Iterable<Long> listGet(KeyValue keyValue) throws Exception {
         keyedStateBackend.setCurrentKey(keyValue.setUpKey);
         return listState.get();
