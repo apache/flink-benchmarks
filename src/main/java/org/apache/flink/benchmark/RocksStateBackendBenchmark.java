@@ -19,6 +19,9 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.benchmark.functions.IntLongApplications;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.MemorySize;
+import org.apache.flink.contrib.streaming.state.RocksDBOptions;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
@@ -71,6 +74,14 @@ public class RocksStateBackendBenchmark extends StateBackendBenchmarkBase {
 		@TearDown
 		public void tearDown() throws IOException {
 			super.tearDown();
+		}
+
+		@Override
+		protected Configuration createConfiguration() {
+			Configuration configuration = super.createConfiguration();
+			// explicit set the managed memory as 322122552 bytes, which is the default managed memory of 1GB TM with 1 slot.
+			configuration.set(RocksDBOptions.FIX_PER_SLOT_MEMORY_SIZE, MemorySize.parse("322122552b"));
+			return configuration;
 		}
 	}
 }
