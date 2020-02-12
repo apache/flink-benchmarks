@@ -26,7 +26,7 @@ import org.apache.flink.core.fs.FileInputSplit;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
-import org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperator;
+import org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperatorFactory;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.functions.source.TimestampedFileInputSplit;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -65,7 +65,7 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
                 .setParallelism(1)
                 .addSource(new MockSourceFunction())
                 .transform("fileReader", TypeInformation.of(String.class),
-                        new ContinuousFileReaderOperator<>(new MockInputFormat()))
+                        new ContinuousFileReaderOperatorFactory<>(new MockInputFormat()))
                 .addSink(new DiscardingSink<>());
 
         env.execute();
