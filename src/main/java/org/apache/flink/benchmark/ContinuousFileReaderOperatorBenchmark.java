@@ -19,6 +19,7 @@ package org.apache.flink.benchmark;
 
 import joptsimple.internal.Strings;
 import org.apache.flink.api.common.io.FileInputFormat;
+import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.FileInputSplit;
@@ -58,6 +59,7 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
     @Benchmark
     public void readFileSplit(FlinkEnvironmentContext context) throws Exception {
         StreamExecutionEnvironment env = context.env;
+        env.setRestartStrategy(new RestartStrategies.NoRestartStrategyConfiguration());
         env
                 .enableCheckpointing(100)
                 .setParallelism(1)
