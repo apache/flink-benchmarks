@@ -43,6 +43,8 @@ under the License.
 		<mockito.version>2.21.0</mockito.version>
 		<maven.exec.version>1.6.0</maven.exec.version>
 		<maven.compiler.version>3.1</maven.compiler.version>
+		<chill.version>0.7.6</chill.version>
+		<thrift.version>0.13.0</thrift.version>
 	</properties>
 
 	<repositories>
@@ -187,6 +189,37 @@ under the License.
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- serialization benchmark requirements -->
+
+		<!-- Thrift -->
+		<dependency>
+			<groupId>com.twitter</groupId>
+			<artifactId>chill-thrift</artifactId>
+			<version>${chill.version}</version>
+			<!-- exclusions for dependency conversion -->
+			<exclusions>
+				<exclusion>
+					<groupId>com.esotericsoftware.kryo</groupId>
+					<artifactId>kryo</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.thrift</groupId>
+			<artifactId>libthrift</artifactId>
+			<version>${thrift.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 	<profiles>
@@ -300,6 +333,45 @@ under the License.
 		                                                                </transformer>
 									</transformers>
 								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>generate-thrift</id>
+			<activation>
+				<property>
+					<name>generate-thrift</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<!-- Generate MyPojo class from thrift schema -->
+					<plugin>
+						<groupId>org.apache.thrift</groupId>
+						<artifactId>thrift-maven-plugin</artifactId>
+						<version>0.10.0</version>
+						<configuration>
+							<thriftSourceRoot>${project.basedir}/src/main/resources/thrift</thriftSourceRoot>
+							<outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+						</configuration>
+						<executions>
+							<execution>
+								<id>thrift-sources</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>thrift-test-sources</id>
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>testCompile</goal>
+								</goals>
 							</execution>
 						</executions>
 					</plugin>
