@@ -19,14 +19,20 @@
 package org.apache.flink.benchmark.full;
 
 import org.apache.flink.api.common.ExecutionConfig;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.benchmark.FlinkEnvironmentContext;
 import org.apache.flink.benchmark.SerializationFrameworkMiniBenchmarks;
 import org.apache.flink.benchmark.functions.BaseSourceWithKeyRange;
+import org.apache.flink.formats.avro.typeutils.GenericRecordAvroTypeInfo;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 
 import com.twitter.chill.protobuf.ProtobufSerializer;
 import com.twitter.chill.thrift.TBaseSerializer;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.runner.Runner;
@@ -35,6 +41,9 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 /**
@@ -93,6 +102,20 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
 	}
 
 	@Benchmark
+	@OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
+	public void serializerAvroGeneric(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
+
+		Schema schema = AvroGenericRecordSource.loadSchema();
+		env.addSource(new AvroGenericRecordSource(RECORDS_PER_INVOCATION, 10, schema))
+				.rebalance()
+				.addSink(new DiscardingSink<>());
+
+		env.execute();
+	}
+
+	@Benchmark
 	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
 	public void serializerKryoThrift(FlinkEnvironmentContext context) throws Exception {
 		StreamExecutionEnvironment env = context.env;
@@ -124,6 +147,79 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
 				.addSink(new DiscardingSink<>());
 
 		env.execute();
+	}
+
+	/**
+	 * Source emitting an Avro GenericRecord.
+	 */
+	public static class AvroGenericRecordSource extends BaseSourceWithKeyRange<GenericRecord> implements
+			ResultTypeQueryable<GenericRecord> {
+		private static final long serialVersionUID = 2941333602938145526L;
+
+		private final GenericRecordAvroTypeInfo producedType;
+		private transient Schema myPojoSchema;
+		private final String schemaString;
+
+		private transient GenericRecord template;
+
+		public AvroGenericRecordSource(int numEvents, int numKeys, Schema schema) {
+			super(numEvents, numKeys);
+			this.producedType = new GenericRecordAvroTypeInfo(schema);
+			this.myPojoSchema = schema;
+			this.schemaString = schema.toString();
+		}
+
+		private static Schema loadSchema() throws IOException {
+			ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+			try (InputStream is = classLoader.getResourceAsStream("avro/mypojo.avsc")) {
+				if (is == null) {
+					throw new FileNotFoundException("File 'mypojo.avsc' not found");
+				}
+				return new Schema.Parser().parse(is);
+			}
+		}
+
+		@Override
+		protected void init() {
+			super.init();
+
+			if (myPojoSchema == null) {
+				this.myPojoSchema = new Schema.Parser().parse(schemaString);
+			}
+			Schema myOperationSchema = myPojoSchema.getField("operations").schema().getElementType();
+
+			template = new GenericData.Record(myPojoSchema);
+			template.put("id", 0);
+			template.put("name", "myName");
+			template.put("operationName", Arrays.asList("op1", "op2", "op3", "op4"));
+
+			GenericData.Record op1 = new GenericData.Record(myOperationSchema);
+			op1.put("id", 1);
+			op1.put("name", "op1");
+			GenericData.Record op2 = new GenericData.Record(myOperationSchema);
+			op2.put("id", 2);
+			op2.put("name", "op2");
+			GenericData.Record op3 = new GenericData.Record(myOperationSchema);
+			op3.put("id", 3);
+			op3.put("name", "op3");
+			template.put("operations", Arrays.asList(op1, op2, op3));
+
+			template.put("otherId1", 1);
+			template.put("otherId2", 2);
+			template.put("otherId3", 3);
+			template.put("nullable", "null");
+		}
+
+		@Override
+		protected GenericRecord getElement(int keyId) {
+			template.put("id", keyId);
+			return template;
+		}
+
+		@Override
+		public TypeInformation<GenericRecord> getProducedType() {
+			return producedType;
+		}
 	}
 
 	/**
