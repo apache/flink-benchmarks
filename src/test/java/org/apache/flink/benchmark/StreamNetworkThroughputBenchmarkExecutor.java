@@ -19,7 +19,6 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.SecurityOptions;
 import org.apache.flink.runtime.net.SSLUtilsTest;
 import org.apache.flink.streaming.runtime.io.benchmark.StreamNetworkThroughputBenchmark;
 
@@ -69,7 +68,7 @@ public class StreamNetworkThroughputBenchmarkExecutor extends BenchmarkBase {
 	@State(Thread)
 	public static class MultiEnvironment extends StreamNetworkThroughputBenchmark {
 
-		@Param({"100,100ms", "100,100ms,SSL", "1000,1ms", "1000,100ms", "1000,100ms,SSL"})
+		@Param({"100,100ms", "100,100ms,SSL", "1000,1ms", "1000,100ms", "1000,100ms,SSL", "1000,100ms,OpenSSL"})
 		public String channelsFlushTimeout = "100,100ms";
 
 		//Do not spam continuous benchmarking with number of writers parameter.
@@ -80,7 +79,7 @@ public class StreamNetworkThroughputBenchmarkExecutor extends BenchmarkBase {
 		public void setUp() throws Exception {
 			int channels = parseChannels(channelsFlushTimeout);
 			int flushTimeout = parseFlushTimeout(channelsFlushTimeout);
-			boolean useSSL = parseEnableSSL(channelsFlushTimeout);
+			String sslProvider = parseEnableSSL(channelsFlushTimeout);
 
 			setUp(
 					writers,
@@ -90,14 +89,20 @@ public class StreamNetworkThroughputBenchmarkExecutor extends BenchmarkBase {
 					false,
 					-1,
 					-1,
-					useSSL ? SSLUtilsTest.createInternalSslConfigWithKeyAndTrustStores(
-							SecurityOptions.SSL_PROVIDER.defaultValue()) : new Configuration()
+					sslProvider != null ? SSLUtilsTest.createInternalSslConfigWithKeyAndTrustStores(
+							sslProvider) : new Configuration()
 			);
 		}
 
-		private static boolean parseEnableSSL(String channelsFlushTimeout) {
+		private static String parseEnableSSL(String channelsFlushTimeout) {
 			String[] parameters = channelsFlushTimeout.split(",");
-			return Arrays.asList(parameters).contains("SSL");
+			if (Arrays.asList(parameters).contains("SSL")) {
+				return "JDK";
+			} else if (Arrays.asList(parameters).contains("OpenSSL")) {
+				return "OPENSSL";
+			} else {
+				return null;
+			}
 		}
 
 		private static int parseFlushTimeout(String channelsFlushTimeout) {

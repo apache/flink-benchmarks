@@ -38,6 +38,17 @@ We also support to run each benchmark once (with only one fork and one iteration
 mvn test -P test
 ```
 
+## Prerequisites
+
+The recent addition of OpenSSL-based benchmarks require one of two modes to be active:
+- dynamically-linked OpenSSL (default): this uses a dependency with native wrappers that are linked dynamically to your system's libraries. Depending on the installed OpenSSL version and OS, this may fail and you should try the next option:
+- statically-linked OpenSSL: this can be activated by `mvn -Dinclude-netty-tcnative-static` but requires `flink-shaded-netty-tcnative-static` in the version from `pom.xml` which can be generated from inside a corresponding flink-shaded source via:
+```
+mvn clean install -Pinclude-netty-tcnative-static -pl flink-shaded-netty-tcnative-static
+```
+
+If both options are not working, OpenSSL benchmarks will fail but that should not influence any other benchmarks.
+
 ## Code structure
 
 Recommended code structure is to define all benchmarks in [Apache Flink](https://github.com/apache/flink)
