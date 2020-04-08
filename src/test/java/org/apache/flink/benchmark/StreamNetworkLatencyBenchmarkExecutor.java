@@ -49,7 +49,7 @@ public class StreamNetworkLatencyBenchmarkExecutor extends BenchmarkBase {
 			throws RunnerException {
 		Options options = new OptionsBuilder()
 				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + StreamNetworkLatencyBenchmarkExecutor.class.getSimpleName() + ".*")
+				.include(".*" + StreamNetworkLatencyBenchmarkExecutor.class.getCanonicalName() + ".*")
 				.build();
 
 		new Runner(options).run();

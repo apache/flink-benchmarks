@@ -45,7 +45,7 @@ public class ValueStateBenchmark extends StateBenchmarkBase {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .verbosity(VerboseMode.NORMAL)
-                .include(".*" + ValueStateBenchmark.class.getSimpleName() + ".*")
+                .include(".*" + ValueStateBenchmark.class.getCanonicalName() + ".*")
                 .build();
 
         new Runner(opt).run();

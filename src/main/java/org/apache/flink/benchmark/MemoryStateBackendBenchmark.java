@@ -46,7 +46,7 @@ public class MemoryStateBackendBenchmark extends StateBackendBenchmarkBase {
 			throws RunnerException {
 		Options options = new OptionsBuilder()
 				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + MemoryStateBackendBenchmark.class.getSimpleName() + ".*")
+				.include(".*" + MemoryStateBackendBenchmark.class.getCanonicalName() + ".*")
 				.build();
 
 		new Runner(options).run();

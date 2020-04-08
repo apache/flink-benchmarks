@@ -48,7 +48,7 @@ public class StringSerializationBenchmark extends BenchmarkBase {
             throws RunnerException {
         Options options = new OptionsBuilder()
                 .verbosity(VerboseMode.NORMAL)
-                .include(".*" + StringSerializationBenchmark.class.getSimpleName() + ".*")
+                .include(".*" + StringSerializationBenchmark.class.getCanonicalName() + ".*")
                 .build();
 
         new Runner(options).run();

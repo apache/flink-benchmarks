@@ -52,7 +52,7 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
 			throws RunnerException {
 		Options options = new OptionsBuilder()
 				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + BlockingPartitionBenchmark.class.getSimpleName() + ".*")
+				.include(".*" + BlockingPartitionBenchmark.class.getCanonicalName() + ".*")
 				.build();
 
 		new Runner(options).run();

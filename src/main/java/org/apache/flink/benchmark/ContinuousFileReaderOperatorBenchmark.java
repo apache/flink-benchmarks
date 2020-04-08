@@ -50,7 +50,7 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
             throws RunnerException {
         Options options = new OptionsBuilder()
                 .verbosity(VerboseMode.NORMAL)
-                .include(".*" + ContinuousFileReaderOperatorBenchmark.class.getSimpleName() + ".*")
+                .include(".*" + ContinuousFileReaderOperatorBenchmark.class.getCanonicalName() + ".*")
                 .build();
 
         new Runner(options).run();

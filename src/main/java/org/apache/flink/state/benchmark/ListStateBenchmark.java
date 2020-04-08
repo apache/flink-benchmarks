@@ -56,7 +56,7 @@ public class ListStateBenchmark extends StateBenchmarkBase {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .verbosity(VerboseMode.NORMAL)
-                .include(".*" + ListStateBenchmark.class.getSimpleName() + ".*")
+                .include(".*" + ListStateBenchmark.class.getCanonicalName() + ".*")
                 .build();
 
         new Runner(opt).run();

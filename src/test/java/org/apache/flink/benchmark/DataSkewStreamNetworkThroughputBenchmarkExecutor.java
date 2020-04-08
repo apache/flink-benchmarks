@@ -45,7 +45,7 @@ public class DataSkewStreamNetworkThroughputBenchmarkExecutor extends BenchmarkB
 			throws RunnerException {
 		Options options = new OptionsBuilder()
 				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + DataSkewStreamNetworkThroughputBenchmarkExecutor.class.getSimpleName() + ".*")
+				.include(".*" + DataSkewStreamNetworkThroughputBenchmarkExecutor.class.getCanonicalName() + ".*")
 				.build();
 
 		new Runner(options).run();

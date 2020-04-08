@@ -49,7 +49,7 @@ public class RocksStateBackendBenchmark extends StateBackendBenchmarkBase {
 			throws RunnerException {
 		Options options = new OptionsBuilder()
 				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + RocksStateBackendBenchmark.class.getSimpleName() + ".*")
+				.include(".*" + RocksStateBackendBenchmark.class.getCanonicalName() + ".*")
 				.build();
 
 		new Runner(options).run();

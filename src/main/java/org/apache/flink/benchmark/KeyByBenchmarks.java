@@ -43,7 +43,7 @@ public class KeyByBenchmarks extends BenchmarkBase {
 			throws RunnerException {
 		Options options = new OptionsBuilder()
 				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + KeyByBenchmarks.class.getSimpleName() + ".*")
+				.include(".*" + KeyByBenchmarks.class.getCanonicalName() + ".*")
 				.build();
 
 		new Runner(options).run();

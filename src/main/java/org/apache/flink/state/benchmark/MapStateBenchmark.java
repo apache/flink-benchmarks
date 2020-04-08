@@ -52,7 +52,7 @@ public class MapStateBenchmark extends StateBenchmarkBase {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .verbosity(VerboseMode.NORMAL)
-                .include(".*" + MapStateBenchmark.class.getSimpleName() + ".*")
+                .include(".*" + MapStateBenchmark.class.getCanonicalName() + ".*")
                 .build();
 
         new Runner(opt).run();

@@ -57,7 +57,7 @@ public class AsyncWaitOperatorBenchmark extends BenchmarkBase {
 		throws RunnerException {
 		Options options = new OptionsBuilder()
 			.verbosity(VerboseMode.NORMAL)
-			.include(".*" + AsyncWaitOperatorBenchmark.class.getSimpleName() + ".*")
+			.include(".*" + AsyncWaitOperatorBenchmark.class.getCanonicalName() + ".*")
 			.build();
 
 		new Runner(options).run();

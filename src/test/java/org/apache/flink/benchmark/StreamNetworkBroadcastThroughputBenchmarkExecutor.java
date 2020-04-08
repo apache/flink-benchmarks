@@ -45,7 +45,7 @@ public class StreamNetworkBroadcastThroughputBenchmarkExecutor extends Benchmark
 			throws RunnerException {
 		Options options = new OptionsBuilder()
 				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + StreamNetworkBroadcastThroughputBenchmarkExecutor.class.getSimpleName() + ".*")
+				.include(".*" + StreamNetworkBroadcastThroughputBenchmarkExecutor.class.getCanonicalName() + ".*")
 				.build();
 
 		new Runner(options).run();

@@ -42,7 +42,7 @@ public class InputBenchmark extends BenchmarkBase {
 		throws RunnerException {
 		Options options = new OptionsBuilder()
 			.verbosity(VerboseMode.NORMAL)
-			.include(".*" + InputBenchmark.class.getSimpleName() + ".*")
+			.include(".*" + InputBenchmark.class.getCanonicalName() + ".*")
 			.build();
 
 		new Runner(options).run();

@@ -48,7 +48,7 @@ public class WindowBenchmarks extends BenchmarkBase {
 			throws RunnerException {
 		Options options = new OptionsBuilder()
 				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + WindowBenchmarks.class.getSimpleName() + ".*")
+				.include(".*" + WindowBenchmarks.class.getCanonicalName() + ".*")
 				.build();
 
 		new Runner(options).run();

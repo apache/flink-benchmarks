@@ -52,7 +52,7 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
 	public static void main(String[] args) throws RunnerException {
 		Options options = new OptionsBuilder()
 				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + SerializationFrameworkMiniBenchmarks.class.getSimpleName() + ".*")
+				.include(".*" + SerializationFrameworkMiniBenchmarks.class.getCanonicalName() + ".*")
 				.build();
 
 		new Runner(options).run();
