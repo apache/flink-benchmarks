@@ -26,6 +26,7 @@ import org.apache.flink.runtime.jobgraph.ScheduleMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.graph.GlobalDataExchangeMode;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 import org.apache.flink.util.FileUtils;
 
@@ -79,7 +80,7 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
 
 		StreamGraph streamGraph = env.getStreamGraph();
 		streamGraph.setChaining(false);
-		streamGraph.setBlockingConnectionsBetweenChains(true);
+		streamGraph.setGlobalDataExchangeMode(GlobalDataExchangeMode.ALL_EDGES_BLOCKING);
 		streamGraph.setScheduleMode(ScheduleMode.LAZY_FROM_SOURCES_WITH_BATCH_SLOT_REQUEST);
 
 		env.execute(streamGraph);
