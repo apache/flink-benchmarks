@@ -42,7 +42,7 @@ mvn test -P test
 
 The recent addition of OpenSSL-based benchmarks require one of two modes to be active:
 - dynamically-linked OpenSSL (default): this uses a dependency with native wrappers that are linked dynamically to your system's libraries. Depending on the installed OpenSSL version and OS, this may fail and you should try the next option:
-- statically-linked OpenSSL: this can be activated by `mvn -Dinclude-netty-tcnative-static` but requires `flink-shaded-netty-tcnative-static` in the version from `pom.xml` which can be generated from inside a corresponding flink-shaded source via:
+- statically-linked OpenSSL: this can be activated by `mvn -Dnetty-tcnative.flavor=static` but requires `flink-shaded-netty-tcnative-static` in the version from `pom.xml`. This module is not provided by Apache Flink by default due to licensing issues (see https://issues.apache.org/jira/browse/LEGAL-393) but can be generated from inside a corresponding `flink-shaded` source via:
 ```
 mvn clean install -Pinclude-netty-tcnative-static -pl flink-shaded-netty-tcnative-static
 ```
