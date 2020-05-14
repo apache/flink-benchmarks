@@ -49,6 +49,8 @@ under the License.
 		<thrift.version>0.13.0</thrift.version>
 		<protobuf.version>3.11.4</protobuf.version>
 		<netty-tcnative.flavor>dynamic</netty-tcnative.flavor>
+		<benchmarkExcludes>org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*</benchmarkExcludes>
+		<benchmarks>.*</benchmarks>
 	</properties>
 
 	<repositories>
@@ -304,6 +306,9 @@ under the License.
 			<id>benchmark</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>benchmarks</name>
+				</property>
 			</activation>
 			<build>
 				<plugins>
@@ -327,10 +332,10 @@ under the License.
 								<classpath/>
 								<argument>org.openjdk.jmh.Main</argument>
 								<argument>-e</argument>
-								<argument>org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*</argument>
+								<argument>${benchmarkExcludes}</argument>
 								<argument>-rf</argument>
 								<argument>csv</argument>
-								<argument>.*</argument>
+								<argument>${benchmarks}</argument>
 							</arguments>
 						</configuration>
 					</plugin>
@@ -366,6 +371,17 @@ under the License.
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+		<profile>
+			<id>custom-benchmark</id>
+			<activation>
+				<property>
+					<name>benchmarks</name>
+				</property>
+			</activation>
+			<properties>
+				<benchmarkExcludes>""</benchmarkExcludes>
+			</properties>
 		</profile>
 
 		<profile>
