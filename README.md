@@ -9,14 +9,14 @@ benchmark suite to define runners to execute those test cases. You can execute t
 default benchmark suite (which takes ~1hour) at once:
 
 ```
-mvn -Dflink.version=1.5.0 clean install exec:exec
+mvn -Dflink.version=1.11-SNAPSHOT clean install exec:exec
 ```
 
 There is also a separate benchmark suit for state backend, and you can execute this suit (which takes ~1hour) using
 below command:
 
 ```
-mvn -Dflink.version=1.5.0 clean package exec:exec \
+mvn -Dflink.version=1.11-SNAPSHOT clean package exec:exec \
  -Dbenchmarks="org.apache.flink.state.benchmark.*"
 ```
 
@@ -28,7 +28,7 @@ There're mainly two ways:
 
 2. From command line, using command like:
    ```
-   mvn -Dflink.version=1.5.0 clean package exec:exec \
+   mvn -Dflink.version=1.11-SNAPSHOT clean package exec:exec \
     -Dbenchmarks="<benchmark_class>"
    ```
 
