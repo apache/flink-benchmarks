@@ -24,18 +24,24 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.FileInputSplit;
 import org.apache.flink.core.fs.Path;
+import org.apache.flink.core.testutils.OneShotLatch;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperatorFactory;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.functions.source.TimestampedFileInputSplit;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @OperationsPerInvocation(value = ContinuousFileReaderOperatorBenchmark.RECORDS_PER_INVOCATION)
 public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
@@ -46,6 +52,10 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
     private static final TimestampedFileInputSplit SPLIT = new TimestampedFileInputSplit(0, 0, new Path("."), 0, 0, new String[]{});
     private static final String LINE = Strings.repeat('0', 10);
 
+    // Source should wait until all elements reach sink. Otherwise, END_OF_INPUT is sent once all splits are emitted.
+    // Thus, all subsequent reads in ContinuousFileReaderOperator would be made in CLOSING state in a simple while-true loop (MailboxExecutor.isIdle is always true).
+    private static OneShotLatch TARGET_COUNT_REACHED_LATCH = new OneShotLatch();
+
     public static void main(String[] args)
             throws RunnerException {
         Options options = new OptionsBuilder()
@@ -54,6 +64,11 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
                 .build();
 
         new Runner(options).run();
+    }
+
+    @TearDown(Level.Iteration)
+    public void tearDown() {
+        TARGET_COUNT_REACHED_LATCH.reset();
     }
 
     @Benchmark
@@ -66,7 +81,7 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
                 .addSource(new MockSourceFunction())
                 .transform("fileReader", TypeInformation.of(String.class),
                         new ContinuousFileReaderOperatorFactory<>(new MockInputFormat()))
-                .addSink(new DiscardingSink<>());
+                .addSink(new LimitedSink());
 
         env.execute();
     }
@@ -81,6 +96,18 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
                 count++;
                 synchronized (ctx.getCheckpointLock()) {
                     ctx.collect(SPLIT);
+                }
+            }
+            while (isRunning) {
+                try {
+                    TARGET_COUNT_REACHED_LATCH.await(100, TimeUnit.MILLISECONDS);
+                    return;
+                } catch (InterruptedException e) {
+                    if (!isRunning) {
+                        Thread.currentThread().interrupt();
+                    }
+                } catch (TimeoutException e) {
+                	// continue waiting
                 }
             }
         }
@@ -114,6 +141,17 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
         @Override
         public void configure(Configuration parameters) {
             // prevent super from requiring certain settings (input.file.path)
+        }
+    }
+
+    private static class LimitedSink implements SinkFunction<String> {
+        private int count;
+
+        @Override
+        public void invoke(String value, Context context) {
+        	if (++count == RECORDS_PER_INVOCATION) {
+        	    TARGET_COUNT_REACHED_LATCH.trigger();
+            }
         }
     }
 }
