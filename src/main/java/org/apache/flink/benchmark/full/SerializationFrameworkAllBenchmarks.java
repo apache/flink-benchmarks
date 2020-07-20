@@ -24,6 +24,7 @@ import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.benchmark.FlinkEnvironmentContext;
 import org.apache.flink.benchmark.SerializationFrameworkMiniBenchmarks;
 import org.apache.flink.benchmark.functions.BaseSourceWithKeyRange;
+import org.apache.flink.benchmark.functions.ScalaADTSource;
 import org.apache.flink.formats.avro.typeutils.GenericRecordAvroTypeInfo;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
@@ -114,6 +115,20 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
 
 		env.execute();
 	}
+
+	@Benchmark
+	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
+	public void serializerScalaADT(FlinkEnvironmentContext context) throws Exception {
+		StreamExecutionEnvironment env = context.env;
+		env.setParallelism(4);
+
+		env.addSource(new ScalaADTSource(RECORDS_PER_INVOCATION), ScalaADTSource.adtTypeInfo())
+				.rebalance()
+				.addSink(new DiscardingSink<>());
+
+		env.execute();
+	}
+
 
 	@Benchmark
 	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
