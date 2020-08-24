@@ -29,6 +29,7 @@ import org.apache.flink.streaming.api.graph.StreamingJobGraphGenerator;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.Runner;
@@ -47,6 +48,9 @@ public class RemoteChannelThroughputBenchmark extends BenchmarkBase {
     private static final long CHECKPOINT_INTERVAL_MS = 100;
 
     private MiniCluster miniCluster;
+
+    @Param({"ALIGNED", "UNALIGNED"})
+    public String mode = "ALIGNED";
 
     public static void main(String[] args)
             throws RunnerException {
@@ -80,6 +84,7 @@ public class RemoteChannelThroughputBenchmark extends BenchmarkBase {
         StreamExecutionEnvironment env = context.env;
         env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
         env.setParallelism(PARALLELISM);
+        env.getCheckpointConfig().enableUnalignedCheckpoints(!mode.equals("ALIGNED"));
 
         DataStreamSource<Long> source = env.addSource(new LongSource(RECORDS_PER_SUBTASK));
         source
