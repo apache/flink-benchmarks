@@ -35,7 +35,7 @@ public class FlinkEnvironmentContext {
 
     public static final int NUM_NETWORK_BUFFERS = 1000;
 
-    public final StreamExecutionEnvironment env = getStreamExecutionEnvironment();
+    public StreamExecutionEnvironment env;
 
     protected final int parallelism = 1;
     protected final boolean objectReuse = true;
@@ -43,6 +43,7 @@ public class FlinkEnvironmentContext {
     @Setup
     public void setUp() throws IOException {
         // set up the execution environment
+        env = getStreamExecutionEnvironment();
         env.setParallelism(parallelism);
         env.getConfig().disableSysoutLogging();
         if (objectReuse) {
