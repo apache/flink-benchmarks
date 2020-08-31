@@ -18,6 +18,7 @@
 
 package org.apache.flink.benchmark;
 
+import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.NettyShuffleEnvironmentOptions;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
@@ -49,7 +50,7 @@ public class FlinkEnvironmentContext {
         if (objectReuse) {
             env.getConfig().enableObjectReuse();
         }
-
+        env.setRestartStrategy(RestartStrategies.noRestart());
         env.setStateBackend(new MemoryStateBackend());
     }
 
