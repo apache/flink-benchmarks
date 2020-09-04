@@ -46,7 +46,6 @@ public class FlinkEnvironmentContext {
         // set up the execution environment
         env = getStreamExecutionEnvironment();
         env.setParallelism(parallelism);
-        env.getConfig().disableSysoutLogging();
         if (objectReuse) {
             env.getConfig().enableObjectReuse();
         }
