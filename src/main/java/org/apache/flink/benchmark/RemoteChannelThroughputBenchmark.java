@@ -20,8 +20,6 @@ package org.apache.flink.benchmark;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.benchmark.functions.LongSource;
-import org.apache.flink.runtime.minicluster.MiniCluster;
-import org.apache.flink.runtime.minicluster.MiniClusterConfiguration;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
@@ -30,8 +28,6 @@ import org.apache.flink.streaming.api.graph.StreamingJobGraphGenerator;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -39,15 +35,9 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 @OperationsPerInvocation(value = RemoteChannelThroughputBenchmark.RECORDS_PER_INVOCATION)
-public class RemoteChannelThroughputBenchmark extends BenchmarkBase {
-    public static final int NUM_VERTICES = 3;
-    public static final int PARALLELISM = 4;
-    public static final int RECORDS_PER_SUBTASK = 10_000_000;
-    public static final int RECORDS_PER_INVOCATION = RECORDS_PER_SUBTASK * PARALLELISM;
-
+public class RemoteChannelThroughputBenchmark extends RemoteBenchmarkBase {
+    private static final int NUM_VERTICES = 3;
     private static final long CHECKPOINT_INTERVAL_MS = 100;
-
-    private MiniCluster miniCluster;
 
     @Param({"ALIGNED", "UNALIGNED"})
     public String mode = "ALIGNED";
@@ -62,21 +52,9 @@ public class RemoteChannelThroughputBenchmark extends BenchmarkBase {
         new Runner(options).run();
     }
 
-    @Setup
-    public void setUp() throws Exception {
-        MiniClusterConfiguration miniClusterConfiguration = new MiniClusterConfiguration.Builder()
-            .setNumTaskManagers(NUM_VERTICES * PARALLELISM)
-            .setNumSlotsPerTaskManager(1)
-            .build();
-        miniCluster = new MiniCluster(miniClusterConfiguration);
-        miniCluster.start();
-    }
-
-    @TearDown
-    public void tearDown() throws Exception {
-        if (miniCluster != null) {
-            miniCluster.close();
-        }
+    @Override
+    public int getNumberOfVertexes() {
+        return NUM_VERTICES;
     }
 
     @Benchmark
