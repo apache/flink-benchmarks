@@ -18,15 +18,10 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.benchmark.functions.LongSource;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.NettyShuffleEnvironmentOptions;
-import org.apache.flink.runtime.jobgraph.ScheduleMode;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
-import org.apache.flink.streaming.api.graph.GlobalDataExchangeMode;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 import org.apache.flink.util.FileUtils;
 
@@ -75,14 +70,7 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
 	}
 
 	private void executeBenchmark(StreamExecutionEnvironment env) throws Exception {
-		DataStreamSource<Long> source = env.addSource(new LongSource(RECORDS_PER_INVOCATION));
-		source.addSink(new DiscardingSink<>());
-
-		StreamGraph streamGraph = env.getStreamGraph();
-		streamGraph.setChaining(false);
-		streamGraph.setGlobalDataExchangeMode(GlobalDataExchangeMode.ALL_EDGES_BLOCKING);
-		streamGraph.setScheduleMode(ScheduleMode.LAZY_FROM_SOURCES_WITH_BATCH_SLOT_REQUEST);
-
+		StreamGraph streamGraph = StreamGraphUtils.buildGraphForBatchJob(env, RECORDS_PER_INVOCATION);
 		env.execute(streamGraph);
 	}
 
