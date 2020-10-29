@@ -20,13 +20,28 @@ under the License.
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.apache.flink.benchmark</groupId>
-	<artifactId>flink-hackathon-benchmarks</artifactId>
+	<groupId>org.apache.flink</groupId>
+	<artifactId>benchmark</artifactId>
 	<version>0.1</version>
 	<packaging>jar</packaging>
 
-	<name>Flink Benchmark Job</name>
-	<url>http://www.myorganization.org</url>
+	<name>Flink : Benchmark Job</name>
+	<url>http://flink.apache.org</url>
+	<inceptionYear>2014</inceptionYear>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/apache/flink-statefun</url>
+		<connection>git@github.com:apache/flink-benchmarks.git</connection>
+		<developerConnection>scm:git:https://gitbox.apache.org/repos/asf/flink-benchmarks.git</developerConnection>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
