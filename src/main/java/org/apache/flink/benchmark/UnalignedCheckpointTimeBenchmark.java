@@ -88,6 +88,7 @@ public class UnalignedCheckpointTimeBenchmark extends BenchmarkBase {
             env.setParallelism(parallelism);
             env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
             env.getCheckpointConfig().enableUnalignedCheckpoints(true);
+            env.getCheckpointConfig().setAlignmentTimeout(0);
         }
 
         protected Configuration createConfiguration() {
