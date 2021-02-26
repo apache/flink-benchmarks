@@ -149,7 +149,6 @@ public class SchedulerBenchmarkUtils {
 			executionGraph.updateState(
 					new TaskExecutionStateTransition(
 							new TaskExecutionState(
-									executionGraph.getJobID(),
 									vertex.getCurrentExecutionAttempt().getAttemptId(),
 									state)));
 		}
@@ -166,7 +165,6 @@ public class SchedulerBenchmarkUtils {
 				.getAttemptId();
 		scheduler.updateTaskExecutionState(
 				new TaskExecutionState(
-						scheduler.getExecutionGraph().getJobID(),
 						attemptId,
 						executionState));
 	}
