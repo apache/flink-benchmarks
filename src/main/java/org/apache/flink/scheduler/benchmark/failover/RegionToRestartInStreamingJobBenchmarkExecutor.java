@@ -16,12 +16,11 @@
  * limitations under the License.
  */
 
-package org.apache.flink.scheduler.benchmark.deploying;
+package org.apache.flink.scheduler.benchmark.failover;
 
-import org.apache.flink.runtime.executiongraph.Execution;
-import org.apache.flink.runtime.executiongraph.ExecutionVertex;
-import org.apache.flink.runtime.jobgraph.JobVertex;
-import org.apache.flink.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.failover.RegionToRestartInStreamingJobBenchmark;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -29,45 +28,32 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
 
 /**
- * The benchmark of deploying downstream tasks in a BATCH job.
- * The related method is {@link Execution#deploy}.
+ * The benchmark of calculating region to restart when failover occurs in a STREAMING job.
  */
-public class DeployingDownstreamTasksInBatchJobBenchmark extends DeployingTasksBenchmarkBase {
+public class RegionToRestartInStreamingJobBenchmarkExecutor extends SchedulerBenchmarkBase {
 
-	@Param("BATCH")
+	@Param("STREAMING")
 	private JobConfiguration jobConfiguration;
 
-	private ExecutionVertex[] vertices;
+	private RegionToRestartInStreamingJobBenchmark benchmark;
 
 	public static void main(String[] args) throws RunnerException {
-		runBenchmark(DeployingDownstreamTasksInBatchJobBenchmark.class);
+		runBenchmark(RegionToRestartInStreamingJobBenchmarkExecutor.class);
 	}
 
 	@Setup(Level.Trial)
 	public void setup() throws Exception {
-		createAndSetupExecutionGraph(jobConfiguration);
-
-		final JobVertex source = jobVertices.get(0);
-
-		for (ExecutionVertex ev : executionGraph.getJobVertex(source.getID()).getTaskVertices()) {
-			Execution execution = ev.getCurrentExecutionAttempt();
-			execution.deploy();
-		}
-
-		final JobVertex sink = jobVertices.get(1);
-
-		vertices = executionGraph.getJobVertex(sink.getID()).getTaskVertices();
+		benchmark = new RegionToRestartInStreamingJobBenchmark();
+		benchmark.setup(jobConfiguration);
 	}
 
 	@Benchmark
 	@BenchmarkMode(Mode.SingleShotTime)
-	public void deployDownstreamTasks() throws Exception {
-		for (ExecutionVertex ev : vertices) {
-			Execution execution = ev.getCurrentExecutionAttempt();
-			execution.deploy();
-		}
+	public void calculateRegionToRestart(Blackhole blackhole) {
+		blackhole.consume(benchmark.calculateRegionToRestart());
 	}
 }
