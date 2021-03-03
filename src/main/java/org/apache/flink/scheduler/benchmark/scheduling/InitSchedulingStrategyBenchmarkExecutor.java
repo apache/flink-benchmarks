@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-package org.apache.flink.scheduler.benchmark.failover;
+package org.apache.flink.scheduler.benchmark.scheduling;
 
-import org.apache.flink.runtime.executiongraph.failover.flip1.RestartPipelinedRegionFailoverStrategy;
-import org.apache.flink.runtime.jobmaster.TestingLogicalSlotBuilder;
-import org.apache.flink.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.scheduling.InitSchedulingStrategyBenchmark;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -31,39 +31,29 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
 
-import static org.apache.flink.runtime.executiongraph.ExecutionGraphTestUtils.switchAllVerticesToRunning;
-import static org.apache.flink.scheduler.benchmark.SchedulerBenchmarkUtils.deployAllTasks;
-
 /**
- * The benchmark of calculating region to restart when failover occurs in a STREAMING job.
- * The related method is {@link RestartPipelinedRegionFailoverStrategy#getTasksNeedingRestart}.
+ * The benchmark of initializing the scheduling strategy in a STREAMING/BATCH job.
  */
-public class RegionToRestartInStreamingJobBenchmark extends FailoverBenchmarkBase {
+public class InitSchedulingStrategyBenchmarkExecutor extends SchedulerBenchmarkBase {
 
-	@Param("STREAMING")
+	@Param({"BATCH", "STREAMING"})
 	private JobConfiguration jobConfiguration;
 
+	private InitSchedulingStrategyBenchmark benchmark;
+
 	public static void main(String[] args) throws RunnerException {
-		runBenchmark(RegionToRestartInStreamingJobBenchmark.class);
+		runBenchmark(InitSchedulingStrategyBenchmarkExecutor.class);
 	}
 
 	@Setup(Level.Trial)
 	public void setup() throws Exception {
-		createRestartPipelinedRegionFailoverStrategy(jobConfiguration);
-
-		TestingLogicalSlotBuilder slotBuilder = new TestingLogicalSlotBuilder();
-
-		deployAllTasks(executionGraph, slotBuilder);
-
-		switchAllVerticesToRunning(executionGraph);
+		benchmark = new InitSchedulingStrategyBenchmark();
+		benchmark.setup(jobConfiguration);
 	}
 
 	@Benchmark
 	@BenchmarkMode(Mode.SingleShotTime)
-	public void calculateRegionToRestart(Blackhole blackhole) {
-		tasks = strategy.getTasksNeedingRestart(
-				executionGraph.getJobVertex(source.getID()).getTaskVertices()[0].getID(),
-				new Exception("For test."));
-		blackhole.consume(tasks);
+	public void initSchedulingStrategy(Blackhole blackhole) {
+		blackhole.consume(benchmark.initSchedulingStrategy());
 	}
 }

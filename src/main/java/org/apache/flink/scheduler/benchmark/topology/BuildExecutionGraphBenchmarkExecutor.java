@@ -18,11 +18,8 @@
 
 package org.apache.flink.scheduler.benchmark.topology;
 
-import org.apache.flink.runtime.executiongraph.ExecutionGraph;
-import org.apache.flink.runtime.executiongraph.TestingDefaultExecutionGraphBuilder;
-import org.apache.flink.runtime.jobgraph.JobGraph;
-import org.apache.flink.runtime.jobgraph.JobVertex;
-import org.apache.flink.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.topology.BuildExecutionGraphBenchmark;
 import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
@@ -33,37 +30,29 @@ import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.runner.RunnerException;
 
-import java.util.List;
-
-import static org.apache.flink.scheduler.benchmark.SchedulerBenchmarkUtils.createDefaultJobVertices;
-import static org.apache.flink.scheduler.benchmark.SchedulerBenchmarkUtils.createJobGraph;
-
 /**
- * The benchmark of building the topology of {@link ExecutionGraph} in a STREAMING/BATCH job.
- * The related method is {@link ExecutionGraph#attachJobGraph},
+ * The benchmark of building the topology of ExecutionGraph in a STREAMING/BATCH job.
  */
-public class BuildExecutionGraphBenchmark extends SchedulerBenchmarkBase {
-
-	private List<JobVertex> jobVertices;
-	private ExecutionGraph executionGraph;
+public class BuildExecutionGraphBenchmarkExecutor extends SchedulerBenchmarkBase {
 
 	@Param({"BATCH", "STREAMING"})
 	private JobConfiguration jobConfiguration;
 
+	private BuildExecutionGraphBenchmark benchmark;
+
 	public static void main(String[] args) throws RunnerException {
-		runBenchmark(BuildExecutionGraphBenchmark.class);
+		runBenchmark(BuildExecutionGraphBenchmarkExecutor.class);
 	}
 
 	@Setup(Level.Trial)
 	public void setup() throws Exception {
-		jobVertices = createDefaultJobVertices(jobConfiguration);
-		final JobGraph jobGraph = createJobGraph(jobConfiguration);
-		executionGraph = TestingDefaultExecutionGraphBuilder.newBuilder().setJobGraph(jobGraph).build();
+		benchmark = new BuildExecutionGraphBenchmark();
+		benchmark.setup(jobConfiguration);
 	}
 
 	@Benchmark
 	@BenchmarkMode(Mode.SingleShotTime)
 	public void buildTopology() throws Exception {
-		executionGraph.attachJobGraph(jobVertices);
+		benchmark.buildTopology();
 	}
 }

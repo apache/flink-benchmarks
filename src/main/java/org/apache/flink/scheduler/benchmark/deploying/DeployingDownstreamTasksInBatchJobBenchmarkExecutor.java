@@ -16,10 +16,12 @@
  * limitations under the License.
  */
 
-package org.apache.flink.scheduler.benchmark.scheduling;
+package org.apache.flink.scheduler.benchmark.deploying;
 
-import org.apache.flink.runtime.scheduler.strategy.PipelinedRegionSchedulingStrategy;
-import org.apache.flink.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.executiongraph.Execution;
+import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.deploying.DeployingDownstreamTasksInBatchJobBenchmark;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -27,31 +29,32 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
 
 /**
- * The benchmark of initializing {@link PipelinedRegionSchedulingStrategy} in a STREAMING/BATCH job.
+ * The benchmark of deploying downstream tasks in a BATCH job.
+ * The related method is {@link Execution#deploy}.
  */
-public class InitSchedulingStrategyBenchmark extends SchedulingBenchmarkBase {
+public class DeployingDownstreamTasksInBatchJobBenchmarkExecutor extends SchedulerBenchmarkBase {
 
-	@Param({"BATCH", "STREAMING"})
+	@Param("BATCH")
 	private JobConfiguration jobConfiguration;
 
+	private DeployingDownstreamTasksInBatchJobBenchmark benchmark;
+
 	public static void main(String[] args) throws RunnerException {
-		runBenchmark(InitSchedulingStrategyBenchmark.class);
+		runBenchmark(DeployingDownstreamTasksInBatchJobBenchmarkExecutor.class);
 	}
 
 	@Setup(Level.Trial)
 	public void setup() throws Exception {
-		initSchedulingTopology(jobConfiguration);
+		benchmark = new DeployingDownstreamTasksInBatchJobBenchmark();
+		benchmark.setup(jobConfiguration);
 	}
 
 	@Benchmark
 	@BenchmarkMode(Mode.SingleShotTime)
-	public void initSchedulingStrategy(Blackhole blackhole) {
-		final PipelinedRegionSchedulingStrategy schedulingStrategy =
-				new PipelinedRegionSchedulingStrategy(schedulerOperations, schedulingTopology);
-		blackhole.consume(schedulingStrategy);
+	public void deployDownstreamTasks() throws Exception {
+		benchmark.deployDownstreamTasks();
 	}
 }

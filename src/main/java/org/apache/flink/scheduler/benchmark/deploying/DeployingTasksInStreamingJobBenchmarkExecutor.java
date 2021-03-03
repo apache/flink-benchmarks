@@ -19,9 +19,9 @@
 package org.apache.flink.scheduler.benchmark.deploying;
 
 import org.apache.flink.runtime.executiongraph.Execution;
-import org.apache.flink.runtime.executiongraph.ExecutionJobVertex;
-import org.apache.flink.runtime.executiongraph.ExecutionVertex;
-import org.apache.flink.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.deploying.DeployingTasksInStreamingJobBenchmark;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -35,10 +35,12 @@ import org.openjdk.jmh.runner.RunnerException;
  * The benchmark of deploying tasks in a STREAMING job.
  * The related method is {@link Execution#deploy}.
  */
-public class DeployingTasksInStreamingJobBenchmark extends DeployingTasksBenchmarkBase {
+public class DeployingTasksInStreamingJobBenchmarkExecutor extends SchedulerBenchmarkBase {
 
 	@Param("STREAMING")
 	private JobConfiguration jobConfiguration;
+
+	private DeployingTasksInStreamingJobBenchmark benchmark;
 
 	public static void main(String[] args) throws RunnerException {
 		runBenchmark(DeployingTasksInStreamingJobBenchmark.class);
@@ -46,17 +48,13 @@ public class DeployingTasksInStreamingJobBenchmark extends DeployingTasksBenchma
 
 	@Setup(Level.Trial)
 	public void setup() throws Exception {
-		createAndSetupExecutionGraph(jobConfiguration);
+		benchmark = new DeployingTasksInStreamingJobBenchmark();
+		benchmark.setup(jobConfiguration);
 	}
 
 	@Benchmark
 	@BenchmarkMode(Mode.SingleShotTime)
 	public void deployAllTasks() throws Exception {
-		for (ExecutionJobVertex ejv : executionGraph.getVerticesTopologically()) {
-			for (ExecutionVertex ev : ejv.getTaskVertices()) {
-				Execution execution = ev.getCurrentExecutionAttempt();
-				execution.deploy();
-			}
-		}
+		benchmark.deployAllTasks();
 	}
 }
