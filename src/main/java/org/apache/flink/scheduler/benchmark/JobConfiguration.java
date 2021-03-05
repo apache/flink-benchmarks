@@ -21,38 +21,38 @@ package org.apache.flink.scheduler.benchmark;
 import org.apache.flink.api.common.ExecutionMode;
 import org.apache.flink.runtime.io.network.partition.ResultPartitionType;
 import org.apache.flink.runtime.jobgraph.DistributionPattern;
-import org.apache.flink.runtime.jobgraph.ScheduleMode;
+import org.apache.flink.runtime.jobgraph.JobType;
 
 /**
  * {@link JobConfiguration} contains the configuration of a STREAMING/BATCH job.
- * It concludes {@link DistributionPattern}, {@link ResultPartitionType}, {@link ScheduleMode}, {@link ExecutionMode}.
+ * It concludes {@link DistributionPattern}, {@link ResultPartitionType}, {@link JobType}, {@link ExecutionMode}.
  */
 public enum JobConfiguration {
 
 	STREAMING(DistributionPattern.ALL_TO_ALL,
 			  ResultPartitionType.PIPELINED,
-			  ScheduleMode.EAGER,
+			  JobType.STREAMING,
 			  ExecutionMode.PIPELINED),
 
 	BATCH(DistributionPattern.ALL_TO_ALL,
 		  ResultPartitionType.BLOCKING,
-		  ScheduleMode.LAZY_FROM_SOURCES,
+		  JobType.BATCH,
 		  ExecutionMode.BATCH);
 
 	private final static int PARALLELISM = 4000;
 	private final DistributionPattern distributionPattern;
 	private final ResultPartitionType resultPartitionType;
-	private final ScheduleMode scheduleMode;
+	private final JobType jobType;
 	private final ExecutionMode executionMode;
 
 	JobConfiguration(
 			DistributionPattern distributionPattern,
 			ResultPartitionType resultPartitionType,
-			ScheduleMode scheduleMode,
+			JobType jobType,
 			ExecutionMode executionMode) {
 		this.distributionPattern = distributionPattern;
 		this.resultPartitionType = resultPartitionType;
-		this.scheduleMode = scheduleMode;
+		this.jobType = jobType;
 		this.executionMode = executionMode;
 	}
 
@@ -68,8 +68,8 @@ public enum JobConfiguration {
 		return resultPartitionType;
 	}
 
-	public ScheduleMode getScheduleMode() {
-		return scheduleMode;
+	public JobType getJobType() {
+		return jobType;
 	}
 
 	public ExecutionMode getExecutionMode() {
