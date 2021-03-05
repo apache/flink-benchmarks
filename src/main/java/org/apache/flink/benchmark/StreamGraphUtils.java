@@ -19,7 +19,7 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.benchmark.functions.LongSource;
-import org.apache.flink.runtime.jobgraph.ScheduleMode;
+import org.apache.flink.runtime.jobgraph.JobType;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
@@ -38,7 +38,7 @@ public class StreamGraphUtils {
 		StreamGraph streamGraph = env.getStreamGraph();
 		streamGraph.setChaining(false);
 		streamGraph.setGlobalDataExchangeMode(GlobalDataExchangeMode.ALL_EDGES_BLOCKING);
-		streamGraph.setScheduleMode(ScheduleMode.LAZY_FROM_SOURCES_WITH_BATCH_SLOT_REQUEST);
+		streamGraph.setJobType(JobType.BATCH);
 
 		return streamGraph;
 	}

@@ -82,7 +82,7 @@ public class SchedulerBenchmarkUtils {
 
 		final JobGraph jobGraph = new JobGraph(jobVertices.toArray(new JobVertex[0]));
 
-		jobGraph.setScheduleMode(jobConfiguration.getScheduleMode());
+		jobGraph.setJobType(jobConfiguration.getJobType());
 
 		final ExecutionConfig executionConfig = new ExecutionConfig();
 		executionConfig.setExecutionMode(jobConfiguration.getExecutionMode());
