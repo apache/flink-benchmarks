@@ -30,6 +30,7 @@ import org.apache.flink.runtime.executiongraph.ExecutionGraph;
 import org.apache.flink.runtime.executiongraph.ExecutionVertex;
 import org.apache.flink.runtime.executiongraph.TaskExecutionStateTransition;
 import org.apache.flink.runtime.jobgraph.JobGraph;
+import org.apache.flink.runtime.jobgraph.JobGraphBuilder;
 import org.apache.flink.runtime.jobgraph.JobVertex;
 import org.apache.flink.runtime.jobgraph.JobVertexID;
 import org.apache.flink.runtime.jobmaster.LogicalSlot;
@@ -80,7 +81,9 @@ public class SchedulerBenchmarkUtils {
 			List<JobVertex> jobVertices,
 			JobConfiguration jobConfiguration) throws IOException {
 
-		final JobGraph jobGraph = new JobGraph(jobVertices.toArray(new JobVertex[0]));
+		final JobGraph jobGraph = JobGraphBuilder.newStreamingJobGraphBuilder()
+				.addJobVertices(jobVertices)
+				.build();
 
 		jobGraph.setJobType(jobConfiguration.getJobType());
 
