@@ -40,6 +40,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 
