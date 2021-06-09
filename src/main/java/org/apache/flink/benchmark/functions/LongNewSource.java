@@ -31,6 +31,9 @@ import java.util.stream.IntStream;
 
 /**
  * The source should produce same records as {@link LongSource}.
+ *
+ * <p>{@link LongSource} generates records from 0 to {@code maxValue} for every parallel instance.
+ * The original {@link NumberSequenceSource} would split the range 0 to {@code maxValue} between all subtasks.
  */
 public class LongNewSource extends NumberSequenceSource {
 	private final Boundedness boundedness;

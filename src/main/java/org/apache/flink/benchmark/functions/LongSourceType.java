@@ -29,18 +29,18 @@ import java.util.function.BiFunction;
  * Enum based factory for different Long sources.
  */
 public enum LongSourceType {
-	LEGACY_SOURCE((env, maxValue) -> {
+	LEGACY((env, maxValue) -> {
 		return env.addSource(new LongSource(maxValue));
 	}),
-	FLIP_27_SOURCE_BOUNDED((env, maxValue) -> {
+	F27_BOUNDED((env, maxValue) -> {
 		return env.fromSource(
 				new LongNewSource(Boundedness.BOUNDED, maxValue),
 				WatermarkStrategy.noWatermarks(),
 				"NewLongSource");
 	}),
-	FLIP_27_SOURCE_UNBOUNDED((env, maxValue) -> {
+	F27_UNBOUNDED((env, maxValue) -> {
 		return env.fromSource(
-				new LongNewSource(Boundedness.BOUNDED, maxValue),
+				new LongNewSource(Boundedness.CONTINUOUS_UNBOUNDED, maxValue),
 				WatermarkStrategy.noWatermarks(),
 				"NewLongSource");
 	});
