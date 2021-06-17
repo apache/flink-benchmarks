@@ -347,7 +347,7 @@ public class SortingBoundedInputBenchmarks extends BenchmarkBase {
         public void setKeyContextElement(StreamRecord<Integer> record) {}
 
         @Override
-        public void emitStreamStatus(StreamStatus streamStatus) throws Exception {}
+        public void processStreamStatus(StreamStatus streamStatus) throws Exception {}
     }
 
     private static class InputGenerator extends SplittableIterator<Integer> {
