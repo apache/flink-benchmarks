@@ -19,6 +19,7 @@
 package org.apache.flink.scheduler.benchmark;
 
 import org.apache.flink.runtime.testutils.TestingUtils;
+
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
