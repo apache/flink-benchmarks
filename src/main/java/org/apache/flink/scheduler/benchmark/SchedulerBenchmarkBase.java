@@ -18,15 +18,12 @@
 
 package org.apache.flink.scheduler.benchmark;
 
-import org.apache.flink.runtime.testutils.TestingUtils;
-
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -57,10 +54,5 @@ public class SchedulerBenchmarkBase {
 				.build();
 
 		new Runner(options).run();
-	}
-
-	@TearDown
-	public void teardown() {
-		TestingUtils.defaultExecutor().shutdownNow();
 	}
 }
