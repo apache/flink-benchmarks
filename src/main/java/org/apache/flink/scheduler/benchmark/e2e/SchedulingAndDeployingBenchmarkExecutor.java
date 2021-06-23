@@ -20,7 +20,7 @@ package org.apache.flink.scheduler.benchmark.e2e;
 
 import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
 import org.apache.flink.runtime.scheduler.benchmark.e2e.SchedulingAndDeployingBenchmark;
-import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkExecutorBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -34,7 +34,7 @@ import org.openjdk.jmh.runner.RunnerException;
 /**
  * The benchmark of scheduling and deploying tasks in a STREAMING/BATCH job.
  */
-public class SchedulingAndDeployingBenchmarkExecutor extends SchedulerBenchmarkBase {
+public class SchedulingAndDeployingBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
 	@Param({"BATCH", "STREAMING"})
 	private JobConfiguration jobConfiguration;

@@ -20,7 +20,7 @@ package org.apache.flink.scheduler.benchmark.topology;
 
 import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
 import org.apache.flink.runtime.scheduler.benchmark.topology.BuildExecutionGraphBenchmark;
-import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkExecutorBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -33,7 +33,7 @@ import org.openjdk.jmh.runner.RunnerException;
 /**
  * The benchmark of building the topology of ExecutionGraph in a STREAMING/BATCH job.
  */
-public class BuildExecutionGraphBenchmarkExecutor extends SchedulerBenchmarkBase {
+public class BuildExecutionGraphBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
 	@Param({"BATCH", "STREAMING"})
 	private JobConfiguration jobConfiguration;

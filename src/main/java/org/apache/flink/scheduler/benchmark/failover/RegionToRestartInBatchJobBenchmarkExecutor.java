@@ -20,7 +20,7 @@ package org.apache.flink.scheduler.benchmark.failover;
 
 import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
 import org.apache.flink.runtime.scheduler.benchmark.failover.RegionToRestartInBatchJobBenchmark;
-import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkExecutorBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -34,7 +34,7 @@ import org.openjdk.jmh.runner.RunnerException;
 /**
  * The benchmark of calculating the regions to restart when failover occurs in a BATCH job.
  */
-public class RegionToRestartInBatchJobBenchmarkExecutor extends SchedulerBenchmarkBase {
+public class RegionToRestartInBatchJobBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
 	@Param("BATCH")
 	private JobConfiguration jobConfiguration;

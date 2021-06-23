@@ -20,7 +20,7 @@ package org.apache.flink.scheduler.benchmark.failover;
 
 import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
 import org.apache.flink.runtime.scheduler.benchmark.failover.RegionToRestartInStreamingJobBenchmark;
-import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkExecutorBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -34,7 +34,7 @@ import org.openjdk.jmh.runner.RunnerException;
 /**
  * The benchmark of calculating region to restart when failover occurs in a STREAMING job.
  */
-public class RegionToRestartInStreamingJobBenchmarkExecutor extends SchedulerBenchmarkBase {
+public class RegionToRestartInStreamingJobBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
 	@Param("STREAMING")
 	private JobConfiguration jobConfiguration;
