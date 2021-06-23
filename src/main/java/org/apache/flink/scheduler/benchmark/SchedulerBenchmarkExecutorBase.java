@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 		"-Dcom.sun.management.jmxremote.ssl=false",
 		"-Dcom.sun.management.jmxremote.ssl"
 })
-public class SchedulerBenchmarkBase {
+public class SchedulerBenchmarkExecutorBase {
 
 	public static void runBenchmark(Class<?> clazz) throws RunnerException {
 		Options options = new OptionsBuilder()

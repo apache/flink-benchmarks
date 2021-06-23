@@ -20,7 +20,7 @@ package org.apache.flink.scheduler.benchmark.scheduling;
 
 import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
 import org.apache.flink.runtime.scheduler.benchmark.scheduling.SchedulingDownstreamTasksInBatchJobBenchmark;
-import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkExecutorBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -33,7 +33,7 @@ import org.openjdk.jmh.runner.RunnerException;
 /**
  * The benchmark of scheduling downstream task in a BATCH job.
  */
-public class SchedulingDownstreamTasksInBatchJobBenchmarkExecutor extends SchedulerBenchmarkBase {
+public class SchedulingDownstreamTasksInBatchJobBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
 	@Param({"BATCH"})
 	private JobConfiguration jobConfiguration;

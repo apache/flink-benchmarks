@@ -20,7 +20,7 @@ package org.apache.flink.scheduler.benchmark.partitionrelease;
 
 import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
 import org.apache.flink.runtime.scheduler.benchmark.partitionrelease.PartitionReleaseInBatchJobBenchmark;
-import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkBase;
+import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkExecutorBase;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -33,7 +33,7 @@ import org.openjdk.jmh.runner.RunnerException;
 /**
  * The benchmark of releasing partitions in a BATCH job.
  */
-public class PartitionReleaseInBatchJobBenchmarkExecutor extends SchedulerBenchmarkBase {
+public class PartitionReleaseInBatchJobBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
 	@Param("BATCH")
 	private JobConfiguration jobConfiguration;
