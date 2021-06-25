@@ -31,7 +31,6 @@ import org.apache.flink.benchmark.operators.RecordSource.EmptySplit;
 import org.apache.flink.benchmark.operators.RecordSource.Record;
 import org.apache.flink.core.io.InputStatus;
 import org.apache.flink.core.io.SimpleVersionedSerializer;
-import org.apache.flink.runtime.concurrent.FutureUtils;
 
 import javax.annotation.Nullable;
 
@@ -131,7 +130,7 @@ public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorS
 
         @Override
         public CompletableFuture<Void> isAvailable() {
-            return FutureUtils.completedVoidFuture();
+            return CompletableFuture.completedFuture(null);
         }
 
         @Override
