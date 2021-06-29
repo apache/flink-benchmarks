@@ -59,7 +59,7 @@ public class CreateSchedulerBenchmarkExecutor extends SchedulerBenchmarkExecutor
 	}
 
 	@TearDown(Level.Trial)
-	public void teardownTrial() throws Exception {
+	public void teardown() {
 		benchmark.teardown();
 	}
 }

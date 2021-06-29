@@ -28,6 +28,7 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
 
@@ -55,5 +56,10 @@ public class RegionToRestartInStreamingJobBenchmarkExecutor extends SchedulerBen
 	@BenchmarkMode(Mode.SingleShotTime)
 	public void calculateRegionToRestart(Blackhole blackhole) {
 		blackhole.consume(benchmark.calculateRegionToRestart());
+	}
+
+	@TearDown(Level.Trial)
+	public void teardown() {
+		benchmark.teardown();
 	}
 }
