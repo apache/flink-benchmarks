@@ -19,6 +19,7 @@
 package org.apache.flink.scheduler.benchmark.partitionrelease;
 
 import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
+import org.apache.flink.runtime.scheduler.benchmark.SchedulerBenchmarkUtils;
 import org.apache.flink.runtime.scheduler.benchmark.partitionrelease.PartitionReleaseInBatchJobBenchmark;
 import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkExecutorBase;
 
@@ -28,6 +29,7 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.RunnerException;
 
 /**
@@ -54,5 +56,10 @@ public class PartitionReleaseInBatchJobBenchmarkExecutor extends SchedulerBenchm
 	@BenchmarkMode(Mode.SingleShotTime)
 	public void partitionRelease() {
 		benchmark.partitionRelease();
+	}
+
+	@TearDown(Level.Trial)
+	public void teardown() {
+		benchmark.teardown();
 	}
 }

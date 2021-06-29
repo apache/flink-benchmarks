@@ -29,6 +29,7 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.RunnerException;
 
 /**
@@ -56,5 +57,10 @@ public class DeployingDownstreamTasksInBatchJobBenchmarkExecutor extends Schedul
 	@BenchmarkMode(Mode.SingleShotTime)
 	public void deployDownstreamTasks() throws Exception {
 		benchmark.deployDownstreamTasks();
+	}
+
+	@TearDown(Level.Trial)
+	public void teardown() {
+		benchmark.teardown();
 	}
 }
