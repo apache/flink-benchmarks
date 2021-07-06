@@ -66,13 +66,9 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
         new Runner(options).run();
     }
 
-    @TearDown(Level.Iteration)
-    public void tearDown() {
-        TARGET_COUNT_REACHED_LATCH.reset();
-    }
-
     @Benchmark
     public void readFileSplit(FlinkEnvironmentContext context) throws Exception {
+        TARGET_COUNT_REACHED_LATCH.reset();
         StreamExecutionEnvironment env = context.env;
         env.setRestartStrategy(new RestartStrategies.NoRestartStrategyConfiguration());
         env
