@@ -87,7 +87,6 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
 		 */
 		private final int parallelism = 4;
 
-		@Setup
 		public void setUp() throws IOException {
 			super.setUp();
 
