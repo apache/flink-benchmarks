@@ -66,6 +66,7 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
      */
     public static class BlockingPartitionEnvironmentContext extends FlinkEnvironmentContext {
 
+        @Override
         public void setUp() throws IOException {
             super.setUp();
 
