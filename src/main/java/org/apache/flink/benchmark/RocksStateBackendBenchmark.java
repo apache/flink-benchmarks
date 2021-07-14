@@ -66,14 +66,8 @@ public class RocksStateBackendBenchmark extends StateBackendBenchmarkBase {
 		@Param({"ROCKS", "ROCKS_INC"})
 		public StateBackend stateBackend = StateBackend.MEMORY;
 
-		@Setup
 		public void setUp() throws IOException {
 			super.setUp(stateBackend, RECORDS_PER_INVOCATION);
-		}
-
-		@TearDown
-		public void tearDown() throws IOException {
-			super.tearDown();
 		}
 
 		@Override

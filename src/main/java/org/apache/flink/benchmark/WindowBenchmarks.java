@@ -83,7 +83,6 @@ public class WindowBenchmarks extends BenchmarkBase {
 
 		public DataStreamSource<IntegerLongSource.Record> source;
 
-		@Setup
 		@Override
 		public void setUp() throws IOException {
 			super.setUp();

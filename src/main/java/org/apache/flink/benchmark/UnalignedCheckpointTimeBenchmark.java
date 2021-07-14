@@ -94,7 +94,6 @@ public class UnalignedCheckpointTimeBenchmark extends BenchmarkBase {
         @Param({"0", "1", "ALIGNED"})
         public String timeout = "0";
 
-        @Setup
         public void setUp() throws IOException {
             super.setUp();
 

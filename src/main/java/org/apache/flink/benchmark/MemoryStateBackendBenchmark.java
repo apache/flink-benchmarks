@@ -63,14 +63,8 @@ public class MemoryStateBackendBenchmark extends StateBackendBenchmarkBase {
 		@Param({"MEMORY", "FS", "FS_ASYNC"})
 		public StateBackend stateBackend = StateBackend.MEMORY;
 
-		@Setup
 		public void setUp() throws IOException {
 			super.setUp(stateBackend, RECORDS_PER_INVOCATION);
-		}
-
-		@TearDown
-		public void tearDown() throws IOException {
-			super.tearDown();
 		}
 	}
 }
