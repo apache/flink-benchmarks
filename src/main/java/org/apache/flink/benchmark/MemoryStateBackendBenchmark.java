@@ -63,6 +63,7 @@ public class MemoryStateBackendBenchmark extends StateBackendBenchmarkBase {
 		@Param({"MEMORY", "FS", "FS_ASYNC"})
 		public StateBackend stateBackend = StateBackend.MEMORY;
 
+		@Override
 		public void setUp() throws IOException {
 			super.setUp(stateBackend, RECORDS_PER_INVOCATION);
 		}
