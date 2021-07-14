@@ -18,6 +18,12 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.benchmark.functions.LongSource;
+import org.apache.flink.configuration.ConfigConstants;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.CoreOptions;
+import org.apache.flink.configuration.MemorySize;
+import org.apache.flink.configuration.NettyShuffleEnvironmentOptions;
+import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -26,6 +32,8 @@ import org.apache.flink.streaming.api.functions.async.ResultFuture;
 import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 
+import org.apache.flink.util.ExecutorUtils;
+import org.apache.flink.util.FileUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.Param;
@@ -37,6 +45,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,8 +56,6 @@ public class AsyncWaitOperatorBenchmark extends BenchmarkBase {
 	public static final int RECORDS_PER_INVOCATION = 1_000_000;
 
 	private static final long CHECKPOINT_INTERVAL_MS = 100;
-
-	private static ExecutorService executor;
 
 	@Param
 	public AsyncDataStream.OutputMode outputMode;
@@ -61,16 +68,6 @@ public class AsyncWaitOperatorBenchmark extends BenchmarkBase {
 			.build();
 
 		new Runner(options).run();
-	}
-
-	@Setup
-	public void setUp() {
-		executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-	}
-
-	@TearDown
-	public void tearDown() {
-		executor.shutdown();
 	}
 
 	@Benchmark
@@ -107,9 +104,23 @@ public class AsyncWaitOperatorBenchmark extends BenchmarkBase {
 	}
 
 	private static class BenchmarkAsyncFunctionExecutor extends RichAsyncFunction<Long, Long> {
+
+		private ExecutorService executor;
+
+		@Override
+		public void open(Configuration parameters) {
+			executor =  Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		}
+
 		@Override
 		public void asyncInvoke(Long input, ResultFuture<Long> resultFuture) {
 			executor.execute(() -> resultFuture.complete(Collections.singleton(input * 2)));
+		}
+
+		@Override
+		public void close() throws InterruptedException {
+			executor.shutdownNow();
+			executor.awaitTermination(1, TimeUnit.MINUTES);
 		}
 	}
 }

@@ -84,7 +84,7 @@ public class WindowBenchmarks extends BenchmarkBase {
 		public DataStreamSource<IntegerLongSource.Record> source;
 
 		@Override
-		public void setUp() throws IOException {
+		public void setUp() throws Exception {
 			super.setUp();
 
 			env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);

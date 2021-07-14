@@ -64,7 +64,7 @@ public class MemoryStateBackendBenchmark extends StateBackendBenchmarkBase {
 		public StateBackend stateBackend = StateBackend.MEMORY;
 
 		@Override
-		public void setUp() throws IOException {
+		public void setUp() throws Exception {
 			super.setUp(stateBackend, RECORDS_PER_INVOCATION);
 		}
 	}

@@ -95,7 +95,7 @@ public class UnalignedCheckpointTimeBenchmark extends BenchmarkBase {
         public String timeout = "0";
 
         @Override
-        public void setUp() throws IOException {
+        public void setUp() throws Exception {
             super.setUp();
 
             env.setParallelism(parallelism);

@@ -26,6 +26,7 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.util.FileUtils;
+import org.openjdk.jmh.annotations.TearDown;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +57,7 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
 			}
 		}
 
-		public void setUp(StateBackend stateBackend, long recordsPerInvocation) throws IOException {
+		public void setUp(StateBackend stateBackend, long recordsPerInvocation) throws Exception {
 			super.setUp();
 
 			final AbstractStateBackend backend;
@@ -87,6 +88,7 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
 			source = env.addSource(new IntegerLongSource(numberOfElements, recordsPerInvocation));
 		}
 
+		@Override
 		public void tearDown() throws IOException {
 			FileUtils.deleteDirectory(checkpointDir);
 		}
