@@ -381,7 +381,7 @@ under the License.
 									</transformers>
 									<filters>
 										<filter>
-											<artifact>*:*</artifact>
+											<artifact>*</artifact>
 											<excludes>
 												<exclude>META-INF/*.SF</exclude>
 												<exclude>META-INF/*.DSA</exclude>
