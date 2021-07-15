@@ -116,6 +116,7 @@ public class UnalignedCheckpointTimeBenchmark extends BenchmarkBase {
 
         @Override
         protected int getNumberOfTaskManagers() {
+            // why is this using PARALLELISM when we don't actually use it?
             return NUM_VERTICES * PARALLELISM;
         }
 
