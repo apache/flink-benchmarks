@@ -54,7 +54,10 @@ public class FlinkEnvironmentContext {
             throw new RuntimeException("setUp was called multiple times!");
         }
         final Configuration clusterConfig = createConfiguration();
-        miniCluster = new MiniCluster(new MiniClusterConfiguration.Builder().setConfiguration(clusterConfig).build());
+        miniCluster = new MiniCluster(new MiniClusterConfiguration.Builder()
+            .setNumSlotsPerTaskManager(4)
+            .setConfiguration(clusterConfig)
+            .build());
         try {
             miniCluster.start();
         } catch (Exception e) {
