@@ -52,8 +52,14 @@ If both options are not working, OpenSSL benchmarks will fail but that should no
 
 ## Code structure
 
-Recommended code structure is to define all benchmarks in [Apache Flink](https://github.com/apache/flink)
-and only wrap them here, in this repository, into executor classes. 
+To avoid compatibility problems and compilation errors, benchmarks defined in this repository should be
+using stable `@Public` Flink API. If this is not possible the benchmarking code should be defined in the
+[Apache Flink](https://github.com/apache/flink) repository. In this repository there should be committed
+only a very thin executor class that's using executing the benchmark. For this latter pattern please take
+a look for example at the `CreateSchedulerBenchmarkExecutor` and how is it using `CreateSchedulerBenchmark`
+(defined in the [flink-runtime](https://github.com/apache/flink/blob/release-1.13/flink-runtime/src/test/java/org/apache/flink/runtime/scheduler/benchmark/e2e/CreateSchedulerBenchmark.java)).
+Note that the benchmark class should also be tested, just as `CreateSchedulerBenchmarkTest` is tested in the
+[flink-runtime](https://github.com/apache/flink/blob/release-1.13/flink-runtime/src/test/java/org/apache/flink/runtime/scheduler/benchmark/e2e/CreateSchedulerBenchmarkTest.java).
 
 Such code structured is due to using GPL2 licensed [jmh](http://openjdk.java.net/projects/code-tools/jmh/) library
 for the actual execution of the benchmarks. Ideally we would prefer to have all of the code moved to [Apache Flink](https://github.com/apache/flink)
