@@ -20,12 +20,18 @@ package org.apache.flink.benchmark;
 
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.configuration.NettyShuffleEnvironmentOptions;
+import org.apache.flink.configuration.RestOptions;
+import org.apache.flink.runtime.minicluster.MiniCluster;
+import org.apache.flink.runtime.minicluster.MiniClusterConfiguration;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import org.apache.flink.test.util.MiniClusterPipelineExecutorServiceLoader;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
 
 import java.io.IOException;
 
@@ -37,14 +43,29 @@ public class FlinkEnvironmentContext {
     public static final int NUM_NETWORK_BUFFERS = 1000;
 
     public StreamExecutionEnvironment env;
+    public MiniCluster miniCluster;
 
     protected final int parallelism = 1;
     protected final boolean objectReuse = true;
 
     @Setup
     public void setUp() throws IOException {
+        if (miniCluster != null) {
+            throw new RuntimeException("setUp was called multiple times!");
+        }
+        final Configuration clusterConfig = createConfiguration();
+        miniCluster = new MiniCluster(new MiniClusterConfiguration.Builder().setConfiguration(clusterConfig).build());
+        try {
+            miniCluster.start();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         // set up the execution environment
-        env = getStreamExecutionEnvironment();
+        env = new StreamExecutionEnvironment(
+            new MiniClusterPipelineExecutorServiceLoader(miniCluster),
+            clusterConfig,
+            null);
+
         env.setParallelism(parallelism);
         if (objectReuse) {
             env.getConfig().enableObjectReuse();
@@ -53,17 +74,22 @@ public class FlinkEnvironmentContext {
         env.setStateBackend(new MemoryStateBackend());
     }
 
+    @TearDown
+    public void tearDown() throws Exception {
+        miniCluster.close();
+        miniCluster = null;
+    }
+
     public void execute() throws Exception {
         env.execute();
     }
 
     protected Configuration createConfiguration() {
         final Configuration configuration = new Configuration();
+        configuration.setString(RestOptions.BIND_PORT, "0");
         configuration.setInteger(NettyShuffleEnvironmentOptions.NETWORK_NUM_BUFFERS, NUM_NETWORK_BUFFERS);
+        configuration.set(DeploymentOptions.TARGET, MiniClusterPipelineExecutorServiceLoader.NAME);
+        configuration.set(DeploymentOptions.ATTACHED, true);
         return configuration;
-    }
-
-    private StreamExecutionEnvironment getStreamExecutionEnvironment() {
-        return StreamExecutionEnvironment.createLocalEnvironment(1, createConfiguration());
     }
 }
