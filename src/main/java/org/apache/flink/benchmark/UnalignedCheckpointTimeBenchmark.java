@@ -109,11 +109,19 @@ public class UnalignedCheckpointTimeBenchmark extends BenchmarkBase {
             }
         }
 
+        @Override
+        protected int getNumberOfSlotsPerTaskManager() {
+            return 1;
+        }
+
+        @Override
+        protected int getNumberOfTaskManagers() {
+            return NUM_VERTICES * PARALLELISM;
+        }
+
         protected Configuration createConfiguration() {
             Configuration conf = super.createConfiguration();
-            conf.setInteger(TaskManagerOptions.NUM_TASK_SLOTS, 1);
             conf.set(TaskManagerOptions.MEMORY_SEGMENT_SIZE, new MemorySize(1024 * 4));
-            conf.setInteger(ConfigConstants.LOCAL_NUMBER_TASK_MANAGER, NUM_VERTICES * PARALLELISM);
             return conf;
         }
     }

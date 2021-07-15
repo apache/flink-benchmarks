@@ -55,9 +55,11 @@ public class FlinkEnvironmentContext {
         }
         final Configuration clusterConfig = createConfiguration();
         miniCluster = new MiniCluster(new MiniClusterConfiguration.Builder()
-            .setNumSlotsPerTaskManager(4)
+            .setNumSlotsPerTaskManager(getNumberOfSlotsPerTaskManager())
+            .setNumTaskManagers(getNumberOfTaskManagers())
             .setConfiguration(clusterConfig)
             .build());
+
         try {
             miniCluster.start();
         } catch (Exception e) {
@@ -81,6 +83,14 @@ public class FlinkEnvironmentContext {
     public void tearDown() throws Exception {
         miniCluster.close();
         miniCluster = null;
+    }
+
+    protected int getNumberOfTaskManagers() {
+        return 1;
+    }
+
+    protected int getNumberOfSlotsPerTaskManager() {
+        return 4;
     }
 
     public void execute() throws Exception {
