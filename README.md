@@ -75,7 +75,8 @@ for the actual execution of the benchmarks. Ideally we would prefer to have all 
   4. go back to the change and verify +5% performance improvement
   5. if something doesn't show the results that you were expecting, investigate and don't ignore this! Maybe there is some larger performance instability and your previous results were just lucky/unlucky flukes.
 - Some results can show up over the benchmarking noise only in long term trends.
-- Please tune the length of the benchmark (usually by number of processed records). The less records, the faster the benchmark, the more iterations can be executed, however the higher chance of one of setup overheads skewing the results. Rule of thumb is that you should increase the number of processed records up to a point where results stop improving visibly, while trying to keep the single benchmark execution under 1 second.
+- Please tune the length of the benchmark (usually by number of processed records). The less records, the faster the benchmark, the more iterations can be executed, however the higher chance of one of setup overheads skewing the results. Rule of thumb is that you should increase the number of processed records up to a point where results stop improving visibly, while trying to keep the single benchmark invocation under/around 1 second.
+
 
 ### Naming convention
 
