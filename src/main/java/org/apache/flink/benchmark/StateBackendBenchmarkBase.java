@@ -87,7 +87,9 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
 			source = env.addSource(new IntegerLongSource(numberOfElements, recordsPerInvocation));
 		}
 
-		public void tearDown() throws IOException {
+		@Override
+		public void tearDown() throws Exception {
+			super.tearDown();
 			FileUtils.deleteDirectory(checkpointDir);
 		}
 	}
