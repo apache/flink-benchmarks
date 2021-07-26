@@ -79,7 +79,7 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
             Configuration configuration = super.createConfiguration();
 
             configuration.setString(NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, "file");
-            configuration.setString(CoreOptions.TMP_DIRS, FileUtils.getCurrentWorkingDirectory().toAbsolutePath().toUri().toString());
+            configuration.setString(CoreOptions.TMP_DIRS, FileUtils.getCurrentWorkingDirectory().toAbsolutePath().toString());
             return configuration;
         }
     }
