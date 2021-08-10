@@ -38,7 +38,7 @@ import java.util.Random;
 @OperationsPerInvocation(value = ProcessingTimerBenchmark.PROCESSING_TIMERS_PER_INVOCATION)
 public class ProcessingTimerBenchmark extends BenchmarkBase {
 
-    public static final int PROCESSING_TIMERS_PER_INVOCATION = 1_000;
+    public static final int PROCESSING_TIMERS_PER_INVOCATION = 150_000;
 
     private static final int PARALLELISM = 1;
 
