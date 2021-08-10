@@ -24,6 +24,7 @@ import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.util.Collector;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.runner.Runner;
@@ -43,12 +44,12 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
 
     private static OneShotLatch LATCH = new OneShotLatch();
 
-    public static void main(String[] args)
-            throws RunnerException {
-        Options options = new OptionsBuilder()
-                .verbosity(VerboseMode.NORMAL)
-                .include(".*" + ProcessingTimerBenchmark.class.getCanonicalName() + ".*")
-                .build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + ProcessingTimerBenchmark.class.getCanonicalName() + ".*")
+                        .build();
 
         new Runner(options).run();
     }
@@ -91,7 +92,8 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
         public void cancel() {}
     }
 
-    private static class ProcessingTimerKeyedProcessFunction extends KeyedProcessFunction<Integer, String, String> {
+    private static class ProcessingTimerKeyedProcessFunction
+            extends KeyedProcessFunction<Integer, String, String> {
 
         private final long timersPerRecord;
         private long firedTimesCount;
@@ -106,7 +108,8 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
         }
 
         @Override
-        public void processElement(String s, Context context, Collector<String> collector) throws Exception {
+        public void processElement(String s, Context context, Collector<String> collector)
+                throws Exception {
             final long currTimestamp = System.currentTimeMillis();
             for (int i = 0; i < timersPerRecord; i++) {
                 context.timerService().registerProcessingTimeTimer(currTimestamp - i - 1);
@@ -114,7 +117,8 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
         }
 
         @Override
-        public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out) throws Exception {
+        public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
+                throws Exception {
             if (++firedTimesCount == timersPerRecord) {
                 LATCH.trigger();
             }
