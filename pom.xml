@@ -331,6 +331,9 @@ under the License.
 								<argument>-classpath</argument>
 								<classpath/>
 								<argument>org.openjdk.jmh.Main</argument>
+								<!--shouldFailOnError-->
+								<argument>-foe</argument>
+								<argument>true</argument>
 								<argument>-e</argument>
 								<argument>${benchmarkExcludes}</argument>
 								<argument>-rf</argument>
