@@ -18,15 +18,29 @@
 
 package org.apache.flink.benchmark;
 
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
+import org.apache.flink.api.connector.source.Boundedness;
+import org.apache.flink.api.connector.source.ReaderOutput;
+import org.apache.flink.api.connector.source.SourceReader;
+import org.apache.flink.api.connector.source.SourceReaderContext;
+import org.apache.flink.api.connector.source.lib.NumberSequenceSource;
+import org.apache.flink.api.connector.source.mocks.MockSource;
+import org.apache.flink.api.connector.source.mocks.MockSourceReader;
+import org.apache.flink.api.connector.source.mocks.MockSourceSplit;
 import org.apache.flink.benchmark.functions.LongSource;
 import org.apache.flink.benchmark.functions.QueuingLongSource;
 import org.apache.flink.benchmark.operators.MultiplyByTwoOperatorFactory;
+import org.apache.flink.core.io.InputStatus;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.MultipleConnectedStreams;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.transformations.MultipleInputTransformation;
+import org.apache.flink.util.CloseableIterator;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
@@ -36,18 +50,20 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-public class MultipleInputBenchmark extends BenchmarkBase {
+import java.util.concurrent.CompletableFuture;
 
+public class MultipleInputBenchmark extends BenchmarkBase {
 	public static final int RECORDS_PER_INVOCATION = TwoInputBenchmark.RECORDS_PER_INVOCATION;
 	public static final int ONE_IDLE_RECORDS_PER_INVOCATION = TwoInputBenchmark.ONE_IDLE_RECORDS_PER_INVOCATION;
+	public static final int CHAINED_IDLE_RECORDS_PER_INVOCATION = 3000;
 	public static final long CHECKPOINT_INTERVAL_MS = TwoInputBenchmark.CHECKPOINT_INTERVAL_MS;
 
 	public static void main(String[] args)
-		throws RunnerException {
+			throws RunnerException {
 		Options options = new OptionsBuilder()
-			.verbosity(VerboseMode.NORMAL)
-			.include(".*" + MultipleInputBenchmark.class.getSimpleName() + ".*")
-			.build();
+				.verbosity(VerboseMode.NORMAL)
+				.include(".*" + MultipleInputBenchmark.class.getSimpleName() + ".*")
+				.build();
 
 		new Runner(options).run();
 	}
@@ -82,10 +98,85 @@ public class MultipleInputBenchmark extends BenchmarkBase {
 		env.execute();
 	}
 
+	@Benchmark
+	@OperationsPerInvocation(CHAINED_IDLE_RECORDS_PER_INVOCATION)
+	public void multiInputIdleSourcesChainedWithInput(FlinkEnvironmentContext context) throws Exception {
+		final StreamExecutionEnvironment env = context.env;
+		env.getConfig().enableObjectReuse();
+
+		final DataStream<Long> source1 =
+				env.fromSource(
+						new NumberSequenceSource(1L, CHAINED_IDLE_RECORDS_PER_INVOCATION),
+						WatermarkStrategy.noWatermarks(),
+						"source-1");
+
+		final DataStreamSource<Integer> source2 =
+				env.fromSource(new IdlingSource(1), WatermarkStrategy.noWatermarks(), "source-2");
+
+		MultipleInputTransformation<Long> transform = new MultipleInputTransformation<>(
+				"custom operator",
+				new MultiplyByTwoOperatorFactory(),
+				BasicTypeInfo.LONG_TYPE_INFO,
+				1);
+
+		transform.addInput(((DataStream<?>) source1).getTransformation());
+		transform.addInput(((DataStream<?>) source2).getTransformation());
+
+		env.addOperator(transform);
+		final SingleOutputStreamOperator<Long> stream = new MultipleConnectedStreams(env).transform(transform);
+
+		IdlingSource.reset();
+		try (final CloseableIterator<Long> iterator = stream.executeAndCollect()) {
+			while (iterator.hasNext()) {
+				final Long next = iterator.next();
+				if (next == CHAINED_IDLE_RECORDS_PER_INVOCATION) {
+					IdlingSource.signalCanFinish();
+				}
+			}
+		}
+	}
+
+	private static class IdlingSource extends MockSource {
+		private static CompletableFuture<Void> canFinish = new CompletableFuture<>();
+
+		public static void signalCanFinish() {
+			canFinish.complete(null);
+		}
+
+		public static void reset() {
+			canFinish.completeExceptionally(new IllegalStateException("State has been reset"));
+			canFinish = new CompletableFuture<>();
+		}
+
+		public IdlingSource(int numSplits) {
+			super(Boundedness.BOUNDED, numSplits, true, true);
+		}
+
+		@Override
+		public SourceReader<Integer, MockSourceSplit> createReader(
+				SourceReaderContext readerContext) {
+			return new MockSourceReader(true, true) {
+				@Override
+				public InputStatus pollNext(ReaderOutput<Integer> sourceOutput) {
+					if (canFinish.isDone() && !canFinish.isCompletedExceptionally()) {
+						return InputStatus.END_OF_INPUT;
+					} else {
+						return InputStatus.NOTHING_AVAILABLE;
+					}
+				}
+
+				@Override
+				public synchronized CompletableFuture<Void> isAvailable() {
+					return canFinish;
+				}
+			};
+		}
+	}
+
 	private static void connectAndDiscard(
 			StreamExecutionEnvironment env,
-			DataStreamSource<Long> source1,
-			DataStreamSource<Long> source2) {
+			DataStream<?> source1,
+			DataStream<?> source2) {
 		MultipleInputTransformation<Long> transform = new MultipleInputTransformation<>(
 				"custom operator",
 				new MultiplyByTwoOperatorFactory(),
