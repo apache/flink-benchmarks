@@ -35,12 +35,11 @@ import org.apache.flink.core.io.InputStatus;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.MultipleConnectedStreams;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.operators.ChainingStrategy;
 import org.apache.flink.streaming.api.transformations.MultipleInputTransformation;
-import org.apache.flink.util.CloseableIterator;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
@@ -55,7 +54,6 @@ import java.util.concurrent.CompletableFuture;
 public class MultipleInputBenchmark extends BenchmarkBase {
 	public static final int RECORDS_PER_INVOCATION = TwoInputBenchmark.RECORDS_PER_INVOCATION;
 	public static final int ONE_IDLE_RECORDS_PER_INVOCATION = TwoInputBenchmark.ONE_IDLE_RECORDS_PER_INVOCATION;
-	public static final int CHAINED_IDLE_RECORDS_PER_INVOCATION = 30_000;
 	public static final long CHECKPOINT_INTERVAL_MS = TwoInputBenchmark.CHECKPOINT_INTERVAL_MS;
 
 	public static void main(String[] args)
@@ -99,14 +97,14 @@ public class MultipleInputBenchmark extends BenchmarkBase {
 	}
 
 	@Benchmark
-	@OperationsPerInvocation(CHAINED_IDLE_RECORDS_PER_INVOCATION)
+	@OperationsPerInvocation(RECORDS_PER_INVOCATION)
 	public void multiInputChainedIdleSource(FlinkEnvironmentContext context) throws Exception {
 		final StreamExecutionEnvironment env = context.env;
 		env.getConfig().enableObjectReuse();
 
 		final DataStream<Long> source1 =
 				env.fromSource(
-						new NumberSequenceSource(1L, CHAINED_IDLE_RECORDS_PER_INVOCATION),
+						new NumberSequenceSource(1L, RECORDS_PER_INVOCATION),
 						WatermarkStrategy.noWatermarks(),
 						"source-1");
 
@@ -124,17 +122,8 @@ public class MultipleInputBenchmark extends BenchmarkBase {
 		transform.setChainingStrategy(ChainingStrategy.HEAD_WITH_SOURCES);
 
 		env.addOperator(transform);
-		final SingleOutputStreamOperator<Long> stream = new MultipleConnectedStreams(env).transform(transform);
-
-		IdlingSource.reset();
-		try (final CloseableIterator<Long> iterator = stream.executeAndCollect()) {
-			while (iterator.hasNext()) {
-				final Long next = iterator.next();
-				if (next == CHAINED_IDLE_RECORDS_PER_INVOCATION) {
-					IdlingSource.signalCanFinish();
-				}
-			}
-		}
+		new MultipleConnectedStreams(env).transform(transform).addSink(new SinkClosingIdlingSource()).setParallelism(1);
+		context.execute();
 	}
 
 	private static class IdlingSource extends MockSource {
@@ -171,6 +160,17 @@ public class MultipleInputBenchmark extends BenchmarkBase {
 					return canFinish;
 				}
 			};
+		}
+	}
+
+	private static class SinkClosingIdlingSource implements SinkFunction<Long> {
+		private int recordsSoFar = 0;
+
+		@Override
+		public void invoke(Long value) {
+			if (++recordsSoFar >= RECORDS_PER_INVOCATION) {
+				IdlingSource.signalCanFinish();
+			}
 		}
 	}
 
