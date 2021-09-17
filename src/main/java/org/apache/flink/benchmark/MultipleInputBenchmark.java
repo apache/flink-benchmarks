@@ -33,12 +33,12 @@ import org.apache.flink.benchmark.functions.QueuingLongSource;
 import org.apache.flink.benchmark.operators.MultiplyByTwoOperatorFactory;
 import org.apache.flink.core.io.InputStatus;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.MultipleConnectedStreams;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.operators.ChainingStrategy;
 import org.apache.flink.streaming.api.transformations.MultipleInputTransformation;
 import org.apache.flink.util.CloseableIterator;
 
@@ -55,7 +55,7 @@ import java.util.concurrent.CompletableFuture;
 public class MultipleInputBenchmark extends BenchmarkBase {
 	public static final int RECORDS_PER_INVOCATION = TwoInputBenchmark.RECORDS_PER_INVOCATION;
 	public static final int ONE_IDLE_RECORDS_PER_INVOCATION = TwoInputBenchmark.ONE_IDLE_RECORDS_PER_INVOCATION;
-	public static final int CHAINED_IDLE_RECORDS_PER_INVOCATION = 3000;
+	public static final int CHAINED_IDLE_RECORDS_PER_INVOCATION = 30_000;
 	public static final long CHECKPOINT_INTERVAL_MS = TwoInputBenchmark.CHECKPOINT_INTERVAL_MS;
 
 	public static void main(String[] args)
@@ -100,7 +100,7 @@ public class MultipleInputBenchmark extends BenchmarkBase {
 
 	@Benchmark
 	@OperationsPerInvocation(CHAINED_IDLE_RECORDS_PER_INVOCATION)
-	public void multiInputIdleSourcesChainedWithInput(FlinkEnvironmentContext context) throws Exception {
+	public void multiInputChainedIdleSource(FlinkEnvironmentContext context) throws Exception {
 		final StreamExecutionEnvironment env = context.env;
 		env.getConfig().enableObjectReuse();
 
@@ -121,6 +121,7 @@ public class MultipleInputBenchmark extends BenchmarkBase {
 
 		transform.addInput(((DataStream<?>) source1).getTransformation());
 		transform.addInput(((DataStream<?>) source2).getTransformation());
+		transform.setChainingStrategy(ChainingStrategy.HEAD_WITH_SOURCES);
 
 		env.addOperator(transform);
 		final SingleOutputStreamOperator<Long> stream = new MultipleConnectedStreams(env).transform(transform);
