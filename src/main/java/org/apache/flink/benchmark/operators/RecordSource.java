@@ -70,7 +70,7 @@ public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorS
 
     @Override
     public SourceReader<Record, EmptySplit> createReader(SourceReaderContext readerContext) {
-        return new RecourdSourceReader(minCheckpoints);
+        return new RecordSourceReader(minCheckpoints);
     }
 
     @Override
@@ -95,12 +95,12 @@ public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorS
         return new EnumeratorVersionedSerializer();
     }
 
-    public static class RecourdSourceReader implements SourceReader<Record, EmptySplit> {
+    public static class RecordSourceReader implements SourceReader<Record, EmptySplit> {
         private final int minCheckpoints;
         private int numCompletedCheckpoints;
         private long counter = 0;
 
-        public RecourdSourceReader(int minCheckpoints) {
+        public RecordSourceReader(int minCheckpoints) {
             this.minCheckpoints = minCheckpoints;
         }
 
