@@ -59,6 +59,6 @@ public class SchedulingAndDeployingBenchmarkExecutor extends SchedulerBenchmarkE
 
 	@TearDown(Level.Trial)
 	public void teardown() {
-		benchmark.teardown();
+		//benchmark.teardown();
 	}
 }

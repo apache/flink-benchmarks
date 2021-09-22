@@ -60,6 +60,6 @@ public class CreateSchedulerBenchmarkExecutor extends SchedulerBenchmarkExecutor
 
 	@TearDown(Level.Trial)
 	public void teardown() {
-		benchmark.teardown();
+		// benchmark.teardown();
 	}
 }
