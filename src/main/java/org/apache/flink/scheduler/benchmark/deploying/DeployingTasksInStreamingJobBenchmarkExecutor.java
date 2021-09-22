@@ -61,6 +61,6 @@ public class DeployingTasksInStreamingJobBenchmarkExecutor extends SchedulerBenc
 
 	@TearDown(Level.Trial)
 	public void teardown() {
-		benchmark.teardown();
+		// benchmark.teardown();
 	}
 }

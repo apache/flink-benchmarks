@@ -60,6 +60,6 @@ public class RegionToRestartInBatchJobBenchmarkExecutor extends SchedulerBenchma
 
 	@TearDown(Level.Trial)
 	public void teardown() {
-		benchmark.teardown();
+		// benchmark.teardown();
 	}
 }

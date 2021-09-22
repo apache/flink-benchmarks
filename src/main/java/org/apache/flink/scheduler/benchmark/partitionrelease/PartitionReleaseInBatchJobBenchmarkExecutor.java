@@ -60,6 +60,6 @@ public class PartitionReleaseInBatchJobBenchmarkExecutor extends SchedulerBenchm
 
 	@TearDown(Level.Trial)
 	public void teardown() {
-		benchmark.teardown();
+		// benchmark.teardown();
 	}
 }

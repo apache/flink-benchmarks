@@ -19,7 +19,6 @@
 package org.apache.flink.scheduler.benchmark.topology;
 
 import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
-import org.apache.flink.runtime.scheduler.benchmark.SchedulerBenchmarkUtils;
 import org.apache.flink.runtime.scheduler.benchmark.topology.BuildExecutionGraphBenchmark;
 import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkExecutorBase;
 
@@ -60,6 +59,6 @@ public class BuildExecutionGraphBenchmarkExecutor extends SchedulerBenchmarkExec
 
 	@TearDown(Level.Trial)
 	public void teardown() {
-		benchmark.teardown();
+		// benchmark.teardown();
 	}
 }

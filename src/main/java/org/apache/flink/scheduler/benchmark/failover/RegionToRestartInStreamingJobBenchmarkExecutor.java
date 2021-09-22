@@ -60,6 +60,6 @@ public class RegionToRestartInStreamingJobBenchmarkExecutor extends SchedulerBen
 
 	@TearDown(Level.Trial)
 	public void teardown() {
-		benchmark.teardown();
+		// benchmark.teardown();
 	}
 }

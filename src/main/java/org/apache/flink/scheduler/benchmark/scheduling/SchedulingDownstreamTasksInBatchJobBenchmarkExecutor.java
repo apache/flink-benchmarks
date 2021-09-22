@@ -60,6 +60,6 @@ public class SchedulingDownstreamTasksInBatchJobBenchmarkExecutor extends Schedu
 
 	@TearDown(Level.Trial)
 	public void teardown() {
-		benchmark.teardown();
+		// benchmark.teardown();
 	}
 }

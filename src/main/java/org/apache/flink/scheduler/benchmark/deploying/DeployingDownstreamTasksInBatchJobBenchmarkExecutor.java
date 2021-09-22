@@ -61,6 +61,6 @@ public class DeployingDownstreamTasksInBatchJobBenchmarkExecutor extends Schedul
 
 	@TearDown(Level.Trial)
 	public void teardown() {
-		benchmark.teardown();
+		// benchmark.teardown();
 	}
 }
