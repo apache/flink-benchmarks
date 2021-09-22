@@ -41,26 +41,32 @@ import java.util.concurrent.CompletableFuture;
 
 /** A source that generates longs in a fixed number of splits. */
 public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorState> {
-    public static final int PAYLOAD_SIZE = 1024;
+    public static final int DEFAULT_PAYLOAD_SIZE = 1024;
+    private final int recordSize;
 
     public static class Record {
         public long value;
         public byte[] payload;
 
         public Record() {
-            this(0);
+            this(0, DEFAULT_PAYLOAD_SIZE);
         }
 
-        public Record(long value) {
+        public Record(long value, int recordSize) {
             this.value = value;
-            payload = new byte[PAYLOAD_SIZE];
+            payload = new byte[recordSize];
         }
     }
 
     private final int minCheckpoints;
 
     public RecordSource(int minCheckpoints) {
+        this(minCheckpoints, DEFAULT_PAYLOAD_SIZE);
+    }
+
+    public RecordSource(int minCheckpoints, int recordSize) {
         this.minCheckpoints = minCheckpoints;
+        this.recordSize = recordSize;
     }
 
     @Override
@@ -70,7 +76,7 @@ public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorS
 
     @Override
     public SourceReader<Record, EmptySplit> createReader(SourceReaderContext readerContext) {
-        return new RecordSourceReader(minCheckpoints);
+        return new RecordSourceReader(minCheckpoints, recordSize);
     }
 
     @Override
@@ -97,11 +103,13 @@ public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorS
 
     public static class RecordSourceReader implements SourceReader<Record, EmptySplit> {
         private final int minCheckpoints;
+        private final int recordSize;
         private int numCompletedCheckpoints;
         private long counter = 0;
 
-        public RecordSourceReader(int minCheckpoints) {
+        public RecordSourceReader(int minCheckpoints, int recordSize) {
             this.minCheckpoints = minCheckpoints;
+            this.recordSize = recordSize;
         }
 
         @Override
@@ -109,7 +117,7 @@ public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorS
 
         @Override
         public InputStatus pollNext(ReaderOutput<Record> output) throws InterruptedException {
-            output.collect(new Record(counter++));
+            output.collect(new Record(counter++, recordSize));
 
             if (numCompletedCheckpoints >= minCheckpoints) {
                 return InputStatus.END_OF_INPUT;
@@ -180,7 +188,6 @@ public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorS
 
     private static class EnumeratorVersionedSerializer
             implements SimpleVersionedSerializer<EmptyEnumeratorState> {
-
         @Override
         public int getVersion() {
             return 0;
