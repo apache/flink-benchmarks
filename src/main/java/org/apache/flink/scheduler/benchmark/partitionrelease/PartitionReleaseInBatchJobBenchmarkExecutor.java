@@ -19,7 +19,6 @@
 package org.apache.flink.scheduler.benchmark.partitionrelease;
 
 import org.apache.flink.runtime.scheduler.benchmark.JobConfiguration;
-import org.apache.flink.runtime.scheduler.benchmark.SchedulerBenchmarkUtils;
 import org.apache.flink.runtime.scheduler.benchmark.partitionrelease.PartitionReleaseInBatchJobBenchmark;
 import org.apache.flink.scheduler.benchmark.SchedulerBenchmarkExecutorBase;
 
