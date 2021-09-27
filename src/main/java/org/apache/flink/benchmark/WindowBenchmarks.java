@@ -36,8 +36,6 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-import java.io.IOException;
-
 @OperationsPerInvocation(value = WindowBenchmarks.RECORDS_PER_INVOCATION)
 public class WindowBenchmarks extends BenchmarkBase {
 
@@ -83,7 +81,7 @@ public class WindowBenchmarks extends BenchmarkBase {
 		public DataStreamSource<IntegerLongSource.Record> source;
 
 		@Override
-		public void setUp() throws IOException {
+		public void setUp() throws Exception {
 			super.setUp();
 
 			env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);

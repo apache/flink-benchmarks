@@ -57,7 +57,11 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
 		}
 
 		public void setUp(StateBackend stateBackend, long recordsPerInvocation) throws IOException {
-			super.setUp();
+			try {
+				super.setUp();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 			final AbstractStateBackend backend;
 			String checkpointDataUri = "file://" + checkpointDir.getAbsolutePath();

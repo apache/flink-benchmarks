@@ -32,8 +32,6 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-import java.io.IOException;
-
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
 @OperationsPerInvocation(value = MemoryStateBackendBenchmark.RECORDS_PER_INVOCATION)
@@ -62,7 +60,7 @@ public class MemoryStateBackendBenchmark extends StateBackendBenchmarkBase {
 		public StateBackend stateBackend = StateBackend.MEMORY;
 
 		@Override
-		public void setUp() throws IOException {
+		public void setUp() throws Exception {
 			super.setUp(stateBackend, RECORDS_PER_INVOCATION);
 		}
 	}

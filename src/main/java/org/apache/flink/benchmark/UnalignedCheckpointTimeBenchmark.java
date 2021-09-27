@@ -38,7 +38,6 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-import java.io.IOException;
 import java.time.Duration;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -93,7 +92,7 @@ public class UnalignedCheckpointTimeBenchmark extends BenchmarkBase {
         public String timeout = "0";
 
         @Override
-        public void setUp() throws IOException {
+        public void setUp() throws Exception {
             super.setUp();
 
             env.setParallelism(parallelism);
