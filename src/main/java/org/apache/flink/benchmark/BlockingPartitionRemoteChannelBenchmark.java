@@ -33,8 +33,6 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-import java.io.IOException;
-
 @OperationsPerInvocation(value = BlockingPartitionRemoteChannelBenchmark.RECORDS_PER_INVOCATION)
 public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase {
 
@@ -66,7 +64,7 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
     public static class BlockingPartitionEnvironmentContext extends FlinkEnvironmentContext {
 
         @Override
-        public void setUp() throws IOException {
+        public void setUp() throws Exception {
             super.setUp();
 
             env.setParallelism(PARALLELISM);

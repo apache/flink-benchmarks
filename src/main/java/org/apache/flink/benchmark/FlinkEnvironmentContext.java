@@ -33,8 +33,6 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
-import java.io.IOException;
-
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
 @State(Thread)
@@ -49,7 +47,7 @@ public class FlinkEnvironmentContext {
     protected final boolean objectReuse = true;
 
     @Setup
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
         if (miniCluster != null) {
             throw new RuntimeException("setUp was called multiple times!");
         }
