@@ -35,7 +35,6 @@ import org.apache.flink.runtime.rest.messages.JobVertexBackPressureHeaders;
 import org.apache.flink.runtime.rest.messages.JobVertexBackPressureInfo;
 import org.apache.flink.runtime.rest.messages.JobVertexMessageParameters;
 import org.apache.flink.runtime.testutils.CommonTestUtils;
-import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
@@ -43,10 +42,7 @@ import org.apache.flink.util.FlinkRuntimeException;
 import org.apache.flink.util.concurrent.ExecutorThreadFactory;
 
 import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
@@ -89,7 +85,8 @@ import static org.apache.flink.api.common.eventtime.WatermarkStrategy.noWatermar
  * </ul>
  */
 @OutputTimeUnit(SECONDS)
-@Warmup(iterations = 4)
+@Warmup(iterations = 20)
+@Measurement(iterations = 10)
 public class CheckpointingTimeBenchmark extends BenchmarkBase {
     public static final int JOB_PARALLELISM = 4;
     public static final MemorySize START_MEMORY_SEGMENT_SIZE = MemorySize.parse("4 kb");
