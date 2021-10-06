@@ -1,0 +1,87 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.flink.benchmark;
+
+import org.apache.flink.api.common.JobID;
+import org.apache.flink.api.common.time.Deadline;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.UnmodifiableConfiguration;
+import org.apache.flink.runtime.jobgraph.JobVertexID;
+import org.apache.flink.runtime.rest.RestClient;
+import org.apache.flink.runtime.rest.messages.EmptyRequestBody;
+import org.apache.flink.runtime.rest.messages.JobVertexBackPressureHeaders;
+import org.apache.flink.runtime.rest.messages.JobVertexBackPressureInfo;
+import org.apache.flink.runtime.rest.messages.JobVertexMessageParameters;
+import org.apache.flink.util.FlinkRuntimeException;
+import org.apache.flink.util.concurrent.ExecutorThreadFactory;
+
+import java.net.URI;
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.Executors;
+
+/**
+ * Utility class for querying a backpressure status.
+ */
+public class BackpressureUtils {
+    static void waitForBackpressure(JobID jobID, List<JobVertexID> sourceId, URI restAddress)
+            throws Exception {
+        final RestClient restClient =
+                new RestClient(
+                        new UnmodifiableConfiguration(new Configuration()),
+                        Executors.newSingleThreadScheduledExecutor(
+                                new ExecutorThreadFactory("Flink-RestClient-IO")));
+        Deadline deadline = Deadline.fromNow(Duration.ofSeconds(30));
+        boolean allBackpressured;
+        do {
+            allBackpressured =
+                    sourceId.stream()
+                            .map(id -> queryBackpressure(jobID, id, restClient, restAddress))
+                            .allMatch(
+                                    level ->
+                                            level
+                                                    == JobVertexBackPressureInfo
+                                                            .VertexBackPressureLevel.HIGH);
+        } while (!allBackpressured && deadline.hasTimeLeft());
+        if (!allBackpressured) {
+            throw new FlinkRuntimeException(
+                    "Could not trigger backpressure for the job in given time.");
+        }
+    }
+
+    private static JobVertexBackPressureInfo.VertexBackPressureLevel queryBackpressure(
+            JobID jobID, JobVertexID vertexID, RestClient restClient, URI restAddress) {
+        try {
+            final JobVertexMessageParameters metricsParameters = new JobVertexMessageParameters();
+            metricsParameters.jobPathParameter.resolve(jobID);
+            metricsParameters.jobVertexIdPathParameter.resolve(vertexID);
+            return restClient
+                    .sendRequest(
+                            restAddress.getHost(),
+                            restAddress.getPort(),
+                            JobVertexBackPressureHeaders.getInstance(),
+                            metricsParameters,
+                            EmptyRequestBody.getInstance())
+                    .get()
+                    .getBackpressureLevel();
+        } catch (Exception e) {
+            throw new FlinkRuntimeException(e);
+        }
+    }
+}
