@@ -27,6 +27,7 @@ import java.util.Random;
  * possible affect of using {@link Random#nextLong()}
  */
 class StateBenchmarkConstants {
+    // TODO: why all of those static fields? Those should be inside a context class
     static final int mapKeyCount = 10;
     static final int listValueCount = 100;
     static final int setupKeyCount = 500_000;
