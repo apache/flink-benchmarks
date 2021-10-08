@@ -45,9 +45,7 @@ import static org.apache.flink.state.benchmark.StateBenchmarkConstants.randomVal
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeys;
 
-/**
- * Base implementation of the state benchmarks.
- */
+/** Base implementation of the state benchmarks. */
 public class StateBenchmarkBase extends BenchmarkBase {
     KeyedStateBackend<Long> keyedStateBackend;
 
@@ -61,6 +59,7 @@ public class StateBenchmarkBase extends BenchmarkBase {
         cleanUp(keyedStateBackend);
     }
 
+    // TODO: why AtomicInteger?
     static AtomicInteger keyIndex;
 
     private static int getCurrentIndex() {
@@ -81,7 +80,11 @@ public class StateBenchmarkBase extends BenchmarkBase {
             mapKey = mapKeys.get(currentIndex % mapKeyCount);
             mapValue = mapValues.get(currentIndex % mapKeyCount);
             value = randomValues.get(currentIndex % randomValueCount);
-            listValue = Collections.singletonList(randomValues.get(currentIndex % randomValueCount));
+            // TODO: singletonList is taking 25% of time in mapAdd benchmark... This shouldn't be
+            // initiated if benchmark is not using it and for the benchmarks that are using it,
+            // this should also be probably somehow avoided.
+            listValue =
+                    Collections.singletonList(randomValues.get(currentIndex % randomValueCount));
         }
 
         @TearDown(Level.Invocation)
