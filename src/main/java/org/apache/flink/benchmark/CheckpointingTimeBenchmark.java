@@ -67,6 +67,21 @@ import static org.apache.flink.api.common.eventtime.WatermarkStrategy.noWatermar
 /**
  * The test verifies that the debloating kicks in and properly downsizes buffers. In the end the
  * checkpoint should take ~2(number of rebalance) * DEBLOATING_TARGET.
+ *
+ * <p>Some info about the chosen numbers:
+ *
+ * <ul>
+ *   <li>The minimal memory segment size is decreased (256b) so that the scaling possibility is
+ *       higher. Memory segments start with 8kb
+ *   <li>A memory segment of the minimal size fits ~9 records (of size 29b), each record takes ~200ns
+ *       to be processed by the sink
+ *   <li>We have 2 (exclusive buffers) * 4 (parallelism) + 8 floating = 64 buffers per gate, with
+ *       300 ms debloating target and ~200ns/record processing speed, we can buffer 1500/64 = ~24
+ *       records in a buffer after debloating which means the size of a buffer (24 * 29 = 696) is slightly above the
+ *       minimal memory segment size.
+ *   <li>The buffer debloating target of 300ms means a checkpoint should take ~2(number of
+ *       exchanges)*300ms=~600ms
+ * </ul>
  */
 @OutputTimeUnit(SECONDS)
 public class CheckpointingTimeBenchmark extends BenchmarkBase {
