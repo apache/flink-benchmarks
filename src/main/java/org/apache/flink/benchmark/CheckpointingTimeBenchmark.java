@@ -18,13 +18,11 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.benchmark.operators.RecordSource;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.runtime.jobgraph.JobVertexID;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 
 import org.openjdk.jmh.annotations.Benchmark;
