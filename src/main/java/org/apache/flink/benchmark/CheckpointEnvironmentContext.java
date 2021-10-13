@@ -121,7 +121,10 @@ public abstract class CheckpointEnvironmentContext extends FlinkEnvironmentConte
         jobID = jobClient.getJobID();
         CommonTestUtils.waitForAllTaskRunning(miniCluster, jobID, false);
         BackpressureUtils.waitForBackpressure(
-                jobID, streamGraphWithSources.getSources(), miniCluster.getRestAddress().get());
+                jobID,
+                streamGraphWithSources.getSources(),
+                miniCluster.getRestAddress().get(),
+                miniCluster.getConfiguration());
         if (getSleepPostSetUp() > 0) {
             Thread.sleep(getSleepPostSetUp());
         }
