@@ -18,12 +18,6 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.runtime.minicluster.MiniCluster;
-import org.apache.flink.runtime.minicluster.MiniClusterConfiguration;
-
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.TearDown;
-
 /** Benchmark base for setting up the cluster to perform remote network shuffle. */
 public abstract class RemoteBenchmarkBase extends BenchmarkBase {
 
@@ -31,26 +25,18 @@ public abstract class RemoteBenchmarkBase extends BenchmarkBase {
     protected static final int RECORDS_PER_SUBTASK = 10_000_000;
     protected static final int RECORDS_PER_INVOCATION = RECORDS_PER_SUBTASK * PARALLELISM;
 
-    protected MiniCluster miniCluster;
-
-    @Setup
-    public void setUp() throws Exception {
-        MiniClusterConfiguration miniClusterConfiguration =
-                new MiniClusterConfiguration.Builder()
-                        .setNumTaskManagers(getNumberOfVertexes() * PARALLELISM)
-                        .setNumSlotsPerTaskManager(1)
-                        .build();
-        miniCluster = new MiniCluster(miniClusterConfiguration);
-        miniCluster.start();
-    }
-
-    @TearDown
-    public void tearDown() throws Exception {
-        if (miniCluster != null) {
-            miniCluster.close();
+    public abstract static class RemoteBenchmarkContext extends FlinkEnvironmentContext {
+        @Override
+        protected int getNumberOfTaskManagers() {
+            return getNumberOfVertices() * PARALLELISM;
         }
-    }
 
-    /** @return the number of vertexes the respective job graph contains. */
-    abstract int getNumberOfVertexes();
+        @Override
+        protected int getNumberOfSlotsPerTaskManager() {
+            return 1;
+        }
+
+        /** @return the number of vertices the respective job graph contains. */
+        abstract int getNumberOfVertices();
+    }
 }
