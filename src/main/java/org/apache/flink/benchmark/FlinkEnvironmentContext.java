@@ -39,12 +39,10 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
 public class FlinkEnvironmentContext {
 
     public static final int NUM_NETWORK_BUFFERS = 1000;
-
-    public StreamExecutionEnvironment env;
-    public MiniCluster miniCluster;
-
     protected final int parallelism = 1;
     protected final boolean objectReuse = true;
+    public StreamExecutionEnvironment env;
+    public MiniCluster miniCluster;
 
     @Setup
     public void setUp() throws Exception {
@@ -52,11 +50,13 @@ public class FlinkEnvironmentContext {
             throw new RuntimeException("setUp was called multiple times!");
         }
         final Configuration clusterConfig = createConfiguration();
-        miniCluster = new MiniCluster(new MiniClusterConfiguration.Builder()
-            .setNumSlotsPerTaskManager(getNumberOfSlotsPerTaskManager())
-            .setNumTaskManagers(getNumberOfTaskManagers())
-            .setConfiguration(clusterConfig)
-            .build());
+        miniCluster =
+                new MiniCluster(
+                        new MiniClusterConfiguration.Builder()
+                                .setNumSlotsPerTaskManager(getNumberOfSlotsPerTaskManager())
+                                .setNumTaskManagers(getNumberOfTaskManagers())
+                                .setConfiguration(clusterConfig)
+                                .build());
 
         try {
             miniCluster.start();
@@ -64,10 +64,11 @@ public class FlinkEnvironmentContext {
             throw new RuntimeException(e);
         }
         // set up the execution environment
-        env = new StreamExecutionEnvironment(
-            new MiniClusterPipelineExecutorServiceLoader(miniCluster),
-            clusterConfig,
-            null);
+        env =
+                new StreamExecutionEnvironment(
+                        new MiniClusterPipelineExecutorServiceLoader(miniCluster),
+                        clusterConfig,
+                        null);
 
         env.setParallelism(parallelism);
         if (objectReuse) {
@@ -98,7 +99,8 @@ public class FlinkEnvironmentContext {
     protected Configuration createConfiguration() {
         final Configuration configuration = new Configuration();
         configuration.setString(RestOptions.BIND_PORT, "0");
-        configuration.setInteger(NettyShuffleEnvironmentOptions.NETWORK_NUM_BUFFERS, NUM_NETWORK_BUFFERS);
+        configuration.setInteger(
+                NettyShuffleEnvironmentOptions.NETWORK_NUM_BUFFERS, NUM_NETWORK_BUFFERS);
         configuration.set(DeploymentOptions.TARGET, MiniClusterPipelineExecutorServiceLoader.NAME);
         configuration.set(DeploymentOptions.ATTACHED, true);
         return configuration;

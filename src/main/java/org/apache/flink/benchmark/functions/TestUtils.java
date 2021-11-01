@@ -25,16 +25,14 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import static org.junit.Assert.fail;
 
-/**
- * Test utilities.
- */
+/** Test utilities. */
 public class TestUtils {
 
-    public static JobExecutionResult tryExecute(StreamExecutionEnvironment see, String name) throws Exception {
+    public static JobExecutionResult tryExecute(StreamExecutionEnvironment see, String name)
+            throws Exception {
         try {
             return see.execute(name);
-        }
-        catch (ProgramInvocationException | JobExecutionException root) {
+        } catch (ProgramInvocationException | JobExecutionException root) {
             Throwable cause = root.getCause();
 
             // search for nested SuccessExceptions
@@ -43,8 +41,7 @@ public class TestUtils {
                 if (cause == null || depth++ == 20) {
                     root.printStackTrace();
                     fail("Test failed: " + root.getMessage());
-                }
-                else {
+                } else {
                     cause = cause.getCause();
                 }
             }

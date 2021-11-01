@@ -32,34 +32,32 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
 
-/**
- * The benchmark of initializing the scheduling strategy in a STREAMING/BATCH job.
- */
+/** The benchmark of initializing the scheduling strategy in a STREAMING/BATCH job. */
 public class InitSchedulingStrategyBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
-	@Param({"BATCH", "STREAMING"})
-	private JobConfiguration jobConfiguration;
+    @Param({"BATCH", "STREAMING"})
+    private JobConfiguration jobConfiguration;
 
-	private InitSchedulingStrategyBenchmark benchmark;
+    private InitSchedulingStrategyBenchmark benchmark;
 
-	public static void main(String[] args) throws RunnerException {
-		runBenchmark(InitSchedulingStrategyBenchmarkExecutor.class);
-	}
+    public static void main(String[] args) throws RunnerException {
+        runBenchmark(InitSchedulingStrategyBenchmarkExecutor.class);
+    }
 
-	@Setup(Level.Trial)
-	public void setup() throws Exception {
-		benchmark = new InitSchedulingStrategyBenchmark();
-		benchmark.setup(jobConfiguration);
-	}
+    @Setup(Level.Trial)
+    public void setup() throws Exception {
+        benchmark = new InitSchedulingStrategyBenchmark();
+        benchmark.setup(jobConfiguration);
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.SingleShotTime)
-	public void initSchedulingStrategy(Blackhole blackhole) {
-		blackhole.consume(benchmark.initSchedulingStrategy());
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.SingleShotTime)
+    public void initSchedulingStrategy(Blackhole blackhole) {
+        blackhole.consume(benchmark.initSchedulingStrategy());
+    }
 
-	@TearDown(Level.Trial)
-	public void teardown() {
-		benchmark.teardown();
-	}
+    @TearDown(Level.Trial)
+    public void teardown() {
+        benchmark.teardown();
+    }
 }

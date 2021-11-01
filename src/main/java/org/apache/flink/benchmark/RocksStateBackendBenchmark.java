@@ -39,40 +39,43 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
 
 @OperationsPerInvocation(value = RocksStateBackendBenchmark.RECORDS_PER_INVOCATION)
 public class RocksStateBackendBenchmark extends StateBackendBenchmarkBase {
-	public static final int RECORDS_PER_INVOCATION = 2_000_000;
+    public static final int RECORDS_PER_INVOCATION = 2_000_000;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + RocksStateBackendBenchmark.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + RocksStateBackendBenchmark.class.getCanonicalName() + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	public void stateBackends(RocksStateBackendContext context) throws Exception {
-		IntLongApplications.reduceWithWindow(context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
-		context.execute();
-	}
+    @Benchmark
+    public void stateBackends(RocksStateBackendContext context) throws Exception {
+        IntLongApplications.reduceWithWindow(
+                context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
+        context.execute();
+    }
 
-	@State(Thread)
-	public static class RocksStateBackendContext extends StateBackendContext {
-		@Param({"ROCKS", "ROCKS_INC"})
-		public StateBackend stateBackend = StateBackend.MEMORY;
+    @State(Thread)
+    public static class RocksStateBackendContext extends StateBackendContext {
+        @Param({"ROCKS", "ROCKS_INC"})
+        public StateBackend stateBackend = StateBackend.MEMORY;
 
-		@Override
-		public void setUp() throws Exception {
-			super.setUp(stateBackend, RECORDS_PER_INVOCATION);
-		}
+        @Override
+        public void setUp() throws Exception {
+            super.setUp(stateBackend, RECORDS_PER_INVOCATION);
+        }
 
-		@Override
-		protected Configuration createConfiguration() {
-			Configuration configuration = super.createConfiguration();
-			// explicit set the managed memory as 322122552 bytes, which is the default managed memory of 1GB TM with 1 slot.
-			configuration.set(RocksDBOptions.FIX_PER_SLOT_MEMORY_SIZE, MemorySize.parse("322122552b"));
-			return configuration;
-		}
-	}
+        @Override
+        protected Configuration createConfiguration() {
+            Configuration configuration = super.createConfiguration();
+            // explicit set the managed memory as 322122552 bytes, which is the default managed
+            // memory of 1GB TM with 1 slot.
+            configuration.set(
+                    RocksDBOptions.FIX_PER_SLOT_MEMORY_SIZE, MemorySize.parse("322122552b"));
+            return configuration;
+        }
+    }
 }

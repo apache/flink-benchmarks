@@ -26,20 +26,19 @@ import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.graph.GlobalStreamExchangeMode;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 
-/**
- * Utilities for building respective graph for performing in benchmark.
- */
+/** Utilities for building respective graph for performing in benchmark. */
 public class StreamGraphUtils {
 
-	public static StreamGraph buildGraphForBatchJob(StreamExecutionEnvironment env, int numRecords) {
-		DataStreamSource<Long> source = env.addSource(new LongSource(numRecords));
-		source.addSink(new DiscardingSink<>());
+    public static StreamGraph buildGraphForBatchJob(
+            StreamExecutionEnvironment env, int numRecords) {
+        DataStreamSource<Long> source = env.addSource(new LongSource(numRecords));
+        source.addSink(new DiscardingSink<>());
 
-		StreamGraph streamGraph = env.getStreamGraph();
-		streamGraph.setChaining(false);
-		streamGraph.setGlobalStreamExchangeMode(GlobalStreamExchangeMode.ALL_EDGES_BLOCKING);
-		streamGraph.setJobType(JobType.BATCH);
+        StreamGraph streamGraph = env.getStreamGraph();
+        streamGraph.setChaining(false);
+        streamGraph.setGlobalStreamExchangeMode(GlobalStreamExchangeMode.ALL_EDGES_BLOCKING);
+        streamGraph.setJobType(JobType.BATCH);
 
-		return streamGraph;
-	}
+        return streamGraph;
+    }
 }

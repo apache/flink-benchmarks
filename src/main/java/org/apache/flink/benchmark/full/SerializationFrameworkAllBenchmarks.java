@@ -47,272 +47,294 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-/**
- * Benchmark for serializing POJOs and Tuples with different serialization frameworks.
- */
+/** Benchmark for serializing POJOs and Tuples with different serialization frameworks. */
 public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkMiniBenchmarks {
 
-	public static void main(String[] args) throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + SerializationFrameworkAllBenchmarks.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(
+                                ".*"
+                                        + SerializationFrameworkAllBenchmarks.class
+                                                .getCanonicalName()
+                                        + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
-	public void serializerPojoWithoutRegistration(FlinkEnvironmentContext context) throws Exception {
-		StreamExecutionEnvironment env = context.env;
-		env.setParallelism(4);
+    @Benchmark
+    @OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
+    public void serializerPojoWithoutRegistration(FlinkEnvironmentContext context)
+            throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.setParallelism(4);
 
-		env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
-				.rebalance()
-				.addSink(new DiscardingSink<>());
+        env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
+                .rebalance()
+                .addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
-	public void serializerKryoWithoutRegistration(FlinkEnvironmentContext context) throws Exception {
-		StreamExecutionEnvironment env = context.env;
-		env.setParallelism(4);
-		env.getConfig().enableForceKryo();
+    @Benchmark
+    @OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
+    public void serializerKryoWithoutRegistration(FlinkEnvironmentContext context)
+            throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.setParallelism(4);
+        env.getConfig().enableForceKryo();
 
-		env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
-				.rebalance()
-				.addSink(new DiscardingSink<>());
+        env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
+                .rebalance()
+                .addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
-	public void serializerAvroReflect(FlinkEnvironmentContext context) throws Exception {
-		StreamExecutionEnvironment env = context.env;
-		env.setParallelism(4);
-		env.getConfig().enableForceAvro();
+    @Benchmark
+    @OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
+    public void serializerAvroReflect(FlinkEnvironmentContext context) throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.setParallelism(4);
+        env.getConfig().enableForceAvro();
 
-		env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
-				.rebalance()
-				.addSink(new DiscardingSink<>());
+        env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
+                .rebalance()
+                .addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
-	public void serializerAvroGeneric(FlinkEnvironmentContext context) throws Exception {
-		StreamExecutionEnvironment env = context.env;
-		env.setParallelism(4);
+    @Benchmark
+    @OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
+    public void serializerAvroGeneric(FlinkEnvironmentContext context) throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.setParallelism(4);
 
-		Schema schema = AvroGenericRecordSource.loadSchema();
-		env.addSource(new AvroGenericRecordSource(RECORDS_PER_INVOCATION, 10, schema))
-				.rebalance()
-				.addSink(new DiscardingSink<>());
+        Schema schema = AvroGenericRecordSource.loadSchema();
+        env.addSource(new AvroGenericRecordSource(RECORDS_PER_INVOCATION, 10, schema))
+                .rebalance()
+                .addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-	public void serializerScalaADT(FlinkEnvironmentContext context) throws Exception {
-		StreamExecutionEnvironment env = context.env;
-		env.setParallelism(4);
+    @Benchmark
+    @OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
+    public void serializerScalaADT(FlinkEnvironmentContext context) throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.setParallelism(4);
 
-		env.addSource(new ScalaADTSource(RECORDS_PER_INVOCATION), ScalaADTSource.adtTypeInfo())
-				.rebalance()
-				.addSink(new DiscardingSink<>());
+        env.addSource(new ScalaADTSource(RECORDS_PER_INVOCATION), ScalaADTSource.adtTypeInfo())
+                .rebalance()
+                .addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 
+    @Benchmark
+    @OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
+    public void serializerKryoThrift(FlinkEnvironmentContext context) throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.setParallelism(4);
+        ExecutionConfig executionConfig = env.getConfig();
+        executionConfig.enableForceKryo();
+        executionConfig.addDefaultKryoSerializer(
+                org.apache.flink.benchmark.thrift.MyPojo.class, TBaseSerializer.class);
+        executionConfig.addDefaultKryoSerializer(
+                org.apache.flink.benchmark.thrift.MyOperation.class, TBaseSerializer.class);
 
-	@Benchmark
-	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-	public void serializerKryoThrift(FlinkEnvironmentContext context) throws Exception {
-		StreamExecutionEnvironment env = context.env;
-		env.setParallelism(4);
-		ExecutionConfig executionConfig = env.getConfig();
-		executionConfig.enableForceKryo();
-		executionConfig.addDefaultKryoSerializer(org.apache.flink.benchmark.thrift.MyPojo.class, TBaseSerializer.class);
-		executionConfig.addDefaultKryoSerializer(org.apache.flink.benchmark.thrift.MyOperation.class, TBaseSerializer.class);
+        env.addSource(new ThriftPojoSource(RECORDS_PER_INVOCATION, 10))
+                .rebalance()
+                .addSink(new DiscardingSink<>());
 
-		env.addSource(new ThriftPojoSource(RECORDS_PER_INVOCATION, 10))
-				.rebalance()
-				.addSink(new DiscardingSink<>());
+        env.execute();
+    }
 
-		env.execute();
-	}
+    @Benchmark
+    @OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
+    public void serializerKryoProtobuf(FlinkEnvironmentContext context) throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.setParallelism(4);
+        ExecutionConfig executionConfig = env.getConfig();
+        executionConfig.enableForceKryo();
+        executionConfig.registerTypeWithKryoSerializer(
+                org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo.class,
+                ProtobufSerializer.class);
+        executionConfig.registerTypeWithKryoSerializer(
+                org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation.class,
+                ProtobufSerializer.class);
 
-	@Benchmark
-	@OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-	public void serializerKryoProtobuf(FlinkEnvironmentContext context) throws Exception {
-		StreamExecutionEnvironment env = context.env;
-		env.setParallelism(4);
-		ExecutionConfig executionConfig = env.getConfig();
-		executionConfig.enableForceKryo();
-		executionConfig.registerTypeWithKryoSerializer(org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo.class, ProtobufSerializer.class);
-		executionConfig.registerTypeWithKryoSerializer(org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation.class, ProtobufSerializer.class);
+        env.addSource(new ProtobufPojoSource(RECORDS_PER_INVOCATION, 10))
+                .rebalance()
+                .addSink(new DiscardingSink<>());
 
-		env.addSource(new ProtobufPojoSource(RECORDS_PER_INVOCATION, 10))
-				.rebalance()
-				.addSink(new DiscardingSink<>());
+        env.execute();
+    }
 
-		env.execute();
-	}
+    /** Source emitting an Avro GenericRecord. */
+    public static class AvroGenericRecordSource extends BaseSourceWithKeyRange<GenericRecord>
+            implements ResultTypeQueryable<GenericRecord> {
+        private static final long serialVersionUID = 2941333602938145526L;
 
-	/**
-	 * Source emitting an Avro GenericRecord.
-	 */
-	public static class AvroGenericRecordSource extends BaseSourceWithKeyRange<GenericRecord> implements
-			ResultTypeQueryable<GenericRecord> {
-		private static final long serialVersionUID = 2941333602938145526L;
+        private final GenericRecordAvroTypeInfo producedType;
+        private final String schemaString;
+        private transient Schema myPojoSchema;
+        private transient GenericRecord template;
 
-		private final GenericRecordAvroTypeInfo producedType;
-		private transient Schema myPojoSchema;
-		private final String schemaString;
+        public AvroGenericRecordSource(int numEvents, int numKeys, Schema schema) {
+            super(numEvents, numKeys);
+            this.producedType = new GenericRecordAvroTypeInfo(schema);
+            this.myPojoSchema = schema;
+            this.schemaString = schema.toString();
+        }
 
-		private transient GenericRecord template;
+        private static Schema loadSchema() throws IOException {
+            ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+            try (InputStream is = classLoader.getResourceAsStream("avro/mypojo.avsc")) {
+                if (is == null) {
+                    throw new FileNotFoundException("File 'mypojo.avsc' not found");
+                }
+                return new Schema.Parser().parse(is);
+            }
+        }
 
-		public AvroGenericRecordSource(int numEvents, int numKeys, Schema schema) {
-			super(numEvents, numKeys);
-			this.producedType = new GenericRecordAvroTypeInfo(schema);
-			this.myPojoSchema = schema;
-			this.schemaString = schema.toString();
-		}
+        @Override
+        protected void init() {
+            super.init();
 
-		private static Schema loadSchema() throws IOException {
-			ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-			try (InputStream is = classLoader.getResourceAsStream("avro/mypojo.avsc")) {
-				if (is == null) {
-					throw new FileNotFoundException("File 'mypojo.avsc' not found");
-				}
-				return new Schema.Parser().parse(is);
-			}
-		}
+            if (myPojoSchema == null) {
+                this.myPojoSchema = new Schema.Parser().parse(schemaString);
+            }
+            Schema myOperationSchema =
+                    myPojoSchema.getField("operations").schema().getElementType();
 
-		@Override
-		protected void init() {
-			super.init();
+            template = new GenericData.Record(myPojoSchema);
+            template.put("id", 0);
+            template.put("name", "myName");
+            template.put("operationName", Arrays.asList("op1", "op2", "op3", "op4"));
 
-			if (myPojoSchema == null) {
-				this.myPojoSchema = new Schema.Parser().parse(schemaString);
-			}
-			Schema myOperationSchema = myPojoSchema.getField("operations").schema().getElementType();
+            GenericData.Record op1 = new GenericData.Record(myOperationSchema);
+            op1.put("id", 1);
+            op1.put("name", "op1");
+            GenericData.Record op2 = new GenericData.Record(myOperationSchema);
+            op2.put("id", 2);
+            op2.put("name", "op2");
+            GenericData.Record op3 = new GenericData.Record(myOperationSchema);
+            op3.put("id", 3);
+            op3.put("name", "op3");
+            template.put("operations", Arrays.asList(op1, op2, op3));
 
-			template = new GenericData.Record(myPojoSchema);
-			template.put("id", 0);
-			template.put("name", "myName");
-			template.put("operationName", Arrays.asList("op1", "op2", "op3", "op4"));
+            template.put("otherId1", 1);
+            template.put("otherId2", 2);
+            template.put("otherId3", 3);
+            template.put("nullable", "null");
+        }
 
-			GenericData.Record op1 = new GenericData.Record(myOperationSchema);
-			op1.put("id", 1);
-			op1.put("name", "op1");
-			GenericData.Record op2 = new GenericData.Record(myOperationSchema);
-			op2.put("id", 2);
-			op2.put("name", "op2");
-			GenericData.Record op3 = new GenericData.Record(myOperationSchema);
-			op3.put("id", 3);
-			op3.put("name", "op3");
-			template.put("operations", Arrays.asList(op1, op2, op3));
+        @Override
+        protected GenericRecord getElement(int keyId) {
+            template.put("id", keyId);
+            return template;
+        }
 
-			template.put("otherId1", 1);
-			template.put("otherId2", 2);
-			template.put("otherId3", 3);
-			template.put("nullable", "null");
-		}
+        @Override
+        public TypeInformation<GenericRecord> getProducedType() {
+            return producedType;
+        }
+    }
 
-		@Override
-		protected GenericRecord getElement(int keyId) {
-			template.put("id", keyId);
-			return template;
-		}
+    /**
+     * Source emitting a {@link org.apache.flink.benchmark.thrift.MyPojo POJO} generated by an
+     * Apache Thrift schema.
+     */
+    public static class ThriftPojoSource
+            extends BaseSourceWithKeyRange<org.apache.flink.benchmark.thrift.MyPojo> {
+        private static final long serialVersionUID = 2941333602938145526L;
 
-		@Override
-		public TypeInformation<GenericRecord> getProducedType() {
-			return producedType;
-		}
-	}
+        private transient org.apache.flink.benchmark.thrift.MyPojo template;
 
-	/**
-	 * Source emitting a {@link org.apache.flink.benchmark.thrift.MyPojo POJO} generated by an Apache Thrift schema.
-	 */
-	public static class ThriftPojoSource extends BaseSourceWithKeyRange<org.apache.flink.benchmark.thrift.MyPojo> {
-		private static final long serialVersionUID = 2941333602938145526L;
+        public ThriftPojoSource(int numEvents, int numKeys) {
+            super(numEvents, numKeys);
+        }
 
-		private transient org.apache.flink.benchmark.thrift.MyPojo template;
+        @Override
+        protected void init() {
+            super.init();
+            template =
+                    new org.apache.flink.benchmark.thrift.MyPojo(
+                            0,
+                            "myName",
+                            Arrays.asList("op1", "op2", "op3", "op4"),
+                            Arrays.asList(
+                                    new org.apache.flink.benchmark.thrift.MyOperation(1, "op1"),
+                                    new org.apache.flink.benchmark.thrift.MyOperation(2, "op2"),
+                                    new org.apache.flink.benchmark.thrift.MyOperation(3, "op3")),
+                            1,
+                            2,
+                            3);
+            template.setSomeObject("null");
+        }
 
-		public ThriftPojoSource(int numEvents, int numKeys) {
-			super(numEvents, numKeys);
-		}
+        @Override
+        protected org.apache.flink.benchmark.thrift.MyPojo getElement(int keyId) {
+            template.setId(keyId);
+            return template;
+        }
+    }
 
-		@Override
-		protected void init() {
-			super.init();
-			template = new org.apache.flink.benchmark.thrift.MyPojo(
-					0,
-					"myName",
-					Arrays.asList("op1", "op2", "op3", "op4"),
-					Arrays.asList(
-							new org.apache.flink.benchmark.thrift.MyOperation(1, "op1"),
-							new org.apache.flink.benchmark.thrift.MyOperation(2, "op2"),
-							new org.apache.flink.benchmark.thrift.MyOperation(3, "op3")),
-					1,
-					2,
-					3);
-			template.setSomeObject("null");
-		}
+    /**
+     * Source emitting a {@link org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo POJO}
+     * generated by a Protobuf schema.
+     */
+    public static class ProtobufPojoSource
+            extends BaseSourceWithKeyRange<
+                    org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo> {
+        private static final long serialVersionUID = 2941333602938145526L;
 
-		@Override
-		protected org.apache.flink.benchmark.thrift.MyPojo getElement(int keyId) {
-			template.setId(keyId);
-			return template;
-		}
-	}
+        private transient org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo template;
 
-	/**
-	 * Source emitting a {@link org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo POJO} generated by a Protobuf schema.
-	 */
-	public static class ProtobufPojoSource extends BaseSourceWithKeyRange<org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo> {
-		private static final long serialVersionUID = 2941333602938145526L;
+        public ProtobufPojoSource(int numEvents, int numKeys) {
+            super(numEvents, numKeys);
+        }
 
-			private transient org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo template;
+        @Override
+        protected void init() {
+            super.init();
+            template =
+                    org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo.newBuilder()
+                            .setId(0)
+                            .setName("myName")
+                            .addAllOperationName(Arrays.asList("op1", "op2", "op3", "op4"))
+                            .addOperations(
+                                    org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation
+                                            .newBuilder()
+                                            .setId(1)
+                                            .setName("op1"))
+                            .addOperations(
+                                    org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation
+                                            .newBuilder()
+                                            .setId(2)
+                                            .setName("op2"))
+                            .addOperations(
+                                    org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation
+                                            .newBuilder()
+                                            .setId(3)
+                                            .setName("op3"))
+                            .setOtherId1(1)
+                            .setOtherId2(2)
+                            .setOtherId3(3)
+                            .setSomeObject("null")
+                            .build();
+        }
 
-		public ProtobufPojoSource(int numEvents, int numKeys) {
-			super(numEvents, numKeys);
-		}
-
-		@Override
-		protected void init() {
-			super.init();
-			template = org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo.newBuilder()
-					.setId(0)
-					.setName("myName")
-					.addAllOperationName(Arrays.asList("op1", "op2", "op3", "op4"))
-					.addOperations(org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation.newBuilder()
-							.setId(1)
-							.setName("op1"))
-					.addOperations(org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation.newBuilder()
-							.setId(2)
-							.setName("op2"))
-					.addOperations(org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation.newBuilder()
-							.setId(3)
-							.setName("op3"))
-					.setOtherId1(1)
-					.setOtherId2(2)
-					.setOtherId3(3)
-					.setSomeObject("null")
-					.build();
-		}
-
-		@Override
-		protected org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo getElement(int keyId) {
-			return org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo.newBuilder(template)
-					.setId(keyId)
-					.build();
-		}
-	}
+        @Override
+        protected org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo getElement(
+                int keyId) {
+            return org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo.newBuilder(template)
+                    .setId(keyId)
+                    .build();
+        }
+    }
 }

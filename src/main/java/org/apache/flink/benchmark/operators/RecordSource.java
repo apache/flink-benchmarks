@@ -43,21 +43,6 @@ import java.util.concurrent.CompletableFuture;
 public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorState> {
     public static final int DEFAULT_PAYLOAD_SIZE = 1024;
     private final int recordSize;
-
-    public static class Record {
-        public long value;
-        public byte[] payload;
-
-        public Record() {
-            this(0, DEFAULT_PAYLOAD_SIZE);
-        }
-
-        public Record(long value, int recordSize) {
-            this.value = value;
-            payload = new byte[recordSize];
-        }
-    }
-
     private final int minCheckpoints;
 
     public RecordSource(int minCheckpoints) {
@@ -99,6 +84,20 @@ public class RecordSource implements Source<Record, EmptySplit, EmptyEnumeratorS
     @Override
     public SimpleVersionedSerializer<EmptyEnumeratorState> getEnumeratorCheckpointSerializer() {
         return new EnumeratorVersionedSerializer();
+    }
+
+    public static class Record {
+        public long value;
+        public byte[] payload;
+
+        public Record() {
+            this(0, DEFAULT_PAYLOAD_SIZE);
+        }
+
+        public Record(long value, int recordSize) {
+            this.value = value;
+            payload = new byte[recordSize];
+        }
     }
 
     public static class RecordSourceReader implements SourceReader<Record, EmptySplit> {

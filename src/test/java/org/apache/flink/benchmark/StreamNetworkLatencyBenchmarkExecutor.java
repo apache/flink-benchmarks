@@ -36,43 +36,43 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.openjdk.jmh.annotations.Mode.AverageTime;
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
-/**
- * JMH latency benchmark runner.
- */
+/** JMH latency benchmark runner. */
 @OutputTimeUnit(MILLISECONDS)
 @BenchmarkMode(AverageTime)
 public class StreamNetworkLatencyBenchmarkExecutor extends BenchmarkBase {
 
-	private static final int RECORDS_PER_INVOCATION = 100;
+    private static final int RECORDS_PER_INVOCATION = 100;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + StreamNetworkLatencyBenchmarkExecutor.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(
+                                ".*"
+                                        + StreamNetworkLatencyBenchmarkExecutor.class
+                                                .getCanonicalName()
+                                        + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	public void networkLatency1to1(Environment context) throws Exception {
-		context.executeBenchmark(RECORDS_PER_INVOCATION, false);
-	}
+    @Benchmark
+    public void networkLatency1to1(Environment context) throws Exception {
+        context.executeBenchmark(RECORDS_PER_INVOCATION, false);
+    }
 
-	/**
-	 * Setup for the benchmark(s).
-	 */
-	@State(Thread)
-	public static class Environment extends StreamNetworkPointToPointBenchmark {
-		@Setup
-		public void setUp() throws Exception {
-			super.setUp(10);
-		}
+    /** Setup for the benchmark(s). */
+    @State(Thread)
+    public static class Environment extends StreamNetworkPointToPointBenchmark {
+        @Setup
+        public void setUp() throws Exception {
+            super.setUp(10);
+        }
 
-		@TearDown
-		public void tearDown() {
-			super.tearDown();
-		}
-	}
+        @TearDown
+        public void tearDown() {
+            super.tearDown();
+        }
+    }
 }

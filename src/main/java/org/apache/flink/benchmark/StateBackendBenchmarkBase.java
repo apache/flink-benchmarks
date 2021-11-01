@@ -32,69 +32,70 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class StateBackendBenchmarkBase extends BenchmarkBase {
-	public enum StateBackend {
-		MEMORY,
-		FS,
-		FS_ASYNC,
-		ROCKS,
-		ROCKS_INC
-	}
+    public enum StateBackend {
+        MEMORY,
+        FS,
+        FS_ASYNC,
+        ROCKS,
+        ROCKS_INC
+    }
 
-	public static class StateBackendContext extends FlinkEnvironmentContext {
+    public static class StateBackendContext extends FlinkEnvironmentContext {
 
-		public final File checkpointDir;
+        public final File checkpointDir;
 
-		public final int numberOfElements = 1000;
+        public final int numberOfElements = 1000;
 
-		public DataStreamSource<IntegerLongSource.Record> source;
+        public DataStreamSource<IntegerLongSource.Record> source;
 
-		public StateBackendContext() {
-			try {
-				checkpointDir = Files.createTempDirectory("bench-").toFile();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+        public StateBackendContext() {
+            try {
+                checkpointDir = Files.createTempDirectory("bench-").toFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-		public void setUp(StateBackend stateBackend, long recordsPerInvocation) throws IOException {
-			try {
-				super.setUp();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+        public void setUp(StateBackend stateBackend, long recordsPerInvocation) throws IOException {
+            try {
+                super.setUp();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-			final AbstractStateBackend backend;
-			String checkpointDataUri = "file://" + checkpointDir.getAbsolutePath();
-			switch (stateBackend) {
-				case MEMORY:
-					backend = new MemoryStateBackend();
-					break;
-				case FS:
-					backend = new FsStateBackend(checkpointDataUri, false);
-					break;
-				case FS_ASYNC:
-					backend = new FsStateBackend(checkpointDataUri, true);
-					break;
-				case ROCKS:
-					backend = new RocksDBStateBackend(checkpointDataUri, false);
-					break;
-				case ROCKS_INC:
-					backend = new RocksDBStateBackend(checkpointDataUri, true);
-					break;
-				default:
-					throw new UnsupportedOperationException("Unknown state backend: " + stateBackend);
-			}
+            final AbstractStateBackend backend;
+            String checkpointDataUri = "file://" + checkpointDir.getAbsolutePath();
+            switch (stateBackend) {
+                case MEMORY:
+                    backend = new MemoryStateBackend();
+                    break;
+                case FS:
+                    backend = new FsStateBackend(checkpointDataUri, false);
+                    break;
+                case FS_ASYNC:
+                    backend = new FsStateBackend(checkpointDataUri, true);
+                    break;
+                case ROCKS:
+                    backend = new RocksDBStateBackend(checkpointDataUri, false);
+                    break;
+                case ROCKS_INC:
+                    backend = new RocksDBStateBackend(checkpointDataUri, true);
+                    break;
+                default:
+                    throw new UnsupportedOperationException(
+                            "Unknown state backend: " + stateBackend);
+            }
 
-			env.setStateBackend(backend);
+            env.setStateBackend(backend);
 
-			env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-			source = env.addSource(new IntegerLongSource(numberOfElements, recordsPerInvocation));
-		}
+            env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+            source = env.addSource(new IntegerLongSource(numberOfElements, recordsPerInvocation));
+        }
 
-		@Override
-		public void tearDown() throws Exception {
-			super.tearDown();
-			FileUtils.deleteDirectory(checkpointDir);
-		}
-	}
+        @Override
+        public void tearDown() throws Exception {
+            super.tearDown();
+            FileUtils.deleteDirectory(checkpointDir);
+        }
+    }
 }

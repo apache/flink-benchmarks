@@ -47,20 +47,14 @@ import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeys
 
 /** Base implementation of the state benchmarks. */
 public class StateBenchmarkBase extends BenchmarkBase {
-    KeyedStateBackend<Long> keyedStateBackend;
+    // TODO: why AtomicInteger?
+    static AtomicInteger keyIndex;
+    final ThreadLocalRandom random = ThreadLocalRandom.current();
 
     @Param({"HEAP", "ROCKSDB"})
     protected StateBackendBenchmarkUtils.StateBackendType backendType;
 
-    final ThreadLocalRandom random = ThreadLocalRandom.current();
-
-    @TearDown
-    public void tearDown() throws IOException {
-        cleanUp(keyedStateBackend);
-    }
-
-    // TODO: why AtomicInteger?
-    static AtomicInteger keyIndex;
+    KeyedStateBackend<Long> keyedStateBackend;
 
     private static int getCurrentIndex() {
         int currentIndex = keyIndex.getAndIncrement();
@@ -70,8 +64,20 @@ public class StateBenchmarkBase extends BenchmarkBase {
         return currentIndex;
     }
 
+    @TearDown
+    public void tearDown() throws IOException {
+        cleanUp(keyedStateBackend);
+    }
+
     @State(Scope.Thread)
     public static class KeyValue {
+        long newKey;
+        long setUpKey;
+        long mapKey;
+        double mapValue;
+        long value;
+        List<Long> listValue;
+
         @Setup(Level.Invocation)
         public void kvSetup() {
             int currentIndex = getCurrentIndex();
@@ -91,12 +97,5 @@ public class StateBenchmarkBase extends BenchmarkBase {
         public void kvTearDown() {
             listValue = null;
         }
-
-        long newKey;
-        long setUpKey;
-        long mapKey;
-        double mapValue;
-        long value;
-        List<Long> listValue;
     }
 }

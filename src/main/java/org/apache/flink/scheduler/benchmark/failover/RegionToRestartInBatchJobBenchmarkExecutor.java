@@ -32,34 +32,32 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
 
-/**
- * The benchmark of calculating the regions to restart when failover occurs in a BATCH job.
- */
+/** The benchmark of calculating the regions to restart when failover occurs in a BATCH job. */
 public class RegionToRestartInBatchJobBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
-	@Param("BATCH")
-	private JobConfiguration jobConfiguration;
+    @Param("BATCH")
+    private JobConfiguration jobConfiguration;
 
-	private RegionToRestartInBatchJobBenchmark benchmark;
+    private RegionToRestartInBatchJobBenchmark benchmark;
 
-	public static void main(String[] args) throws RunnerException {
-		runBenchmark(RegionToRestartInBatchJobBenchmarkExecutor.class);
-	}
+    public static void main(String[] args) throws RunnerException {
+        runBenchmark(RegionToRestartInBatchJobBenchmarkExecutor.class);
+    }
 
-	@Setup(Level.Trial)
-	public void setup() throws Exception {
-		benchmark = new RegionToRestartInBatchJobBenchmark();
-		benchmark.setup(jobConfiguration);
-	}
+    @Setup(Level.Trial)
+    public void setup() throws Exception {
+        benchmark = new RegionToRestartInBatchJobBenchmark();
+        benchmark.setup(jobConfiguration);
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.SingleShotTime)
-	public void calculateRegionToRestart(Blackhole blackhole) {
-		blackhole.consume(benchmark.calculateRegionToRestart());
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.SingleShotTime)
+    public void calculateRegionToRestart(Blackhole blackhole) {
+        blackhole.consume(benchmark.calculateRegionToRestart());
+    }
 
-	@TearDown(Level.Trial)
-	public void teardown() {
-		benchmark.teardown();
-	}
+    @TearDown(Level.Trial)
+    public void teardown() {
+        benchmark.teardown();
+    }
 }

@@ -18,5 +18,4 @@
 
 package org.apache.flink.benchmark.functions;
 
-public class SuccessException extends Exception {
-}
+public class SuccessException extends Exception {}

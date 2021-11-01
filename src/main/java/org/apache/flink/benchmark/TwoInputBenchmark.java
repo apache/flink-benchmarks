@@ -36,63 +36,68 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 
 public class TwoInputBenchmark extends BenchmarkBase {
 
-	public static final int RECORDS_PER_INVOCATION = 25_000_000;
-	public static final int ONE_IDLE_RECORDS_PER_INVOCATION = 15_000_000;
-	public static final long CHECKPOINT_INTERVAL_MS = 100;
+    public static final int RECORDS_PER_INVOCATION = 25_000_000;
+    public static final int ONE_IDLE_RECORDS_PER_INVOCATION = 15_000_000;
+    public static final long CHECKPOINT_INTERVAL_MS = 100;
 
-	public static void main(String[] args)
-		throws RunnerException {
-		Options options = new OptionsBuilder()
-			.verbosity(VerboseMode.NORMAL)
-			.include(".*" + TwoInputBenchmark.class.getCanonicalName() + ".*")
-			.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + TwoInputBenchmark.class.getCanonicalName() + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(value = TwoInputBenchmark.RECORDS_PER_INVOCATION)
-	public void twoInputMapSink(FlinkEnvironmentContext context) throws Exception {
+    @Benchmark
+    @OperationsPerInvocation(value = TwoInputBenchmark.RECORDS_PER_INVOCATION)
+    public void twoInputMapSink(FlinkEnvironmentContext context) throws Exception {
 
-		StreamExecutionEnvironment env = context.env;
+        StreamExecutionEnvironment env = context.env;
 
-		env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
-		env.setParallelism(1);
+        env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
+        env.setParallelism(1);
 
-		// Setting buffer timeout to 1 is an attempt to improve twoInputMapSink benchmark stability.
-		// Without 1ms buffer timeout, some JVM forks are much slower then others, making results
-		// unstable and unreliable.
-		env.setBufferTimeout(1);
+        // Setting buffer timeout to 1 is an attempt to improve twoInputMapSink benchmark stability.
+        // Without 1ms buffer timeout, some JVM forks are much slower then others, making results
+        // unstable and unreliable.
+        env.setBufferTimeout(1);
 
-		long numRecordsPerInput = RECORDS_PER_INVOCATION / 2;
-		DataStreamSource<Long> source1 = env.addSource(new LongSource(numRecordsPerInput));
-		DataStreamSource<Long> source2 = env.addSource(new LongSource(numRecordsPerInput));
+        long numRecordsPerInput = RECORDS_PER_INVOCATION / 2;
+        DataStreamSource<Long> source1 = env.addSource(new LongSource(numRecordsPerInput));
+        DataStreamSource<Long> source2 = env.addSource(new LongSource(numRecordsPerInput));
 
-		source1
-			.connect(source2)
-			.transform("custom operator", TypeInformation.of(Long.class), new MultiplyByTwoCoStreamMap())
-			.addSink(new DiscardingSink<>());
+        source1.connect(source2)
+                .transform(
+                        "custom operator",
+                        TypeInformation.of(Long.class),
+                        new MultiplyByTwoCoStreamMap())
+                .addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(value = TwoInputBenchmark.ONE_IDLE_RECORDS_PER_INVOCATION)
-	public void twoInputOneIdleMapSink(FlinkEnvironmentContext context) throws Exception {
+    @Benchmark
+    @OperationsPerInvocation(value = TwoInputBenchmark.ONE_IDLE_RECORDS_PER_INVOCATION)
+    public void twoInputOneIdleMapSink(FlinkEnvironmentContext context) throws Exception {
 
-		StreamExecutionEnvironment env = context.env;
-		env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
-		env.setParallelism(1);
+        StreamExecutionEnvironment env = context.env;
+        env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
+        env.setParallelism(1);
 
-		QueuingLongSource.reset();
-		DataStreamSource<Long> source1 = env.addSource(new QueuingLongSource(1, ONE_IDLE_RECORDS_PER_INVOCATION - 1));
-		DataStreamSource<Long> source2 = env.addSource(new QueuingLongSource(2, 1));
+        QueuingLongSource.reset();
+        DataStreamSource<Long> source1 =
+                env.addSource(new QueuingLongSource(1, ONE_IDLE_RECORDS_PER_INVOCATION - 1));
+        DataStreamSource<Long> source2 = env.addSource(new QueuingLongSource(2, 1));
 
-		source1
-				.connect(source2)
-				.transform("custom operator", TypeInformation.of(Long.class), new MultiplyByTwoCoStreamMap())
-				.addSink(new DiscardingSink<>());
+        source1.connect(source2)
+                .transform(
+                        "custom operator",
+                        TypeInformation.of(Long.class),
+                        new MultiplyByTwoCoStreamMap())
+                .addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 }

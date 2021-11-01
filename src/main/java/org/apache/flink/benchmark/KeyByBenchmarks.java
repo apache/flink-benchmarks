@@ -31,74 +31,72 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-/**
- * Benchmark for keyBy() on tuples and arrays.
- */
+/** Benchmark for keyBy() on tuples and arrays. */
 public class KeyByBenchmarks extends BenchmarkBase {
 
-	private static final int TUPLE_RECORDS_PER_INVOCATION = 15_000_000;
-	private static final int ARRAY_RECORDS_PER_INVOCATION = 7_000_000;
+    private static final int TUPLE_RECORDS_PER_INVOCATION = 15_000_000;
+    private static final int ARRAY_RECORDS_PER_INVOCATION = 7_000_000;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + KeyByBenchmarks.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + KeyByBenchmarks.class.getCanonicalName() + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(value = KeyByBenchmarks.TUPLE_RECORDS_PER_INVOCATION)
-	public void tupleKeyBy(FlinkEnvironmentContext context) throws Exception {
-		StreamExecutionEnvironment env = context.env;
-		env.setParallelism(4);
+    @Benchmark
+    @OperationsPerInvocation(value = KeyByBenchmarks.TUPLE_RECORDS_PER_INVOCATION)
+    public void tupleKeyBy(FlinkEnvironmentContext context) throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.setParallelism(4);
 
-		env.addSource(new IncreasingTupleSource(TUPLE_RECORDS_PER_INVOCATION, 10))
-				.keyBy(0)
-				.addSink(new DiscardingSink<>());
+        env.addSource(new IncreasingTupleSource(TUPLE_RECORDS_PER_INVOCATION, 10))
+                .keyBy(0)
+                .addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(value = KeyByBenchmarks.ARRAY_RECORDS_PER_INVOCATION)
-	public void arrayKeyBy(FlinkEnvironmentContext context) throws Exception {
-		StreamExecutionEnvironment env = context.env;
-		env.setParallelism(4);
+    @Benchmark
+    @OperationsPerInvocation(value = KeyByBenchmarks.ARRAY_RECORDS_PER_INVOCATION)
+    public void arrayKeyBy(FlinkEnvironmentContext context) throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.setParallelism(4);
 
-		env.addSource(new IncreasingArraySource(ARRAY_RECORDS_PER_INVOCATION, 10))
-				.keyBy(0)
-				.addSink(new DiscardingSink<>());
+        env.addSource(new IncreasingArraySource(ARRAY_RECORDS_PER_INVOCATION, 10))
+                .keyBy(0)
+                .addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 
-	private static class IncreasingTupleSource extends BaseSourceWithKeyRange<Tuple2<Integer, Integer>> {
-		private static final long serialVersionUID = 2941333602938145526L;
+    private static class IncreasingTupleSource
+            extends BaseSourceWithKeyRange<Tuple2<Integer, Integer>> {
+        private static final long serialVersionUID = 2941333602938145526L;
 
-		IncreasingTupleSource(int numEvents, int numKeys) {
-			super(numEvents, numKeys);
-		}
+        IncreasingTupleSource(int numEvents, int numKeys) {
+            super(numEvents, numKeys);
+        }
 
-		@Override
-		protected Tuple2<Integer, Integer> getElement(int keyId) {
-			return new Tuple2<>(keyId, 1);
-		}
+        @Override
+        protected Tuple2<Integer, Integer> getElement(int keyId) {
+            return new Tuple2<>(keyId, 1);
+        }
+    }
 
-	}
+    private static class IncreasingArraySource extends BaseSourceWithKeyRange<int[]> {
+        private static final long serialVersionUID = -7883758559005221998L;
 
-	private static class IncreasingArraySource extends BaseSourceWithKeyRange<int[]> {
-		private static final long serialVersionUID = -7883758559005221998L;
+        IncreasingArraySource(int numEvents, int numKeys) {
+            super(numEvents, numKeys);
+        }
 
-		IncreasingArraySource(int numEvents, int numKeys) {
-			super(numEvents, numKeys);
-		}
-
-		@Override
-		protected int[] getElement(int keyId) {
-			return new int[] {keyId, 1};
-		}
-	}
+        @Override
+        protected int[] getElement(int keyId) {
+            return new int[] {keyId, 1};
+        }
+    }
 }

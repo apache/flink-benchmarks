@@ -27,8 +27,7 @@ public class IntLongApplications {
     public static <W extends Window> void reduceWithWindow(
             DataStreamSource<IntegerLongSource.Record> source,
             WindowAssigner<Object, W> windowAssigner) {
-        source
-                .map(new MultiplyIntLongByTwo())
+        source.map(new MultiplyIntLongByTwo())
                 .keyBy(record -> record.key)
                 .window(windowAssigner)
                 .reduce(new SumReduceIntLong())

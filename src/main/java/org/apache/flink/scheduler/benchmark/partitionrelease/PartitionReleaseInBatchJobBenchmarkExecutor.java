@@ -31,34 +31,32 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.RunnerException;
 
-/**
- * The benchmark of releasing partitions in a BATCH job.
- */
+/** The benchmark of releasing partitions in a BATCH job. */
 public class PartitionReleaseInBatchJobBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
-	@Param("BATCH")
-	private JobConfiguration jobConfiguration;
+    @Param("BATCH")
+    private JobConfiguration jobConfiguration;
 
-	private PartitionReleaseInBatchJobBenchmark benchmark;
+    private PartitionReleaseInBatchJobBenchmark benchmark;
 
-	public static void main(String[] args) throws RunnerException {
-		runBenchmark(PartitionReleaseInBatchJobBenchmarkExecutor.class);
-	}
+    public static void main(String[] args) throws RunnerException {
+        runBenchmark(PartitionReleaseInBatchJobBenchmarkExecutor.class);
+    }
 
-	@Setup(Level.Trial)
-	public void setup() throws Exception {
-		benchmark = new PartitionReleaseInBatchJobBenchmark();
-		benchmark.setup(jobConfiguration);
-	}
+    @Setup(Level.Trial)
+    public void setup() throws Exception {
+        benchmark = new PartitionReleaseInBatchJobBenchmark();
+        benchmark.setup(jobConfiguration);
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.SingleShotTime)
-	public void partitionRelease() {
-		benchmark.partitionRelease();
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.SingleShotTime)
+    public void partitionRelease() {
+        benchmark.partitionRelease();
+    }
 
-	@TearDown(Level.Trial)
-	public void teardown() {
-		benchmark.teardown();
-	}
+    @TearDown(Level.Trial)
+    public void teardown() {
+        benchmark.teardown();
+    }
 }

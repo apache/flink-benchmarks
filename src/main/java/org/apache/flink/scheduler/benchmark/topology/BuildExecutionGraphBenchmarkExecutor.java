@@ -31,34 +31,32 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.RunnerException;
 
-/**
- * The benchmark of building the topology of ExecutionGraph in a STREAMING/BATCH job.
- */
+/** The benchmark of building the topology of ExecutionGraph in a STREAMING/BATCH job. */
 public class BuildExecutionGraphBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
-	@Param({"BATCH", "STREAMING"})
-	private JobConfiguration jobConfiguration;
+    @Param({"BATCH", "STREAMING"})
+    private JobConfiguration jobConfiguration;
 
-	private BuildExecutionGraphBenchmark benchmark;
+    private BuildExecutionGraphBenchmark benchmark;
 
-	public static void main(String[] args) throws RunnerException {
-		runBenchmark(BuildExecutionGraphBenchmarkExecutor.class);
-	}
+    public static void main(String[] args) throws RunnerException {
+        runBenchmark(BuildExecutionGraphBenchmarkExecutor.class);
+    }
 
-	@Setup(Level.Trial)
-	public void setup() throws Exception {
-		benchmark = new BuildExecutionGraphBenchmark();
-		benchmark.setup(jobConfiguration);
-	}
+    @Setup(Level.Trial)
+    public void setup() throws Exception {
+        benchmark = new BuildExecutionGraphBenchmark();
+        benchmark.setup(jobConfiguration);
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.SingleShotTime)
-	public void buildTopology() throws Exception {
-		benchmark.buildTopology();
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.SingleShotTime)
+    public void buildTopology() throws Exception {
+        benchmark.buildTopology();
+    }
 
-	@TearDown(Level.Trial)
-	public void teardown() {
-		benchmark.teardown();
-	}
+    @TearDown(Level.Trial)
+    public void teardown() {
+        benchmark.teardown();
+    }
 }

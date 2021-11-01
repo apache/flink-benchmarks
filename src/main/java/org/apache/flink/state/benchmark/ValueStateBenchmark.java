@@ -36,17 +36,16 @@ import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBen
 import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getValueState;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
 
-/**
- * Implementation for listValue state benchmark testing.
- */
+/** Implementation for listValue state benchmark testing. */
 public class ValueStateBenchmark extends StateBenchmarkBase {
     private ValueState<Long> valueState;
 
     public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .verbosity(VerboseMode.NORMAL)
-                .include(".*" + ValueStateBenchmark.class.getCanonicalName() + ".*")
-                .build();
+        Options opt =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + ValueStateBenchmark.class.getCanonicalName() + ".*")
+                        .build();
 
         new Runner(opt).run();
     }
@@ -54,9 +53,8 @@ public class ValueStateBenchmark extends StateBenchmarkBase {
     @Setup
     public void setUp() throws Exception {
         keyedStateBackend = createKeyedStateBackend(backendType);
-        valueState = getValueState(
-                keyedStateBackend,
-                new ValueStateDescriptor<>("kvState", Long.class));
+        valueState =
+                getValueState(keyedStateBackend, new ValueStateDescriptor<>("kvState", Long.class));
         for (int i = 0; i < setupKeyCount; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
             valueState.update(random.nextLong());

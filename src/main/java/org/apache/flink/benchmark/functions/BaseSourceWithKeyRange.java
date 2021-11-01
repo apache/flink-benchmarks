@@ -21,44 +21,41 @@ package org.apache.flink.benchmark.functions;
 import org.apache.flink.streaming.api.functions.source.ParallelSourceFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext;
 
-/**
- * Abstract base class for sources with a defined number of events and a fixed key range.
- */
-abstract public class BaseSourceWithKeyRange<T> implements ParallelSourceFunction<T> {
-	private static final long serialVersionUID = 8318018060123048234L;
+/** Abstract base class for sources with a defined number of events and a fixed key range. */
+public abstract class BaseSourceWithKeyRange<T> implements ParallelSourceFunction<T> {
+    private static final long serialVersionUID = 8318018060123048234L;
 
-	protected final int numKeys;
-	protected int remainingEvents;
+    protected final int numKeys;
+    protected int remainingEvents;
 
-	public BaseSourceWithKeyRange(int numEvents, int numKeys) {
-		this.remainingEvents = numEvents;
-		this.numKeys = numKeys;
-	}
+    public BaseSourceWithKeyRange(int numEvents, int numKeys) {
+        this.remainingEvents = numEvents;
+        this.numKeys = numKeys;
+    }
 
-	protected void init() {
-	}
+    protected void init() {}
 
-	protected abstract T getElement(int keyId);
+    protected abstract T getElement(int keyId);
 
-	@Override
-	public void run(SourceContext<T> out) {
-		init();
+    @Override
+    public void run(SourceContext<T> out) {
+        init();
 
-		int keyId = 0;
-		while (--remainingEvents >= 0) {
-			T element = getElement(keyId);
-			synchronized (out.getCheckpointLock()) {
-				out.collect(element);
-			}
-			++keyId;
-			if (keyId >= numKeys) {
-				keyId = 0;
-			}
-		}
-	}
+        int keyId = 0;
+        while (--remainingEvents >= 0) {
+            T element = getElement(keyId);
+            synchronized (out.getCheckpointLock()) {
+                out.collect(element);
+            }
+            ++keyId;
+            if (keyId >= numKeys) {
+                keyId = 0;
+            }
+        }
+    }
 
-	@Override
-	public void cancel() {
-		this.remainingEvents = 0;
-	}
+    @Override
+    public void cancel() {
+        this.remainingEvents = 0;
+    }
 }

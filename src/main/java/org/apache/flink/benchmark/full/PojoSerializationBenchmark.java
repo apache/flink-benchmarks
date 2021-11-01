@@ -58,7 +58,8 @@ public class PojoSerializationBenchmark extends BenchmarkBase {
 
     ExecutionConfig config = new ExecutionConfig();
     TypeSerializer<SerializationFrameworkMiniBenchmarks.MyPojo> pojoSerializer =
-            TypeInformation.of(SerializationFrameworkMiniBenchmarks.MyPojo.class).createSerializer(config);
+            TypeInformation.of(SerializationFrameworkMiniBenchmarks.MyPojo.class)
+                    .createSerializer(config);
     TypeSerializer<SerializationFrameworkMiniBenchmarks.MyPojo> kryoSerializer =
             new KryoSerializer<>(SerializationFrameworkMiniBenchmarks.MyPojo.class, config);
     TypeSerializer<org.apache.flink.benchmark.avro.MyPojo> avroSerializer =
@@ -68,46 +69,48 @@ public class PojoSerializationBenchmark extends BenchmarkBase {
     ByteArrayInputStream avroBuffer;
     ByteArrayInputStream kryoBuffer;
 
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + PojoSerializationBenchmark.class.getCanonicalName() + ".*")
+                        .build();
+
+        new Runner(options).run();
+    }
 
     @Setup
     public void setup() throws IOException {
-        pojo = new SerializationFrameworkMiniBenchmarks.MyPojo(
-                0,
-                "myName",
-                new String[] {"op1", "op2", "op3", "op4"},
-                new SerializationFrameworkMiniBenchmarks.MyOperation[] {
-                        new SerializationFrameworkMiniBenchmarks.MyOperation(1, "op1"),
-                        new SerializationFrameworkMiniBenchmarks.MyOperation(2, "op2"),
-                        new SerializationFrameworkMiniBenchmarks.MyOperation(3, "op3")},
-                1,
-                2,
-                3,
-                "null");
-        avroPojo = new org.apache.flink.benchmark.avro.MyPojo(
-                0,
-                "myName",
-                Arrays.asList("op1", "op2", "op3", "op4"),
-                Arrays.asList(
-                        new org.apache.flink.benchmark.avro.MyOperation(1, "op1"),
-                        new org.apache.flink.benchmark.avro.MyOperation(2, "op2"),
-                        new org.apache.flink.benchmark.avro.MyOperation(3, "op3")),
-                1,
-                2,
-                3,
-                "null");
+        pojo =
+                new SerializationFrameworkMiniBenchmarks.MyPojo(
+                        0,
+                        "myName",
+                        new String[] {"op1", "op2", "op3", "op4"},
+                        new SerializationFrameworkMiniBenchmarks.MyOperation[] {
+                            new SerializationFrameworkMiniBenchmarks.MyOperation(1, "op1"),
+                            new SerializationFrameworkMiniBenchmarks.MyOperation(2, "op2"),
+                            new SerializationFrameworkMiniBenchmarks.MyOperation(3, "op3")
+                        },
+                        1,
+                        2,
+                        3,
+                        "null");
+        avroPojo =
+                new org.apache.flink.benchmark.avro.MyPojo(
+                        0,
+                        "myName",
+                        Arrays.asList("op1", "op2", "op3", "op4"),
+                        Arrays.asList(
+                                new org.apache.flink.benchmark.avro.MyOperation(1, "op1"),
+                                new org.apache.flink.benchmark.avro.MyOperation(2, "op2"),
+                                new org.apache.flink.benchmark.avro.MyOperation(3, "op3")),
+                        1,
+                        2,
+                        3,
+                        "null");
         pojoBuffer = new ByteArrayInputStream(write(pojoSerializer, pojo));
         avroBuffer = new ByteArrayInputStream(write(avroSerializer, avroPojo));
         kryoBuffer = new ByteArrayInputStream(write(kryoSerializer, pojo));
-    }
-
-    public static void main(String[] args)
-            throws RunnerException {
-        Options options = new OptionsBuilder()
-                .verbosity(VerboseMode.NORMAL)
-                .include(".*" + PojoSerializationBenchmark.class.getCanonicalName() + ".*")
-                .build();
-
-        new Runner(options).run();
     }
 
     @Benchmark

@@ -50,6 +50,42 @@ public abstract class CheckpointEnvironmentContext extends FlinkEnvironmentConte
 
     public JobID jobID;
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        env.setParallelism(CheckpointEnvironmentContext.JOB_PARALLELISM);
+        env.enableCheckpointing(Long.MAX_VALUE);
+
+        final StreamGraphWithSources streamGraphWithSources = getStreamGraph();
+
+        final JobClient jobClient = env.executeAsync(streamGraphWithSources.getStreamGraph());
+        jobID = jobClient.getJobID();
+        CommonTestUtils.waitForAllTaskRunning(miniCluster, jobID, false);
+        BackpressureUtils.waitForBackpressure(
+                jobID,
+                streamGraphWithSources.getSources(),
+                miniCluster.getRestAddress().get(),
+                miniCluster.getConfiguration());
+        if (getSleepPostSetUp() > 0) {
+            Thread.sleep(getSleepPostSetUp());
+        }
+    }
+
+    protected abstract CheckpointMode getMode();
+
+    protected abstract StreamGraphWithSources getStreamGraph();
+
+    protected int getSleepPostSetUp() {
+        return getMode() == CheckpointMode.ALIGNED
+                ? CheckpointEnvironmentContext.DEBLOATING_STABILIZATION_PERIOD
+                : 0;
+    }
+
+    @Override
+    protected Configuration createConfiguration() {
+        return getMode().configure(super.createConfiguration());
+    }
+
     /**
      * Checkpointing configuration to be used in {@link CheckpointingTimeBenchmark} & {@link
      * MultiInputCheckpointingTimeBenchmark}.
@@ -107,42 +143,6 @@ public abstract class CheckpointEnvironmentContext extends FlinkEnvironmentConte
         public Configuration configure(Configuration config) {
             return configFunc.apply(config);
         }
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        env.setParallelism(CheckpointEnvironmentContext.JOB_PARALLELISM);
-        env.enableCheckpointing(Long.MAX_VALUE);
-
-        final StreamGraphWithSources streamGraphWithSources = getStreamGraph();
-
-        final JobClient jobClient = env.executeAsync(streamGraphWithSources.getStreamGraph());
-        jobID = jobClient.getJobID();
-        CommonTestUtils.waitForAllTaskRunning(miniCluster, jobID, false);
-        BackpressureUtils.waitForBackpressure(
-                jobID,
-                streamGraphWithSources.getSources(),
-                miniCluster.getRestAddress().get(),
-                miniCluster.getConfiguration());
-        if (getSleepPostSetUp() > 0) {
-            Thread.sleep(getSleepPostSetUp());
-        }
-    }
-
-    protected abstract CheckpointMode getMode();
-
-    protected abstract StreamGraphWithSources getStreamGraph();
-
-    protected int getSleepPostSetUp() {
-        return getMode() == CheckpointMode.ALIGNED
-                ? CheckpointEnvironmentContext.DEBLOATING_STABILIZATION_PERIOD
-                : 0;
-    }
-
-    @Override
-    protected Configuration createConfiguration() {
-        return getMode().configure(super.createConfiguration());
     }
 
     /** A simple wrapper to pass a {@link StreamGraph} along with ids of sources it contains. */

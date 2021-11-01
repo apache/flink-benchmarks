@@ -52,144 +52,147 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 import java.util.concurrent.CompletableFuture;
 
 public class MultipleInputBenchmark extends BenchmarkBase {
-	public static final int RECORDS_PER_INVOCATION = TwoInputBenchmark.RECORDS_PER_INVOCATION;
-	public static final int ONE_IDLE_RECORDS_PER_INVOCATION = TwoInputBenchmark.ONE_IDLE_RECORDS_PER_INVOCATION;
-	public static final long CHECKPOINT_INTERVAL_MS = TwoInputBenchmark.CHECKPOINT_INTERVAL_MS;
+    public static final int RECORDS_PER_INVOCATION = TwoInputBenchmark.RECORDS_PER_INVOCATION;
+    public static final int ONE_IDLE_RECORDS_PER_INVOCATION =
+            TwoInputBenchmark.ONE_IDLE_RECORDS_PER_INVOCATION;
+    public static final long CHECKPOINT_INTERVAL_MS = TwoInputBenchmark.CHECKPOINT_INTERVAL_MS;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + MultipleInputBenchmark.class.getSimpleName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + MultipleInputBenchmark.class.getSimpleName() + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	@OperationsPerInvocation(RECORDS_PER_INVOCATION)
-	public void multiInputMapSink(FlinkEnvironmentContext context) throws Exception {
+    private static void connectAndDiscard(
+            StreamExecutionEnvironment env, DataStream<?> source1, DataStream<?> source2) {
+        MultipleInputTransformation<Long> transform =
+                new MultipleInputTransformation<>(
+                        "custom operator",
+                        new MultiplyByTwoOperatorFactory(),
+                        BasicTypeInfo.LONG_TYPE_INFO,
+                        1);
 
-		StreamExecutionEnvironment env = context.env;
-		env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
+        transform.addInput(source1.getTransformation());
+        transform.addInput(source2.getTransformation());
 
-		long numRecordsPerInput = RECORDS_PER_INVOCATION / 2;
-		DataStreamSource<Long> source1 = env.addSource(new LongSource(numRecordsPerInput));
-		DataStreamSource<Long> source2 = env.addSource(new LongSource(numRecordsPerInput));
-		connectAndDiscard(env, source1, source2);
+        env.addOperator(transform);
+        new MultipleConnectedStreams(env).transform(transform).addSink(new DiscardingSink<>());
+    }
 
-		env.execute();
-	}
+    @Benchmark
+    @OperationsPerInvocation(RECORDS_PER_INVOCATION)
+    public void multiInputMapSink(FlinkEnvironmentContext context) throws Exception {
 
-	@Benchmark
-	@OperationsPerInvocation(ONE_IDLE_RECORDS_PER_INVOCATION)
-	public void multiInputOneIdleMapSink(FlinkEnvironmentContext context) throws Exception {
+        StreamExecutionEnvironment env = context.env;
+        env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
 
-		StreamExecutionEnvironment env = context.env;
-		env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
+        long numRecordsPerInput = RECORDS_PER_INVOCATION / 2;
+        DataStreamSource<Long> source1 = env.addSource(new LongSource(numRecordsPerInput));
+        DataStreamSource<Long> source2 = env.addSource(new LongSource(numRecordsPerInput));
+        connectAndDiscard(env, source1, source2);
 
-		QueuingLongSource.reset();
-		DataStreamSource<Long> source1 = env.addSource(new QueuingLongSource(1, ONE_IDLE_RECORDS_PER_INVOCATION - 1));
-		DataStreamSource<Long> source2 = env.addSource(new QueuingLongSource(2, 1));
-		connectAndDiscard(env, source1, source2);
+        env.execute();
+    }
 
-		env.execute();
-	}
+    @Benchmark
+    @OperationsPerInvocation(ONE_IDLE_RECORDS_PER_INVOCATION)
+    public void multiInputOneIdleMapSink(FlinkEnvironmentContext context) throws Exception {
 
-	@Benchmark
-	@OperationsPerInvocation(RECORDS_PER_INVOCATION)
-	public void multiInputChainedIdleSource(FlinkEnvironmentContext context) throws Exception {
-		final StreamExecutionEnvironment env = context.env;
-		env.getConfig().enableObjectReuse();
+        StreamExecutionEnvironment env = context.env;
+        env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
 
-		final DataStream<Long> source1 =
-				env.fromSource(
-						new NumberSequenceSource(1L, RECORDS_PER_INVOCATION),
-						WatermarkStrategy.noWatermarks(),
-						"source-1");
+        QueuingLongSource.reset();
+        DataStreamSource<Long> source1 =
+                env.addSource(new QueuingLongSource(1, ONE_IDLE_RECORDS_PER_INVOCATION - 1));
+        DataStreamSource<Long> source2 = env.addSource(new QueuingLongSource(2, 1));
+        connectAndDiscard(env, source1, source2);
 
-		final DataStreamSource<Integer> source2 =
-				env.fromSource(new IdlingSource(1), WatermarkStrategy.noWatermarks(), "source-2");
+        env.execute();
+    }
 
-		MultipleInputTransformation<Long> transform = new MultipleInputTransformation<>(
-				"custom operator",
-				new MultiplyByTwoOperatorFactory(),
-				BasicTypeInfo.LONG_TYPE_INFO,
-				1);
+    @Benchmark
+    @OperationsPerInvocation(RECORDS_PER_INVOCATION)
+    public void multiInputChainedIdleSource(FlinkEnvironmentContext context) throws Exception {
+        final StreamExecutionEnvironment env = context.env;
+        env.getConfig().enableObjectReuse();
 
-		transform.addInput(((DataStream<?>) source1).getTransformation());
-		transform.addInput(((DataStream<?>) source2).getTransformation());
-		transform.setChainingStrategy(ChainingStrategy.HEAD_WITH_SOURCES);
+        final DataStream<Long> source1 =
+                env.fromSource(
+                        new NumberSequenceSource(1L, RECORDS_PER_INVOCATION),
+                        WatermarkStrategy.noWatermarks(),
+                        "source-1");
 
-		env.addOperator(transform);
-		new MultipleConnectedStreams(env).transform(transform).addSink(new SinkClosingIdlingSource()).setParallelism(1);
-		context.execute();
-	}
+        final DataStreamSource<Integer> source2 =
+                env.fromSource(new IdlingSource(1), WatermarkStrategy.noWatermarks(), "source-2");
 
-	private static class IdlingSource extends MockSource {
-		private static CompletableFuture<Void> canFinish = new CompletableFuture<>();
+        MultipleInputTransformation<Long> transform =
+                new MultipleInputTransformation<>(
+                        "custom operator",
+                        new MultiplyByTwoOperatorFactory(),
+                        BasicTypeInfo.LONG_TYPE_INFO,
+                        1);
 
-		public static void signalCanFinish() {
-			canFinish.complete(null);
-		}
+        transform.addInput(((DataStream<?>) source1).getTransformation());
+        transform.addInput(((DataStream<?>) source2).getTransformation());
+        transform.setChainingStrategy(ChainingStrategy.HEAD_WITH_SOURCES);
 
-		public static void reset() {
-			canFinish.completeExceptionally(new IllegalStateException("State has been reset"));
-			canFinish = new CompletableFuture<>();
-		}
+        env.addOperator(transform);
+        new MultipleConnectedStreams(env)
+                .transform(transform)
+                .addSink(new SinkClosingIdlingSource())
+                .setParallelism(1);
+        context.execute();
+    }
 
-		public IdlingSource(int numSplits) {
-			super(Boundedness.BOUNDED, numSplits, true, true);
-		}
+    private static class IdlingSource extends MockSource {
+        private static CompletableFuture<Void> canFinish = new CompletableFuture<>();
 
-		@Override
-		public SourceReader<Integer, MockSourceSplit> createReader(
-				SourceReaderContext readerContext) {
-			return new MockSourceReader(true, true) {
-				@Override
-				public InputStatus pollNext(ReaderOutput<Integer> sourceOutput) {
-					if (canFinish.isDone() && !canFinish.isCompletedExceptionally()) {
-						return InputStatus.END_OF_INPUT;
-					} else {
-						return InputStatus.NOTHING_AVAILABLE;
-					}
-				}
+        public IdlingSource(int numSplits) {
+            super(Boundedness.BOUNDED, numSplits, true, true);
+        }
 
-				@Override
-				public synchronized CompletableFuture<Void> isAvailable() {
-					return canFinish;
-				}
-			};
-		}
-	}
+        public static void signalCanFinish() {
+            canFinish.complete(null);
+        }
 
-	private static class SinkClosingIdlingSource implements SinkFunction<Long> {
-		private int recordsSoFar = 0;
+        public static void reset() {
+            canFinish.completeExceptionally(new IllegalStateException("State has been reset"));
+            canFinish = new CompletableFuture<>();
+        }
 
-		@Override
-		public void invoke(Long value) {
-			if (++recordsSoFar >= RECORDS_PER_INVOCATION) {
-				IdlingSource.signalCanFinish();
-			}
-		}
-	}
+        @Override
+        public SourceReader<Integer, MockSourceSplit> createReader(
+                SourceReaderContext readerContext) {
+            return new MockSourceReader(true, true) {
+                @Override
+                public InputStatus pollNext(ReaderOutput<Integer> sourceOutput) {
+                    if (canFinish.isDone() && !canFinish.isCompletedExceptionally()) {
+                        return InputStatus.END_OF_INPUT;
+                    } else {
+                        return InputStatus.NOTHING_AVAILABLE;
+                    }
+                }
 
-	private static void connectAndDiscard(
-			StreamExecutionEnvironment env,
-			DataStream<?> source1,
-			DataStream<?> source2) {
-		MultipleInputTransformation<Long> transform = new MultipleInputTransformation<>(
-				"custom operator",
-				new MultiplyByTwoOperatorFactory(),
-				BasicTypeInfo.LONG_TYPE_INFO,
-				1);
+                @Override
+                public synchronized CompletableFuture<Void> isAvailable() {
+                    return canFinish;
+                }
+            };
+        }
+    }
 
-		transform.addInput(source1.getTransformation());
-		transform.addInput(source2.getTransformation());
+    private static class SinkClosingIdlingSource implements SinkFunction<Long> {
+        private int recordsSoFar = 0;
 
-		env.addOperator(transform);
-		new MultipleConnectedStreams(env)
-				.transform(transform)
-				.addSink(new DiscardingSink<>());
-	}
+        @Override
+        public void invoke(Long value) {
+            if (++recordsSoFar >= RECORDS_PER_INVOCATION) {
+                IdlingSource.signalCanFinish();
+            }
+        }
+    }
 }

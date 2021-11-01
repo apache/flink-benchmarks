@@ -39,53 +39,57 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 @OperationsPerInvocation(value = WindowBenchmarks.RECORDS_PER_INVOCATION)
 public class WindowBenchmarks extends BenchmarkBase {
 
-	public static final int RECORDS_PER_INVOCATION = 7_000_000;
+    public static final int RECORDS_PER_INVOCATION = 7_000_000;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + WindowBenchmarks.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + WindowBenchmarks.class.getCanonicalName() + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	public void globalWindow(TimeWindowContext context) throws Exception {
-		IntLongApplications.reduceWithWindow(context.source, GlobalWindows.create());
-		context.execute();
-	}
+    @Benchmark
+    public void globalWindow(TimeWindowContext context) throws Exception {
+        IntLongApplications.reduceWithWindow(context.source, GlobalWindows.create());
+        context.execute();
+    }
 
-	@Benchmark
-	public void tumblingWindow(TimeWindowContext context) throws Exception {
-		IntLongApplications.reduceWithWindow(context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
-		context.execute();
-	}
+    @Benchmark
+    public void tumblingWindow(TimeWindowContext context) throws Exception {
+        IntLongApplications.reduceWithWindow(
+                context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
+        context.execute();
+    }
 
-	@Benchmark
-	public void slidingWindow(TimeWindowContext context) throws Exception {
-		IntLongApplications.reduceWithWindow(context.source, SlidingEventTimeWindows.of(Time.seconds(10_000), Time.seconds(1000)));
-		context.execute();
-	}
+    @Benchmark
+    public void slidingWindow(TimeWindowContext context) throws Exception {
+        IntLongApplications.reduceWithWindow(
+                context.source,
+                SlidingEventTimeWindows.of(Time.seconds(10_000), Time.seconds(1000)));
+        context.execute();
+    }
 
-	@Benchmark
-	public void sessionWindow(TimeWindowContext context) throws Exception {
-		IntLongApplications.reduceWithWindow(context.source, EventTimeSessionWindows.withGap(Time.seconds(500)));
-		context.execute();
-	}
+    @Benchmark
+    public void sessionWindow(TimeWindowContext context) throws Exception {
+        IntLongApplications.reduceWithWindow(
+                context.source, EventTimeSessionWindows.withGap(Time.seconds(500)));
+        context.execute();
+    }
 
-	public static class TimeWindowContext extends FlinkEnvironmentContext {
-		public final int numberOfElements = 1000;
+    public static class TimeWindowContext extends FlinkEnvironmentContext {
+        public final int numberOfElements = 1000;
 
-		public DataStreamSource<IntegerLongSource.Record> source;
+        public DataStreamSource<IntegerLongSource.Record> source;
 
-		@Override
-		public void setUp() throws Exception {
-			super.setUp();
+        @Override
+        public void setUp() throws Exception {
+            super.setUp();
 
-			env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-			source = env.addSource(new IntegerLongSource(numberOfElements, RECORDS_PER_INVOCATION));
-		}
-	}
+            env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+            source = env.addSource(new IntegerLongSource(numberOfElements, RECORDS_PER_INVOCATION));
+        }
+    }
 }

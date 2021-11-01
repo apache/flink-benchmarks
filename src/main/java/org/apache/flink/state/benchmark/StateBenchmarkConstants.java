@@ -36,6 +36,12 @@ class StateBenchmarkConstants {
     static final String dbDirName = "dbPath";
 
     static final ArrayList<Long> mapKeys = new ArrayList<>(mapKeyCount);
+    static final ArrayList<Double> mapValues = new ArrayList<>(mapKeyCount);
+    static final ArrayList<Long> setupKeys = new ArrayList<>(setupKeyCount);
+    static final int newKeyCount = 500_000;
+    static final ArrayList<Long> newKeys = new ArrayList<>(newKeyCount);
+    static final int randomValueCount = 1_000_000;
+    static final ArrayList<Long> randomValues = new ArrayList<>(randomValueCount);
 
     static {
         for (int i = 0; i < mapKeyCount; i++) {
@@ -43,8 +49,6 @@ class StateBenchmarkConstants {
         }
         Collections.shuffle(mapKeys);
     }
-
-    static final ArrayList<Double> mapValues = new ArrayList<>(mapKeyCount);
 
     static {
         Random random = new Random();
@@ -54,8 +58,6 @@ class StateBenchmarkConstants {
         Collections.shuffle(mapValues);
     }
 
-    static final ArrayList<Long> setupKeys = new ArrayList<>(setupKeyCount);
-
     static {
         for (long i = 0; i < setupKeyCount; i++) {
             setupKeys.add(i);
@@ -63,18 +65,12 @@ class StateBenchmarkConstants {
         Collections.shuffle(setupKeys);
     }
 
-    static final int newKeyCount = 500_000;
-    static final ArrayList<Long> newKeys = new ArrayList<>(newKeyCount);
-
     static {
         for (long i = 0; i < newKeyCount; i++) {
             newKeys.add(i + setupKeyCount);
         }
         Collections.shuffle(newKeys);
     }
-
-    static final int randomValueCount = 1_000_000;
-    static final ArrayList<Long> randomValues = new ArrayList<>(randomValueCount);
 
     static {
         for (long i = 0; i < randomValueCount; i++) {
