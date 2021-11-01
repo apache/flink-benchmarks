@@ -48,20 +48,16 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
         new Runner(options).run();
     }
 
-    @Override
-    public int getNumberOfVertexes() {
-        return NUM_VERTICES;
-    }
-
     @Benchmark
     public void remoteFilePartition(BlockingPartitionEnvironmentContext context) throws Exception {
         StreamGraph streamGraph =
                 StreamGraphUtils.buildGraphForBatchJob(context.env, RECORDS_PER_INVOCATION);
-        miniCluster.executeJobBlocking(StreamingJobGraphGenerator.createJobGraph(streamGraph));
+        context.miniCluster.executeJobBlocking(
+                StreamingJobGraphGenerator.createJobGraph(streamGraph));
     }
 
     /** Environment context for specific file based bounded blocking partition. */
-    public static class BlockingPartitionEnvironmentContext extends FlinkEnvironmentContext {
+    public static class BlockingPartitionEnvironmentContext extends RemoteBenchmarkContext {
 
         @Override
         public void setUp() throws Exception {
@@ -81,6 +77,11 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
                     CoreOptions.TMP_DIRS,
                     FileUtils.getCurrentWorkingDirectory().toAbsolutePath().toString());
             return configuration;
+        }
+
+        @Override
+        protected int getNumberOfVertices() {
+            return NUM_VERTICES;
         }
     }
 }

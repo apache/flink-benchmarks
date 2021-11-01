@@ -57,11 +57,6 @@ public class RemoteChannelThroughputBenchmark extends RemoteBenchmarkBase {
         new Runner(options).run();
     }
 
-    @Override
-    public int getNumberOfVertexes() {
-        return NUM_VERTICES;
-    }
-
     @Benchmark
     public void remoteRebalance(RemoteChannelThroughputBenchmarkContext context) throws Exception {
         StreamExecutionEnvironment env = context.env;
@@ -78,12 +73,12 @@ public class RemoteChannelThroughputBenchmark extends RemoteBenchmarkBase {
                 .addSink(new DiscardingSink<>())
                 .slotSharingGroup("sink");
 
-        miniCluster.executeJobBlocking(
+        context.miniCluster.executeJobBlocking(
                 StreamingJobGraphGenerator.createJobGraph(env.getStreamGraph()));
     }
 
     @State(Scope.Thread)
-    public static class RemoteChannelThroughputBenchmarkContext extends FlinkEnvironmentContext {
+    public static class RemoteChannelThroughputBenchmarkContext extends RemoteBenchmarkContext {
         @Param({ALIGNED, UNALIGNED, DEBLOAT})
         public String mode = ALIGNED;
 
@@ -94,6 +89,11 @@ public class RemoteChannelThroughputBenchmark extends RemoteBenchmarkBase {
                 configuration.setBoolean(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, true);
             }
             return configuration;
+        }
+
+        @Override
+        protected int getNumberOfVertices() {
+            return NUM_VERTICES;
         }
     }
 }
