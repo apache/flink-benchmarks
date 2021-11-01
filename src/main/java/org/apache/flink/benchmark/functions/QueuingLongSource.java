@@ -20,34 +20,34 @@ package org.apache.flink.benchmark.functions;
 
 public class QueuingLongSource extends LongSource {
 
-	private static Object lock = new Object();
+    private static Object lock = new Object();
 
-	private static int currentRank = 1;
+    private static int currentRank = 1;
 
-	private final int rank;
+    private final int rank;
 
-	public QueuingLongSource(int rank, long maxValue) {
-		super(maxValue);
-		this.rank = rank;
-	}
+    public QueuingLongSource(int rank, long maxValue) {
+        super(maxValue);
+        this.rank = rank;
+    }
 
-	@Override
-	public void run(SourceContext<Long> ctx) throws Exception {
-		synchronized (lock) {
-			while (currentRank != rank) {
-				lock.wait();
-			}
-		}
+    public static void reset() {
+        currentRank = 1;
+    }
 
-		super.run(ctx);
+    @Override
+    public void run(SourceContext<Long> ctx) throws Exception {
+        synchronized (lock) {
+            while (currentRank != rank) {
+                lock.wait();
+            }
+        }
 
-		synchronized (lock) {
-			currentRank++;
-			lock.notifyAll();
-		}
-	}
+        super.run(ctx);
 
-	public static void reset() {
-		currentRank = 1;
-	}
+        synchronized (lock) {
+            currentRank++;
+            lock.notifyAll();
+        }
+    }
 }

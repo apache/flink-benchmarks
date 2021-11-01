@@ -25,32 +25,33 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.util.function.BiFunction;
 
-/**
- * Enum based factory for different Long sources.
- */
+/** Enum based factory for different Long sources. */
 public enum LongSourceType {
-	LEGACY((env, maxValue) -> {
-		return env.addSource(new LongSource(maxValue));
-	}),
-	F27_BOUNDED((env, maxValue) -> {
-		return env.fromSource(
-				new LongNewSource(Boundedness.BOUNDED, maxValue),
-				WatermarkStrategy.noWatermarks(),
-				"NewLongSource");
-	}),
-	F27_UNBOUNDED((env, maxValue) -> {
-		return env.fromSource(
-				new LongNewSource(Boundedness.CONTINUOUS_UNBOUNDED, maxValue),
-				WatermarkStrategy.noWatermarks(),
-				"NewLongSource");
-	});
-	private final BiFunction<StreamExecutionEnvironment, Long, DataStreamSource<Long>> factory;
+    LEGACY(
+            (env, maxValue) -> {
+                return env.addSource(new LongSource(maxValue));
+            }),
+    F27_BOUNDED(
+            (env, maxValue) -> {
+                return env.fromSource(
+                        new LongNewSource(Boundedness.BOUNDED, maxValue),
+                        WatermarkStrategy.noWatermarks(),
+                        "NewLongSource");
+            }),
+    F27_UNBOUNDED(
+            (env, maxValue) -> {
+                return env.fromSource(
+                        new LongNewSource(Boundedness.CONTINUOUS_UNBOUNDED, maxValue),
+                        WatermarkStrategy.noWatermarks(),
+                        "NewLongSource");
+            });
+    private final BiFunction<StreamExecutionEnvironment, Long, DataStreamSource<Long>> factory;
 
-	LongSourceType(BiFunction<StreamExecutionEnvironment, Long, DataStreamSource<Long>> factory) {
-		this.factory = factory;
-	}
+    LongSourceType(BiFunction<StreamExecutionEnvironment, Long, DataStreamSource<Long>> factory) {
+        this.factory = factory;
+    }
 
-	public DataStreamSource<Long> source(StreamExecutionEnvironment environment, long maxValue) {
-		return factory.apply(environment, maxValue);
-	}
+    public DataStreamSource<Long> source(StreamExecutionEnvironment environment, long maxValue) {
+        return factory.apply(environment, maxValue);
+    }
 };

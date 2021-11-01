@@ -32,34 +32,32 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
 
-/**
- * The benchmark of creating the scheduler in a STREAMING/BATCH job.
- */
+/** The benchmark of creating the scheduler in a STREAMING/BATCH job. */
 public class CreateSchedulerBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
-	@Param({"BATCH", "STREAMING"})
-	private JobConfiguration jobConfiguration;
+    @Param({"BATCH", "STREAMING"})
+    private JobConfiguration jobConfiguration;
 
-	private CreateSchedulerBenchmark benchmark;
+    private CreateSchedulerBenchmark benchmark;
 
-	public static void main(String[] args) throws RunnerException {
-		runBenchmark(CreateSchedulerBenchmarkExecutor.class);
-	}
+    public static void main(String[] args) throws RunnerException {
+        runBenchmark(CreateSchedulerBenchmarkExecutor.class);
+    }
 
-	@Setup(Level.Trial)
-	public void setup() throws Exception {
-		benchmark = new CreateSchedulerBenchmark();
-		benchmark.setup(jobConfiguration);
-	}
+    @Setup(Level.Trial)
+    public void setup() throws Exception {
+        benchmark = new CreateSchedulerBenchmark();
+        benchmark.setup(jobConfiguration);
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.SingleShotTime)
-	public void createScheduler(Blackhole blackhole) throws Exception {
-		blackhole.consume(benchmark.createScheduler());
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.SingleShotTime)
+    public void createScheduler(Blackhole blackhole) throws Exception {
+        blackhole.consume(benchmark.createScheduler());
+    }
 
-	@TearDown(Level.Trial)
-	public void teardown() {
-		benchmark.teardown();
-	}
+    @TearDown(Level.Trial)
+    public void teardown() {
+        benchmark.teardown();
+    }
 }

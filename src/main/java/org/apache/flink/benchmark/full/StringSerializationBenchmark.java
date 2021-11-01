@@ -52,32 +52,33 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class StringSerializationBenchmark extends BenchmarkBase {
 
-    public static void main(String[] args)
-            throws RunnerException {
-        Options options = new OptionsBuilder()
-                .verbosity(VerboseMode.NORMAL)
-                .include(".*" + StringSerializationBenchmark.class.getCanonicalName() + ".*")
-                .build();
-
-        new Runner(options).run();
-    }
-
+    public static final char[] asciiChars =
+            "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890".toCharArray();
+    public static final char[] russianChars =
+            "йцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ".toCharArray();
+    public static final char[] chineseChars =
+            "的是不了人我在有他这为之大来以个中上们到国说和地也子要时道出而于就下得可你年生".toCharArray();
     @Param({"ascii", "russian", "chinese"})
     public String type;
-
     @Param({"4", "128", "16384"})
     public String lengthStr;
-
     int length;
     String input;
-    public static final char[] asciiChars = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890".toCharArray();
-    public static final char[] russianChars = "йцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ".toCharArray();
-    public static final char[] chineseChars = "的是不了人我在有他这为之大来以个中上们到国说和地也子要时道出而于就下得可你年生".toCharArray();
-
     ExecutionConfig config = new ExecutionConfig();
     TypeSerializer<String> serializer = TypeInformation.of(String.class).createSerializer(config);
     ByteArrayInputStream serializedBuffer;
     DataInputView serializedStream;
+
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(
+                                ".*" + StringSerializationBenchmark.class.getCanonicalName() + ".*")
+                        .build();
+
+        new Runner(options).run();
+    }
 
     @Setup
     public void setup() throws IOException {
@@ -117,10 +118,9 @@ public class StringSerializationBenchmark extends BenchmarkBase {
     private String generate(char[] charset, int length) {
         char[] buffer = new char[length];
         Random random = new Random();
-        for (int i=0; i<length; i++) {
+        for (int i = 0; i < length; i++) {
             buffer[i] = charset[random.nextInt(charset.length)];
         }
         return new String(buffer);
     }
-
 }

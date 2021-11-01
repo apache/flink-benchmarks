@@ -33,46 +33,47 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
-/**
- * JMH throughput benchmark runner for data skew scenario.
- */
-@OperationsPerInvocation(value = DataSkewStreamNetworkThroughputBenchmarkExecutor.RECORDS_PER_INVOCATION)
+/** JMH throughput benchmark runner for data skew scenario. */
+@OperationsPerInvocation(
+        value = DataSkewStreamNetworkThroughputBenchmarkExecutor.RECORDS_PER_INVOCATION)
 public class DataSkewStreamNetworkThroughputBenchmarkExecutor extends BenchmarkBase {
 
-	static final int RECORDS_PER_INVOCATION = 5_000_000;
+    static final int RECORDS_PER_INVOCATION = 5_000_000;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + DataSkewStreamNetworkThroughputBenchmarkExecutor.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(
+                                ".*"
+                                        + DataSkewStreamNetworkThroughputBenchmarkExecutor.class
+                                                .getCanonicalName()
+                                        + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	public void networkSkewedThroughput(MultiEnvironment context) throws Exception {
-		context.executeBenchmark(RECORDS_PER_INVOCATION);
-	}
+    @Benchmark
+    public void networkSkewedThroughput(MultiEnvironment context) throws Exception {
+        context.executeBenchmark(RECORDS_PER_INVOCATION);
+    }
 
-	/**
-	 * Setup for the benchmark(s).
-	 */
-	@State(Thread)
-	public static class MultiEnvironment extends DataSkewStreamNetworkThroughputBenchmark {
-		// 1ms buffer timeout
-		private final int flushTimeout = 1;
+    /** Setup for the benchmark(s). */
+    @State(Thread)
+    public static class MultiEnvironment extends DataSkewStreamNetworkThroughputBenchmark {
+        // 1ms buffer timeout
+        private final int flushTimeout = 1;
 
-		// 1000 num of channels (subpartitions)
-		private final int channels = 1000;
+        // 1000 num of channels (subpartitions)
+        private final int channels = 1000;
 
-		// 10 writer threads, to increase the load on the machine
-		private final int writers = 10;
+        // 10 writer threads, to increase the load on the machine
+        private final int writers = 10;
 
-		@Setup
-		public void setUp() throws Exception {
-			setUp(writers, channels, flushTimeout, false, false, -1, -1, new Configuration());
-		}
-	}
+        @Setup
+        public void setUp() throws Exception {
+            setUp(writers, channels, flushTimeout, false, false, -1, -1, new Configuration());
+        }
+    }
 }

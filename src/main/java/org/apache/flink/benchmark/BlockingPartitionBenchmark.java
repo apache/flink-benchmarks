@@ -33,93 +33,101 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-/**
- * JMH throughput benchmark runner.
- */
+/** JMH throughput benchmark runner. */
 @OperationsPerInvocation(value = BlockingPartitionBenchmark.RECORDS_PER_INVOCATION)
 public class BlockingPartitionBenchmark extends BenchmarkBase {
 
-	public static final int RECORDS_PER_INVOCATION = 15_000_000;
+    public static final int RECORDS_PER_INVOCATION = 15_000_000;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + BlockingPartitionBenchmark.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + BlockingPartitionBenchmark.class.getCanonicalName() + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	public void uncompressedFilePartition(UncompressedFileEnvironmentContext context) throws Exception {
-		executeBenchmark(context.env);
-	}
+    @Benchmark
+    public void uncompressedFilePartition(UncompressedFileEnvironmentContext context)
+            throws Exception {
+        executeBenchmark(context.env);
+    }
 
-	@Benchmark
-	public void compressedFilePartition(CompressedFileEnvironmentContext context) throws Exception {
-		executeBenchmark(context.env);
-	}
+    @Benchmark
+    public void compressedFilePartition(CompressedFileEnvironmentContext context) throws Exception {
+        executeBenchmark(context.env);
+    }
 
-	@Benchmark
-	public void uncompressedMmapPartition(UncompressedMmapEnvironmentContext context) throws Exception {
-		executeBenchmark(context.env);
-	}
+    @Benchmark
+    public void uncompressedMmapPartition(UncompressedMmapEnvironmentContext context)
+            throws Exception {
+        executeBenchmark(context.env);
+    }
 
-	private void executeBenchmark(StreamExecutionEnvironment env) throws Exception {
-		StreamGraph streamGraph = StreamGraphUtils.buildGraphForBatchJob(env, RECORDS_PER_INVOCATION);
-		env.execute(streamGraph);
-	}
+    private void executeBenchmark(StreamExecutionEnvironment env) throws Exception {
+        StreamGraph streamGraph =
+                StreamGraphUtils.buildGraphForBatchJob(env, RECORDS_PER_INVOCATION);
+        env.execute(streamGraph);
+    }
 
-	/**
-	 * Setup for the benchmark(s).
-	 */
-	public static class BlockingPartitionEnvironmentContext extends FlinkEnvironmentContext {
+    /** Setup for the benchmark(s). */
+    public static class BlockingPartitionEnvironmentContext extends FlinkEnvironmentContext {
 
-		/**
-		 * Parallelism of 1 causes the reads/writes to be always sequential and only covers the case
-		 * of one reader. More parallelism should be more suitable for finding performance regressions
-		 * of the code. Considering that the benchmarking machine has 4 CPU cores, we set the parallelism
-		 * to 4.
-		 */
-		private final int parallelism = 4;
+        /**
+         * Parallelism of 1 causes the reads/writes to be always sequential and only covers the case
+         * of one reader. More parallelism should be more suitable for finding performance
+         * regressions of the code. Considering that the benchmarking machine has 4 CPU cores, we
+         * set the parallelism to 4.
+         */
+        private final int parallelism = 4;
 
-		@Override
-		public void setUp() throws Exception {
-			super.setUp();
+        @Override
+        public void setUp() throws Exception {
+            super.setUp();
 
-			env.setParallelism(parallelism);
-			env.setBufferTimeout(-1);
-		}
+            env.setParallelism(parallelism);
+            env.setBufferTimeout(-1);
+        }
 
-		protected Configuration createConfiguration(boolean compressionEnabled, String subpartitionType) {
-			Configuration configuration = super.createConfiguration();
+        protected Configuration createConfiguration(
+                boolean compressionEnabled, String subpartitionType) {
+            Configuration configuration = super.createConfiguration();
 
-			configuration.setBoolean(NettyShuffleEnvironmentOptions.BLOCKING_SHUFFLE_COMPRESSION_ENABLED, compressionEnabled);
-			configuration.setString(NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, subpartitionType);
-			configuration.setString(CoreOptions.TMP_DIRS, FileUtils.getCurrentWorkingDirectory().toAbsolutePath().toString());
-			return configuration;
-		}
-	}
+            configuration.setBoolean(
+                    NettyShuffleEnvironmentOptions.BLOCKING_SHUFFLE_COMPRESSION_ENABLED,
+                    compressionEnabled);
+            configuration.setString(
+                    NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, subpartitionType);
+            configuration.setString(
+                    CoreOptions.TMP_DIRS,
+                    FileUtils.getCurrentWorkingDirectory().toAbsolutePath().toString());
+            return configuration;
+        }
+    }
 
-	public static class UncompressedFileEnvironmentContext extends BlockingPartitionEnvironmentContext {
-		@Override
-		protected Configuration createConfiguration() {
-			return createConfiguration(false, "file");
-		}
-	}
+    public static class UncompressedFileEnvironmentContext
+            extends BlockingPartitionEnvironmentContext {
+        @Override
+        protected Configuration createConfiguration() {
+            return createConfiguration(false, "file");
+        }
+    }
 
-	public static class CompressedFileEnvironmentContext extends BlockingPartitionEnvironmentContext {
-		@Override
-		protected Configuration createConfiguration() {
-			return createConfiguration(true, "file");
-		}
-	}
+    public static class CompressedFileEnvironmentContext
+            extends BlockingPartitionEnvironmentContext {
+        @Override
+        protected Configuration createConfiguration() {
+            return createConfiguration(true, "file");
+        }
+    }
 
-	public static class UncompressedMmapEnvironmentContext extends BlockingPartitionEnvironmentContext {
-		@Override
-		protected Configuration createConfiguration() {
-			return createConfiguration(false, "mmap");
-		}
-	}
+    public static class UncompressedMmapEnvironmentContext
+            extends BlockingPartitionEnvironmentContext {
+        @Override
+        protected Configuration createConfiguration() {
+            return createConfiguration(false, "mmap");
+        }
+    }
 }

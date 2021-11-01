@@ -31,34 +31,33 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.RunnerException;
 
-/**
- * The benchmark of scheduling downstream task in a BATCH job.
- */
-public class SchedulingDownstreamTasksInBatchJobBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
+/** The benchmark of scheduling downstream task in a BATCH job. */
+public class SchedulingDownstreamTasksInBatchJobBenchmarkExecutor
+        extends SchedulerBenchmarkExecutorBase {
 
-	@Param({"BATCH"})
-	private JobConfiguration jobConfiguration;
+    @Param({"BATCH"})
+    private JobConfiguration jobConfiguration;
 
-	private SchedulingDownstreamTasksInBatchJobBenchmark benchmark;
+    private SchedulingDownstreamTasksInBatchJobBenchmark benchmark;
 
-	public static void main(String[] args) throws RunnerException {
-		runBenchmark(SchedulingDownstreamTasksInBatchJobBenchmarkExecutor.class);
-	}
+    public static void main(String[] args) throws RunnerException {
+        runBenchmark(SchedulingDownstreamTasksInBatchJobBenchmarkExecutor.class);
+    }
 
-	@Setup(Level.Trial)
-	public void setup() throws Exception {
-		benchmark = new SchedulingDownstreamTasksInBatchJobBenchmark();
-		benchmark.setup(jobConfiguration);
-	}
+    @Setup(Level.Trial)
+    public void setup() throws Exception {
+        benchmark = new SchedulingDownstreamTasksInBatchJobBenchmark();
+        benchmark.setup(jobConfiguration);
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.SingleShotTime)
-	public void schedulingDownstreamTasks() {
-		benchmark.schedulingDownstreamTasks();
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.SingleShotTime)
+    public void schedulingDownstreamTasks() {
+        benchmark.schedulingDownstreamTasks();
+    }
 
-	@TearDown(Level.Trial)
-	public void teardown() {
-		benchmark.teardown();
-	}
+    @TearDown(Level.Trial)
+    public void teardown() {
+        benchmark.teardown();
+    }
 }

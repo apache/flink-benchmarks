@@ -44,72 +44,65 @@ import java.util.concurrent.TimeUnit;
 
 @OperationsPerInvocation(value = AsyncWaitOperatorBenchmark.RECORDS_PER_INVOCATION)
 public class AsyncWaitOperatorBenchmark extends BenchmarkBase {
-	public static final int RECORDS_PER_INVOCATION = 1_000_000;
+    public static final int RECORDS_PER_INVOCATION = 1_000_000;
 
-	private static final long CHECKPOINT_INTERVAL_MS = 100;
+    private static final long CHECKPOINT_INTERVAL_MS = 100;
 
-	private static ExecutorService executor;
+    private static ExecutorService executor;
 
-	@Param
-	public AsyncDataStream.OutputMode outputMode;
+    @Param public AsyncDataStream.OutputMode outputMode;
 
-	public static void main(String[] args)
-		throws RunnerException {
-		Options options = new OptionsBuilder()
-			.verbosity(VerboseMode.NORMAL)
-			.include(".*" + AsyncWaitOperatorBenchmark.class.getCanonicalName() + ".*")
-			.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + AsyncWaitOperatorBenchmark.class.getCanonicalName() + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Setup
-	public void setUp() {
-		executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-	}
+    @Setup
+    public void setUp() {
+        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    }
 
-	@TearDown
-	public void tearDown() {
-		executor.shutdown();
-	}
+    @TearDown
+    public void tearDown() {
+        executor.shutdown();
+    }
 
-	@Benchmark
-	public void asyncWait(FlinkEnvironmentContext context) throws Exception {
+    @Benchmark
+    public void asyncWait(FlinkEnvironmentContext context) throws Exception {
 
-		StreamExecutionEnvironment env = context.env;
-		env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
-		env.setParallelism(1);
+        StreamExecutionEnvironment env = context.env;
+        env.enableCheckpointing(CHECKPOINT_INTERVAL_MS);
+        env.setParallelism(1);
 
-		DataStreamSource<Long> source = env.addSource(new LongSource(RECORDS_PER_INVOCATION));
-		DataStream<Long> result = createAsyncOperator(source);
-		result.addSink(new DiscardingSink<>());
+        DataStreamSource<Long> source = env.addSource(new LongSource(RECORDS_PER_INVOCATION));
+        DataStream<Long> result = createAsyncOperator(source);
+        result.addSink(new DiscardingSink<>());
 
-		env.execute();
-	}
+        env.execute();
+    }
 
-	private DataStream<Long> createAsyncOperator(DataStreamSource<Long> source) {
-		switch (outputMode) {
-			case ORDERED:
-				return AsyncDataStream.orderedWait(
-						source,
-						new BenchmarkAsyncFunctionExecutor(),
-						0,
-						TimeUnit.MILLISECONDS);
-			case UNORDERED:
-				return AsyncDataStream.unorderedWait(
-						source,
-						new BenchmarkAsyncFunctionExecutor(),
-						0,
-						TimeUnit.MILLISECONDS);
-			default:
-				throw new UnsupportedOperationException("Unknown mode");
-		}
-	}
+    private DataStream<Long> createAsyncOperator(DataStreamSource<Long> source) {
+        switch (outputMode) {
+            case ORDERED:
+                return AsyncDataStream.orderedWait(
+                        source, new BenchmarkAsyncFunctionExecutor(), 0, TimeUnit.MILLISECONDS);
+            case UNORDERED:
+                return AsyncDataStream.unorderedWait(
+                        source, new BenchmarkAsyncFunctionExecutor(), 0, TimeUnit.MILLISECONDS);
+            default:
+                throw new UnsupportedOperationException("Unknown mode");
+        }
+    }
 
-	private static class BenchmarkAsyncFunctionExecutor extends RichAsyncFunction<Long, Long> {
-		@Override
-		public void asyncInvoke(Long input, ResultFuture<Long> resultFuture) {
-			executor.execute(() -> resultFuture.complete(Collections.singleton(input * 2)));
-		}
-	}
+    private static class BenchmarkAsyncFunctionExecutor extends RichAsyncFunction<Long, Long> {
+        @Override
+        public void asyncInvoke(Long input, ResultFuture<Long> resultFuture) {
+            executor.execute(() -> resultFuture.complete(Collections.singleton(input * 2)));
+        }
+    }
 }

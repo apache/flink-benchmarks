@@ -36,32 +36,33 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
 
 @OperationsPerInvocation(value = MemoryStateBackendBenchmark.RECORDS_PER_INVOCATION)
 public class MemoryStateBackendBenchmark extends StateBackendBenchmarkBase {
-	public static final int RECORDS_PER_INVOCATION = 7_000_000;
+    public static final int RECORDS_PER_INVOCATION = 7_000_000;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + MemoryStateBackendBenchmark.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + MemoryStateBackendBenchmark.class.getCanonicalName() + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	public void stateBackends(MemoryStateBackendContext context) throws Exception {
-		IntLongApplications.reduceWithWindow(context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
-		context.execute();
-	}
+    @Benchmark
+    public void stateBackends(MemoryStateBackendContext context) throws Exception {
+        IntLongApplications.reduceWithWindow(
+                context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
+        context.execute();
+    }
 
-	@State(Thread)
-	public static class MemoryStateBackendContext extends StateBackendContext {
-		@Param({"MEMORY", "FS", "FS_ASYNC"})
-		public StateBackend stateBackend = StateBackend.MEMORY;
+    @State(Thread)
+    public static class MemoryStateBackendContext extends StateBackendContext {
+        @Param({"MEMORY", "FS", "FS_ASYNC"})
+        public StateBackend stateBackend = StateBackend.MEMORY;
 
-		@Override
-		public void setUp() throws Exception {
-			super.setUp(stateBackend, RECORDS_PER_INVOCATION);
-		}
-	}
+        @Override
+        public void setUp() throws Exception {
+            super.setUp(stateBackend, RECORDS_PER_INVOCATION);
+        }
+    }
 }

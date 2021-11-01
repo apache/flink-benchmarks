@@ -32,27 +32,28 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * The base class of all benchmarks related to the scheduler.
- */
+/** The base class of all benchmarks related to the scheduler. */
 @SuppressWarnings("MethodMayBeStatic")
 @State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
-@Fork(value = 6, jvmArgsAppend = {
-		"-Djava.rmi.server.hostname=127.0.0.1",
-		"-Dcom.sun.management.jmxremote.authenticate=false",
-		"-Dcom.sun.management.jmxremote.ssl=false",
-		"-Dcom.sun.management.jmxremote.ssl"
-})
+@Fork(
+        value = 6,
+        jvmArgsAppend = {
+            "-Djava.rmi.server.hostname=127.0.0.1",
+            "-Dcom.sun.management.jmxremote.authenticate=false",
+            "-Dcom.sun.management.jmxremote.ssl=false",
+            "-Dcom.sun.management.jmxremote.ssl"
+        })
 public class SchedulerBenchmarkExecutorBase {
 
-	public static void runBenchmark(Class<?> clazz) throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + clazz.getCanonicalName() + ".*")
-				.build();
+    public static void runBenchmark(Class<?> clazz) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + clazz.getCanonicalName() + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 }

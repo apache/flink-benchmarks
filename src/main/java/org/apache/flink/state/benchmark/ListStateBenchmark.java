@@ -44,20 +44,20 @@ import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBen
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.listValueCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
 
-/**
- * Implementation for list state benchmark testing.
- */
+/** Implementation for list state benchmark testing. */
 public class ListStateBenchmark extends StateBenchmarkBase {
     private final String STATE_NAME = "listState";
-    private final ListStateDescriptor<Long> STATE_DESC = new ListStateDescriptor<>(STATE_NAME, Long.class);
+    private final ListStateDescriptor<Long> STATE_DESC =
+            new ListStateDescriptor<>(STATE_NAME, Long.class);
     private ListState<Long> listState;
     private List<Long> dummyLists;
 
     public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .verbosity(VerboseMode.NORMAL)
-                .include(".*" + ListStateBenchmark.class.getCanonicalName() + ".*")
-                .build();
+        Options opt =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + ListStateBenchmark.class.getCanonicalName() + ".*")
+                        .build();
 
         new Runner(opt).run();
     }
@@ -83,7 +83,8 @@ public class ListStateBenchmark extends StateBenchmarkBase {
         // to prevent the spike caused by different key distribution in multiple sst files,
         // the more access to the older sst file, the lower throughput will be.
         if (keyedStateBackend instanceof RocksDBKeyedStateBackend) {
-            RocksDBKeyedStateBackend<Long> rocksDBKeyedStateBackend = (RocksDBKeyedStateBackend<Long>) keyedStateBackend;
+            RocksDBKeyedStateBackend<Long> rocksDBKeyedStateBackend =
+                    (RocksDBKeyedStateBackend<Long>) keyedStateBackend;
             compactState(rocksDBKeyedStateBackend, STATE_DESC);
         }
     }
@@ -99,7 +100,8 @@ public class ListStateBenchmark extends StateBenchmarkBase {
                 });
         // make the clearance effective, trigger compaction for RocksDB, and GC for heap.
         if (keyedStateBackend instanceof RocksDBKeyedStateBackend) {
-            RocksDBKeyedStateBackend<Long> rocksDBKeyedStateBackend = (RocksDBKeyedStateBackend<Long>) keyedStateBackend;
+            RocksDBKeyedStateBackend<Long> rocksDBKeyedStateBackend =
+                    (RocksDBKeyedStateBackend<Long>) keyedStateBackend;
             compactState(rocksDBKeyedStateBackend, STATE_DESC);
         } else {
             System.gc();

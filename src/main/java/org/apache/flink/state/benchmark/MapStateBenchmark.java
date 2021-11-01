@@ -42,18 +42,17 @@ import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeyCou
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeys;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
 
-/**
- * Implementation for map state benchmark testing.
- */
+/** Implementation for map state benchmark testing. */
 public class MapStateBenchmark extends StateBenchmarkBase {
     private MapState<Long, Double> mapState;
     private Map<Long, Double> dummyMaps;
 
     public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .verbosity(VerboseMode.NORMAL)
-                .include(".*" + MapStateBenchmark.class.getCanonicalName() + ".*")
-                .build();
+        Options opt =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(".*" + MapStateBenchmark.class.getCanonicalName() + ".*")
+                        .build();
 
         new Runner(opt).run();
     }
@@ -61,9 +60,10 @@ public class MapStateBenchmark extends StateBenchmarkBase {
     @Setup
     public void setUp() throws Exception {
         keyedStateBackend = createKeyedStateBackend(backendType);
-        mapState = getMapState(
-                keyedStateBackend,
-                new MapStateDescriptor<>("mapState", Long.class, Double.class));
+        mapState =
+                getMapState(
+                        keyedStateBackend,
+                        new MapStateDescriptor<>("mapState", Long.class, Double.class));
         dummyMaps = new HashMap<>(mapKeyCount);
         for (int i = 0; i < mapKeyCount; ++i) {
             dummyMaps.put(mapKeys.get(i), random.nextDouble());

@@ -39,90 +39,97 @@ import java.util.Arrays;
 import static org.apache.flink.util.Preconditions.checkArgument;
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
-/**
- * JMH throughput benchmark runner.
- */
+/** JMH throughput benchmark runner. */
 @OperationsPerInvocation(value = StreamNetworkThroughputBenchmarkExecutor.RECORDS_PER_INVOCATION)
 public class StreamNetworkThroughputBenchmarkExecutor extends BenchmarkBase {
 
-	static final int RECORDS_PER_INVOCATION = 5_000_000;
+    static final int RECORDS_PER_INVOCATION = 5_000_000;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + StreamNetworkThroughputBenchmarkExecutor.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(
+                                ".*"
+                                        + StreamNetworkThroughputBenchmarkExecutor.class
+                                                .getCanonicalName()
+                                        + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	public void networkThroughput(MultiEnvironment context) throws Exception {
-		context.executeBenchmark(RECORDS_PER_INVOCATION);
-	}
+    @Benchmark
+    public void networkThroughput(MultiEnvironment context) throws Exception {
+        context.executeBenchmark(RECORDS_PER_INVOCATION);
+    }
 
-	/**
-	 * Setup for the benchmark(s).
-	 */
-	@State(Thread)
-	public static class MultiEnvironment extends StreamNetworkThroughputBenchmark {
+    /** Setup for the benchmark(s). */
+    @State(Thread)
+    public static class MultiEnvironment extends StreamNetworkThroughputBenchmark {
 
-		@Param({"100,100ms", "100,100ms,SSL", "1000,1ms", "1000,100ms", "1000,100ms,SSL", "1000,100ms,OpenSSL"})
-		public String channelsFlushTimeout = "100,100ms";
+        @Param({
+            "100,100ms",
+            "100,100ms,SSL",
+            "1000,1ms",
+            "1000,100ms",
+            "1000,100ms,SSL",
+            "1000,100ms,OpenSSL"
+        })
+        public String channelsFlushTimeout = "100,100ms";
 
-		//Do not spam continuous benchmarking with number of writers parameter.
-		//@Param({"1", "4"})
-		public int writers = 4;
+        // Do not spam continuous benchmarking with number of writers parameter.
+        // @Param({"1", "4"})
+        public int writers = 4;
 
-		@Setup
-		public void setUp() throws Exception {
-			int channels = parseChannels(channelsFlushTimeout);
-			int flushTimeout = parseFlushTimeout(channelsFlushTimeout);
-			String sslProvider = parseEnableSSL(channelsFlushTimeout);
+        private static String parseEnableSSL(String channelsFlushTimeout) {
+            String[] parameters = channelsFlushTimeout.split(",");
+            if (Arrays.asList(parameters).contains("SSL")) {
+                return "JDK";
+            } else if (Arrays.asList(parameters).contains("OpenSSL")) {
+                return "OPENSSL";
+            } else {
+                return null;
+            }
+        }
 
-			setUp(
-					writers,
-					channels,
-					flushTimeout,
-					false,
-					false,
-					-1,
-					-1,
-					sslProvider != null ? SSLUtilsTest.createInternalSslConfigWithKeyAndTrustStores(
-							sslProvider) : new Configuration()
-			);
-		}
+        private static int parseFlushTimeout(String channelsFlushTimeout) {
+            String[] parameters = channelsFlushTimeout.split(",");
+            checkArgument(parameters.length >= 2);
+            String flushTimeout = parameters[1];
 
-		private static String parseEnableSSL(String channelsFlushTimeout) {
-			String[] parameters = channelsFlushTimeout.split(",");
-			if (Arrays.asList(parameters).contains("SSL")) {
-				return "JDK";
-			} else if (Arrays.asList(parameters).contains("OpenSSL")) {
-				return "OPENSSL";
-			} else {
-				return null;
-			}
-		}
+            checkArgument(flushTimeout.endsWith("ms"));
+            return Integer.parseInt(flushTimeout.substring(0, flushTimeout.length() - 2));
+        }
 
-		private static int parseFlushTimeout(String channelsFlushTimeout) {
-			String[] parameters = channelsFlushTimeout.split(",");
-			checkArgument(parameters.length >= 2);
-			String flushTimeout = parameters[1];
+        private static int parseChannels(String channelsFlushTimeout) {
+            String[] parameters = channelsFlushTimeout.split(",");
+            checkArgument(parameters.length >= 1);
+            return Integer.parseInt(parameters[0]);
+        }
 
-			checkArgument(flushTimeout.endsWith("ms"));
-			return Integer.parseInt(flushTimeout.substring(0, flushTimeout.length() - 2));
-		}
+        @Setup
+        public void setUp() throws Exception {
+            int channels = parseChannels(channelsFlushTimeout);
+            int flushTimeout = parseFlushTimeout(channelsFlushTimeout);
+            String sslProvider = parseEnableSSL(channelsFlushTimeout);
 
-		private static int parseChannels(String channelsFlushTimeout) {
-			String[] parameters = channelsFlushTimeout.split(",");
-			checkArgument(parameters.length >= 1);
-			return Integer.parseInt(parameters[0]);
-		}
+            setUp(
+                    writers,
+                    channels,
+                    flushTimeout,
+                    false,
+                    false,
+                    -1,
+                    -1,
+                    sslProvider != null
+                            ? SSLUtilsTest.createInternalSslConfigWithKeyAndTrustStores(sslProvider)
+                            : new Configuration());
+        }
 
-		@TearDown
-		public void tearDown() throws Exception {
-			super.tearDown();
-		}
-	}
+        @TearDown
+        public void tearDown() throws Exception {
+            super.tearDown();
+        }
+    }
 }

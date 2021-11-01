@@ -33,43 +33,44 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
-/**
- * JMH throughput benchmark runner.
- */
-@OperationsPerInvocation(value = StreamNetworkBroadcastThroughputBenchmarkExecutor.RECORDS_PER_INVOCATION)
+/** JMH throughput benchmark runner. */
+@OperationsPerInvocation(
+        value = StreamNetworkBroadcastThroughputBenchmarkExecutor.RECORDS_PER_INVOCATION)
 public class StreamNetworkBroadcastThroughputBenchmarkExecutor extends BenchmarkBase {
 
-	static final int RECORDS_PER_INVOCATION = 500_000;
+    static final int RECORDS_PER_INVOCATION = 500_000;
 
-	public static void main(String[] args)
-			throws RunnerException {
-		Options options = new OptionsBuilder()
-				.verbosity(VerboseMode.NORMAL)
-				.include(".*" + StreamNetworkBroadcastThroughputBenchmarkExecutor.class.getCanonicalName() + ".*")
-				.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(
+                                ".*"
+                                        + StreamNetworkBroadcastThroughputBenchmarkExecutor.class
+                                                .getCanonicalName()
+                                        + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	public void networkBroadcastThroughput(MultiEnvironment context) throws Exception {
-		context.executeBenchmark(RECORDS_PER_INVOCATION);
-	}
+    @Benchmark
+    public void networkBroadcastThroughput(MultiEnvironment context) throws Exception {
+        context.executeBenchmark(RECORDS_PER_INVOCATION);
+    }
 
-	/**
-	 * Setup for the benchmark(s).
-	 */
-	@State(Thread)
-	public static class MultiEnvironment extends StreamNetworkBroadcastThroughputBenchmark {
+    /** Setup for the benchmark(s). */
+    @State(Thread)
+    public static class MultiEnvironment extends StreamNetworkBroadcastThroughputBenchmark {
 
-		@Setup
-		public void setUp() throws Exception {
-			super.setUp(4, 100, 100);
-		}
+        @Setup
+        public void setUp() throws Exception {
+            super.setUp(4, 100, 100);
+        }
 
-		@TearDown
-		public void tearDown() throws Exception {
-			super.tearDown();
-		}
-	}
+        @TearDown
+        public void tearDown() throws Exception {
+            super.tearDown();
+        }
+    }
 }

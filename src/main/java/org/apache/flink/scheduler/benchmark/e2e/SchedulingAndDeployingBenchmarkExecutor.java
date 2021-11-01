@@ -31,34 +31,32 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.RunnerException;
 
-/**
- * The benchmark of scheduling and deploying tasks in a STREAMING/BATCH job.
- */
+/** The benchmark of scheduling and deploying tasks in a STREAMING/BATCH job. */
 public class SchedulingAndDeployingBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
-	@Param({"BATCH", "STREAMING"})
-	private JobConfiguration jobConfiguration;
+    @Param({"BATCH", "STREAMING"})
+    private JobConfiguration jobConfiguration;
 
-	private SchedulingAndDeployingBenchmark benchmark;
+    private SchedulingAndDeployingBenchmark benchmark;
 
-	public static void main(String[] args) throws RunnerException {
-		runBenchmark(SchedulingAndDeployingBenchmarkExecutor.class);
-	}
+    public static void main(String[] args) throws RunnerException {
+        runBenchmark(SchedulingAndDeployingBenchmarkExecutor.class);
+    }
 
-	@Setup(Level.Trial)
-	public void setup() throws Exception {
-		benchmark = new SchedulingAndDeployingBenchmark();
-		benchmark.setup(jobConfiguration);
-	}
+    @Setup(Level.Trial)
+    public void setup() throws Exception {
+        benchmark = new SchedulingAndDeployingBenchmark();
+        benchmark.setup(jobConfiguration);
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.SingleShotTime)
-	public void startScheduling() throws Exception {
-		benchmark.startScheduling();
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.SingleShotTime)
+    public void startScheduling() throws Exception {
+        benchmark.startScheduling();
+    }
 
-	@TearDown(Level.Trial)
-	public void teardown() {
-		benchmark.teardown();
-	}
+    @TearDown(Level.Trial)
+    public void teardown() {
+        benchmark.teardown();
+    }
 }

@@ -32,39 +32,39 @@ import java.util.List;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class MultiplyByTwoOperatorFactory extends AbstractStreamOperatorFactory<Long> {
-	@Override
-	public <T extends StreamOperator<Long>> T createStreamOperator(StreamOperatorParameters<Long> parameters) {
-		return (T) new MultiplyByTwoOperator(parameters);
-	}
+    @Override
+    public <T extends StreamOperator<Long>> T createStreamOperator(
+            StreamOperatorParameters<Long> parameters) {
+        return (T) new MultiplyByTwoOperator(parameters);
+    }
 
-	@Override
-	public Class<? extends StreamOperator> getStreamOperatorClass(ClassLoader classLoader) {
-		return MultiplyByTwoOperator.class;
-	}
+    @Override
+    public Class<? extends StreamOperator> getStreamOperatorClass(ClassLoader classLoader) {
+        return MultiplyByTwoOperator.class;
+    }
 
-	public static class MultiplyByTwoOperator extends AbstractStreamOperatorV2<Long> implements MultipleInputStreamOperator<Long> {
-		public MultiplyByTwoOperator(StreamOperatorParameters<Long> parameters) {
-			super(parameters, 2);
-		}
+    public static class MultiplyByTwoOperator extends AbstractStreamOperatorV2<Long>
+            implements MultipleInputStreamOperator<Long> {
+        public MultiplyByTwoOperator(StreamOperatorParameters<Long> parameters) {
+            super(parameters, 2);
+        }
 
-		@Override
-		public List<Input> getInputs() {
-			return Arrays.asList(
-					new MultiplyByTwoOperator.MultiplyByTwoInput(this, 1),
-					new MultiplyByTwoOperator.MultiplyByTwoInput(this, 2));
-		}
+        @Override
+        public List<Input> getInputs() {
+            return Arrays.asList(
+                    new MultiplyByTwoOperator.MultiplyByTwoInput(this, 1),
+                    new MultiplyByTwoOperator.MultiplyByTwoInput(this, 2));
+        }
 
-		private static class MultiplyByTwoInput extends AbstractInput<Long, Long> {
-			MultiplyByTwoInput(
-					AbstractStreamOperatorV2<Long> owner,
-					int inputId) {
-				super(owner, inputId);
-			}
+        private static class MultiplyByTwoInput extends AbstractInput<Long, Long> {
+            MultiplyByTwoInput(AbstractStreamOperatorV2<Long> owner, int inputId) {
+                super(owner, inputId);
+            }
 
-			@Override
-			public void processElement(StreamRecord<Long> element) {
-				output.collect(element.replace(element.getValue() * 2));
-			}
-		}
-	}
+            @Override
+            public void processElement(StreamRecord<Long> element) {
+                output.collect(element.replace(element.getValue() * 2));
+            }
+        }
+    }
 }

@@ -33,33 +33,32 @@ import java.util.stream.IntStream;
  * The source should produce same records as {@link LongSource}.
  *
  * <p>{@link LongSource} generates records from 0 to {@code maxValue} for every parallel instance.
- * The original {@link NumberSequenceSource} would split the range 0 to {@code maxValue} between all subtasks.
+ * The original {@link NumberSequenceSource} would split the range 0 to {@code maxValue} between all
+ * subtasks.
  */
 public class LongNewSource extends NumberSequenceSource {
-	private final Boundedness boundedness;
-	private final long maxValue;
+    private final Boundedness boundedness;
+    private final long maxValue;
 
-	public LongNewSource(Boundedness boundedness, long maxValue) {
-		super(-1, -1); // we do not use the from/to of the underlying source
-		this.boundedness = boundedness;
-		this.maxValue = maxValue;
-	}
+    public LongNewSource(Boundedness boundedness, long maxValue) {
+        super(-1, -1); // we do not use the from/to of the underlying source
+        this.boundedness = boundedness;
+        this.maxValue = maxValue;
+    }
 
-	@Override
-	public Boundedness getBoundedness() {
-		return boundedness;
-	}
+    @Override
+    public Boundedness getBoundedness() {
+        return boundedness;
+    }
 
-	@Override
-	public SplitEnumerator<NumberSequenceSplit, Collection<NumberSequenceSplit>> createEnumerator(
-			SplitEnumeratorContext<NumberSequenceSplit> splitEnumeratorContext) {
+    @Override
+    public SplitEnumerator<NumberSequenceSplit, Collection<NumberSequenceSplit>> createEnumerator(
+            SplitEnumeratorContext<NumberSequenceSplit> splitEnumeratorContext) {
 
-		final List<NumberSequenceSplit> splits =
-				IntStream.range(0, splitEnumeratorContext.currentParallelism())
-						.mapToObj(
-								id -> new NumberSequenceSplit(String.valueOf(id), 0, maxValue)
-						)
-						.collect(Collectors.toList());
-		return new IteratorSourceEnumerator<>(splitEnumeratorContext, splits);
-	}
+        final List<NumberSequenceSplit> splits =
+                IntStream.range(0, splitEnumeratorContext.currentParallelism())
+                        .mapToObj(id -> new NumberSequenceSplit(String.valueOf(id), 0, maxValue))
+                        .collect(Collectors.toList());
+        return new IteratorSourceEnumerator<>(splitEnumeratorContext, splits);
+    }
 }

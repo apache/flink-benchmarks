@@ -95,17 +95,6 @@ public class SortingBoundedInputBenchmarks extends BenchmarkBase {
         new Runner(options).run();
     }
 
-    @State(Thread)
-    public static class SortingInputContext extends FlinkEnvironmentContext {
-        @Override
-        protected Configuration createConfiguration() {
-            Configuration configuration = super.createConfiguration();
-            configuration.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.BATCH);
-            configuration.set(AlgorithmOptions.SORT_SPILLING_THRESHOLD, 0f);
-            return configuration;
-        }
-    }
-
     @Benchmark
     @OperationsPerInvocation(value = RECORDS_PER_INVOCATION)
     public void sortedOneInput(SortingInputContext context) throws Exception {
@@ -192,6 +181,17 @@ public class SortingBoundedInputBenchmarks extends BenchmarkBase {
 
         counts.addSink(new DiscardingSink<>());
         context.execute();
+    }
+
+    @State(Thread)
+    public static class SortingInputContext extends FlinkEnvironmentContext {
+        @Override
+        protected Configuration createConfiguration() {
+            Configuration configuration = super.createConfiguration();
+            configuration.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.BATCH);
+            configuration.set(AlgorithmOptions.SORT_SPILLING_THRESHOLD, 0f);
+            return configuration;
+        }
     }
 
     private static final class ProcessedKeysOrderAsserter implements Serializable {
@@ -311,12 +311,12 @@ public class SortingBoundedInputBenchmarks extends BenchmarkBase {
         }
 
         @Override
-        public void setChainingStrategy(ChainingStrategy strategy) {}
-
-        @Override
         public ChainingStrategy getChainingStrategy() {
             return ChainingStrategy.NEVER;
         }
+
+        @Override
+        public void setChainingStrategy(ChainingStrategy strategy) {}
 
         @Override
         public Class<? extends StreamOperator> getStreamOperatorClass(ClassLoader classLoader) {

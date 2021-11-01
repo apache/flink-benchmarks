@@ -39,10 +39,11 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
     private static final int NUM_VERTICES = 2;
 
     public static void main(String[] args) throws RunnerException {
-        Options options = new OptionsBuilder()
-            .verbosity(VerboseMode.NORMAL)
-            .include(BlockingPartitionRemoteChannelBenchmark.class.getCanonicalName())
-            .build();
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(BlockingPartitionRemoteChannelBenchmark.class.getCanonicalName())
+                        .build();
 
         new Runner(options).run();
     }
@@ -54,13 +55,12 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
 
     @Benchmark
     public void remoteFilePartition(BlockingPartitionEnvironmentContext context) throws Exception {
-        StreamGraph streamGraph = StreamGraphUtils.buildGraphForBatchJob(context.env, RECORDS_PER_INVOCATION);
+        StreamGraph streamGraph =
+                StreamGraphUtils.buildGraphForBatchJob(context.env, RECORDS_PER_INVOCATION);
         miniCluster.executeJobBlocking(StreamingJobGraphGenerator.createJobGraph(streamGraph));
     }
 
-    /**
-     * Environment context for specific file based bounded blocking partition.
-     */
+    /** Environment context for specific file based bounded blocking partition. */
     public static class BlockingPartitionEnvironmentContext extends FlinkEnvironmentContext {
 
         @Override
@@ -75,8 +75,11 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
         protected Configuration createConfiguration() {
             Configuration configuration = super.createConfiguration();
 
-            configuration.setString(NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, "file");
-            configuration.setString(CoreOptions.TMP_DIRS, FileUtils.getCurrentWorkingDirectory().toAbsolutePath().toString());
+            configuration.setString(
+                    NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, "file");
+            configuration.setString(
+                    CoreOptions.TMP_DIRS,
+                    FileUtils.getCurrentWorkingDirectory().toAbsolutePath().toString());
             return configuration;
         }
     }

@@ -48,19 +48,26 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
     private static final int LINES_PER_SPLIT = 175_000;
     public static final int RECORDS_PER_INVOCATION = SPLITS_PER_INVOCATION * LINES_PER_SPLIT;
 
-    private static final TimestampedFileInputSplit SPLIT = new TimestampedFileInputSplit(0, 0, new Path("."), 0, 0, new String[]{});
+    private static final TimestampedFileInputSplit SPLIT =
+            new TimestampedFileInputSplit(0, 0, new Path("."), 0, 0, new String[] {});
     private static final String LINE = Strings.repeat('0', 10);
 
-    // Source should wait until all elements reach sink. Otherwise, END_OF_INPUT is sent once all splits are emitted.
-    // Thus, all subsequent reads in ContinuousFileReaderOperator would be made in CLOSING state in a simple while-true loop (MailboxExecutor.isIdle is always true).
+    // Source should wait until all elements reach sink. Otherwise, END_OF_INPUT is sent once all
+    // splits are emitted.
+    // Thus, all subsequent reads in ContinuousFileReaderOperator would be made in CLOSING state in
+    // a simple while-true loop (MailboxExecutor.isIdle is always true).
     private static OneShotLatch TARGET_COUNT_REACHED_LATCH = new OneShotLatch();
 
-    public static void main(String[] args)
-            throws RunnerException {
-        Options options = new OptionsBuilder()
-                .verbosity(VerboseMode.NORMAL)
-                .include(".*" + ContinuousFileReaderOperatorBenchmark.class.getCanonicalName() + ".*")
-                .build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(
+                                ".*"
+                                        + ContinuousFileReaderOperatorBenchmark.class
+                                                .getCanonicalName()
+                                        + ".*")
+                        .build();
 
         new Runner(options).run();
     }
@@ -70,11 +77,12 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
         TARGET_COUNT_REACHED_LATCH.reset();
         StreamExecutionEnvironment env = context.env;
         env.setRestartStrategy(new RestartStrategies.NoRestartStrategyConfiguration());
-        env
-                .enableCheckpointing(100)
+        env.enableCheckpointing(100)
                 .setParallelism(1)
                 .addSource(new MockSourceFunction())
-                .transform("fileReader", TypeInformation.of(String.class),
+                .transform(
+                        "fileReader",
+                        TypeInformation.of(String.class),
                         new ContinuousFileReaderOperatorFactory<>(new MockInputFormat()))
                 .addSink(new LimitedSink());
 
@@ -102,7 +110,7 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
                         Thread.currentThread().interrupt();
                     }
                 } catch (TimeoutException e) {
-                	// continue waiting
+                    // continue waiting
                 }
             }
         }
@@ -144,8 +152,8 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
 
         @Override
         public void invoke(String value, Context context) {
-        	if (++count == RECORDS_PER_INVOCATION) {
-        	    TARGET_COUNT_REACHED_LATCH.trigger();
+            if (++count == RECORDS_PER_INVOCATION) {
+                TARGET_COUNT_REACHED_LATCH.trigger();
             }
         }
     }

@@ -33,34 +33,34 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.RunnerException;
 
 /**
- * The benchmark of deploying tasks in a STREAMING job.
- * The related method is {@link Execution#deploy}.
+ * The benchmark of deploying tasks in a STREAMING job. The related method is {@link
+ * Execution#deploy}.
  */
 public class DeployingTasksInStreamingJobBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
 
-	@Param("STREAMING")
-	private JobConfiguration jobConfiguration;
+    @Param("STREAMING")
+    private JobConfiguration jobConfiguration;
 
-	private DeployingTasksInStreamingJobBenchmark benchmark;
+    private DeployingTasksInStreamingJobBenchmark benchmark;
 
-	public static void main(String[] args) throws RunnerException {
-		runBenchmark(DeployingTasksInStreamingJobBenchmark.class);
-	}
+    public static void main(String[] args) throws RunnerException {
+        runBenchmark(DeployingTasksInStreamingJobBenchmark.class);
+    }
 
-	@Setup(Level.Trial)
-	public void setup() throws Exception {
-		benchmark = new DeployingTasksInStreamingJobBenchmark();
-		benchmark.setup(jobConfiguration);
-	}
+    @Setup(Level.Trial)
+    public void setup() throws Exception {
+        benchmark = new DeployingTasksInStreamingJobBenchmark();
+        benchmark.setup(jobConfiguration);
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.SingleShotTime)
-	public void deployAllTasks() throws Exception {
-		benchmark.deployAllTasks();
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.SingleShotTime)
+    public void deployAllTasks() throws Exception {
+        benchmark.deployAllTasks();
+    }
 
-	@TearDown(Level.Trial)
-	public void teardown() {
-		benchmark.teardown();
-	}
+    @TearDown(Level.Trial)
+    public void teardown() {
+        benchmark.teardown();
+    }
 }

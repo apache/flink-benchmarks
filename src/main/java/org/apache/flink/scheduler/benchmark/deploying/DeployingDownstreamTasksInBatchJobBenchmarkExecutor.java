@@ -33,34 +33,35 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.RunnerException;
 
 /**
- * The benchmark of deploying downstream tasks in a BATCH job.
- * The related method is {@link Execution#deploy}.
+ * The benchmark of deploying downstream tasks in a BATCH job. The related method is {@link
+ * Execution#deploy}.
  */
-public class DeployingDownstreamTasksInBatchJobBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
+public class DeployingDownstreamTasksInBatchJobBenchmarkExecutor
+        extends SchedulerBenchmarkExecutorBase {
 
-	@Param("BATCH")
-	private JobConfiguration jobConfiguration;
+    @Param("BATCH")
+    private JobConfiguration jobConfiguration;
 
-	private DeployingDownstreamTasksInBatchJobBenchmark benchmark;
+    private DeployingDownstreamTasksInBatchJobBenchmark benchmark;
 
-	public static void main(String[] args) throws RunnerException {
-		runBenchmark(DeployingDownstreamTasksInBatchJobBenchmarkExecutor.class);
-	}
+    public static void main(String[] args) throws RunnerException {
+        runBenchmark(DeployingDownstreamTasksInBatchJobBenchmarkExecutor.class);
+    }
 
-	@Setup(Level.Trial)
-	public void setup() throws Exception {
-		benchmark = new DeployingDownstreamTasksInBatchJobBenchmark();
-		benchmark.setup(jobConfiguration);
-	}
+    @Setup(Level.Trial)
+    public void setup() throws Exception {
+        benchmark = new DeployingDownstreamTasksInBatchJobBenchmark();
+        benchmark.setup(jobConfiguration);
+    }
 
-	@Benchmark
-	@BenchmarkMode(Mode.SingleShotTime)
-	public void deployDownstreamTasks() throws Exception {
-		benchmark.deployDownstreamTasks();
-	}
+    @Benchmark
+    @BenchmarkMode(Mode.SingleShotTime)
+    public void deployDownstreamTasks() throws Exception {
+        benchmark.deployDownstreamTasks();
+    }
 
-	@TearDown(Level.Trial)
-	public void teardown() {
-		benchmark.teardown();
-	}
+    @TearDown(Level.Trial)
+    public void teardown() {
+        benchmark.teardown();
+    }
 }
