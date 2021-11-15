@@ -365,14 +365,14 @@ under the License.
 										<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 											<mainClass>org.openjdk.jmh.Main</mainClass>
 										</transformer>
-		                                                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-		                                                                        <resource>reference.conf</resource>
-		                                                                </transformer>
-		                                                                <!-- The service transformer is needed to merge META-INF/services files -->
-		                                                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-		                                                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
-		                                                                        <projectName>Apache Flink</projectName>
-		                                                                </transformer>
+										<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+												<resource>reference.conf</resource>
+										</transformer>
+										<!-- The service transformer is needed to merge META-INF/services files -->
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+												<projectName>Apache Flink</projectName>
+										</transformer>
 									</transformers>
 									<filters>
 										<filter>
