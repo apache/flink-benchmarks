@@ -39,7 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.applyToAllKeys;
 import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.compactState;
-import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.createKeyedStateBackend;
 import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getListState;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.listValueCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
@@ -64,7 +63,7 @@ public class ListStateBenchmark extends StateBenchmarkBase {
 
     @Setup
     public void setUp() throws Exception {
-        keyedStateBackend = createKeyedStateBackend(backendType);
+        keyedStateBackend = createKeyedStateBackend();
         listState = getListState(keyedStateBackend, STATE_DESC);
         dummyLists = new ArrayList<>(listValueCount);
         for (int i = 0; i < listValueCount; ++i) {

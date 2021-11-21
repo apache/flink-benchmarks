@@ -18,6 +18,9 @@
 package org.apache.flink.state.benchmark;
 
 import org.apache.flink.benchmark.BenchmarkBase;
+import org.apache.flink.config.ConfigUtil;
+import org.apache.flink.config.StateBenchmarkOptions;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils;
 import org.apache.flink.runtime.state.KeyedStateBackend;
 
@@ -28,7 +31,10 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -52,9 +58,22 @@ public class StateBenchmarkBase extends BenchmarkBase {
     final ThreadLocalRandom random = ThreadLocalRandom.current();
 
     @Param({"HEAP", "ROCKSDB"})
-    protected StateBackendBenchmarkUtils.StateBackendType backendType;
+    private StateBackendBenchmarkUtils.StateBackendType backendType;
 
     KeyedStateBackend<Long> keyedStateBackend;
+
+    protected KeyedStateBackend<Long> createKeyedStateBackend() throws Exception {
+        Configuration benchMarkConfig = ConfigUtil.loadBenchMarkConf();
+        String stateDataDirPath = benchMarkConfig.getString(StateBenchmarkOptions.STATE_DATA_DIR);
+        File dataDir = null;
+        if (stateDataDirPath != null) {
+            dataDir = new File(stateDataDirPath);
+            if (!dataDir.exists()) {
+                Files.createDirectories(Paths.get(stateDataDirPath));
+            }
+        }
+        return StateBackendBenchmarkUtils.createKeyedStateBackend(backendType, dataDir);
+    }
 
     private static int getCurrentIndex() {
         int currentIndex = keyIndex.getAndIncrement();
