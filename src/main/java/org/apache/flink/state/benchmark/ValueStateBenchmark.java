@@ -32,7 +32,6 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.createKeyedStateBackend;
 import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getValueState;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
 
@@ -52,7 +51,7 @@ public class ValueStateBenchmark extends StateBenchmarkBase {
 
     @Setup
     public void setUp() throws Exception {
-        keyedStateBackend = createKeyedStateBackend(backendType);
+        keyedStateBackend = createKeyedStateBackend();
         valueState =
                 getValueState(keyedStateBackend, new ValueStateDescriptor<>("kvState", Long.class));
         for (int i = 0; i < setupKeyCount; ++i) {

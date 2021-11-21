@@ -21,7 +21,7 @@ mvn clean package exec:exec \
 ```
 
 If you want to execute just one benchmark, the best approach is to execute selected main function manually.
-There're mainly two ways:
+There're mainly three ways:
 
 1. From your IDE (hint there is a plugin for Intellij IDEA).
    * In this case don't forget about selecting `flink.version`, default value for the property is defined in pom.xml.
@@ -31,13 +31,37 @@ There're mainly two ways:
    mvn -Dflink.version=<FLINK_VERSION> clean package exec:exec \
     -Dbenchmarks="<benchmark_class>"
    ```
-An example flink version can be -Dflink.version=1.12-SNAPSHOT.
+
+    An example flink version can be -Dflink.version=1.12-SNAPSHOT.
+
+3. Run the uber jar directly like:
+
+    ```
+    java -jar target/benchmarks.jar -rf csv "<benchmark_class>"
+    ```
 
 We also support to run each benchmark once (with only one fork and one iteration) for testing, with below command:
 
 ```
 mvn test -P test
 ```
+
+## Parameters
+
+There are some built-in parameters to run different benchmarks, these can be shown/overridden from the command line.
+
+```
+# show all the parameters combination for the <benchmark_class> 
+java -jar target/benchmarks.jar "<benchmark_class>" -lp
+
+# run benchmark for rocksdb state backend type 
+java -jar target/benchmarks.jar "org.apache.flink.state.benchmark.*" -p "backendType=ROCKSDB" 
+```
+
+## Configuration
+
+Besides the parameters, there is also a benchmark config file `benchmark-conf.yaml` to tune some basic parameters. 
+For example, we can change the state data dir by putting `benchmark.state.data-dir: /data` in the config file. For more options, you can refer to the code in the `org.apache.flink.config` package. 
 
 ## Prerequisites
 
