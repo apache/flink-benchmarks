@@ -66,6 +66,7 @@ under the License.
 		<netty-tcnative.flavor>dynamic</netty-tcnative.flavor>
 		<benchmarkExcludes>org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*,org.apache.flink.scheduler.benchmark.*</benchmarkExcludes>
 		<benchmarks>.*</benchmarks>
+		<executableJava>java</executableJava>
 	</properties>
 
 	<repositories>
@@ -275,7 +276,7 @@ under the License.
 						<configuration>
 							<skip>${skipTests}</skip>
 							<classpathScope>test</classpathScope>
-							<executable>java</executable>
+							<executable>${executableJava}</executable>
 							<arguments>
 								<argument>-Xmx6g</argument>
 								<argument>-classpath</argument>
@@ -325,7 +326,7 @@ under the License.
 						</executions>
 						<configuration>
 							<classpathScope>test</classpathScope>
-							<executable>java</executable>
+							<executable>${executableJava}</executable>
 							<arguments>
 								<argument>-classpath</argument>
 								<classpath/>
