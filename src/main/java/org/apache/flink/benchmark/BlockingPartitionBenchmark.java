@@ -95,6 +95,9 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
                 boolean compressionEnabled, String subpartitionType) {
             Configuration configuration = super.createConfiguration();
 
+            configuration.setInteger(
+                    NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM,
+                    Integer.MAX_VALUE);
             configuration.setBoolean(
                     NettyShuffleEnvironmentOptions.BLOCKING_SHUFFLE_COMPRESSION_ENABLED,
                     compressionEnabled);
