@@ -71,6 +71,9 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
         protected Configuration createConfiguration() {
             Configuration configuration = super.createConfiguration();
 
+            configuration.setInteger(
+                    NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM,
+                    Integer.MAX_VALUE);
             configuration.setString(
                     NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, "file");
             configuration.setString(
