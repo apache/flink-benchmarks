@@ -1,0 +1,86 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+timestamps {
+    try {
+        timeout(time: 6, unit: 'HOURS') { // includes waiting for a machine
+            node('Hetzner') {
+                def mvnHome = tool 'M3'
+                def compileFlink
+                def projectPrefix
+
+                env.JAVA_HOME = tool name: params.java_version
+                stage('Setup java version') {
+                    if(params.java_version == 'openjdk11') {
+                        compileFlink = "'${mvnHome}/bin/mvn' -Dfast -DskipTests -Dskip.npm=true clean install -P java11-target"
+                        projectPrefix = "(Java11)"
+                    } else {
+                        compileFlink = "'${mvnHome}/bin/mvn' -T 1C -Dfast -DskipTests -Dskip.npm=true clean install"
+                        projectPrefix = ""
+                    }
+                }
+                stage('Checking out flink') {
+                    dir('flink') {
+                        git url: '${github_flink_url}', branch: '${github_flink_branch}'
+                    }
+                }
+                stage('Building flink') {
+                    dir('flink') {
+                        sh compileFlink
+                        sh 'git rev-parse --short HEAD > ../flink-commit'
+                        sh "${mvnHome}/bin/mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version|grep -Ev \'(^\\[|Download\\w+:)\' > ../flink-version"
+                    }
+                }
+                stage('Checking out flink-benchmarks') {
+                    dir('flink-benchmarks') {
+                        git url: '${github_benchmarks_url}', branch: '${github_benchmarks_branch}'
+                        sh 'git rev-parse --short HEAD > ../flink-benchmarks-commit'
+                    }
+                }
+                stage('Benchmarking') {
+                    dir('flink-benchmarks') {
+                        sh "${mvnHome}/bin/mvn -Dflink.version=`cat ../flink-version` clean install exec:exec -Dbenchmarks=\"${jmh_benchmarks}\" -DbenchmarkExcludes=\"${jmh_benchmarks_excludes}\"  -DexecutableJava=${JAVA_HOME}/bin/java"
+                    }
+                }
+                stage('Uploading results') {
+                    dir('flink-benchmarks') {
+                        archive 'jmh-result.csv'
+                        sh "python save_jmh_result.py --project \"${project_name}${projectPrefix}\" --exec \"${executable_name}${projectPrefix}\" --environment Hetzner --branch ${result_branch} --commit `cat ../flink-commit`-`cat ../flink-benchmarks-commit`-`date +%s` --codespeed http://54.93.230.145:8000/"
+                    }
+                }
+                stage('Cleanup') {
+                    sh "rm -rf ~/.m2/repository/org/apache/flink/flink-shaded*"
+                    slackSend (
+                            channel: "#flink-dev-benchmarks",
+                            message: "Build finished ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+                    )
+                }
+            }
+        }
+    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
+        slackSend (
+            channel: "#flink-dev-benchmarks",
+            message: "Build interrupted: ${env.JOB_NAME} #  ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+        )
+    } catch (err) {
+        slackSend (
+            channel: "#flink-dev-benchmarks",
+            message: "Failed build ${env.BUILD_NUMBER} of ${env.JOB_NAME} (<${env.BUILD_URL}|Open>): $err"
+        )
+        throw err
+    }
+}
