@@ -27,7 +27,7 @@ timestamps {
                 stage('Setup java version') {
                     if(params.java_version == 'openjdk11') {
                         compileFlink = "'${mvnHome}/bin/mvn' -Dfast -DskipTests -Dskip.npm=true clean install -P java11-target"
-                        projectPrefix = "(Java11)"
+                        projectPrefix = " (Java11)"
                     } else {
                         compileFlink = "'${mvnHome}/bin/mvn' -T 1C -Dfast -DskipTests -Dskip.npm=true clean install"
                         projectPrefix = ""
