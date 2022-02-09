@@ -328,9 +328,8 @@ under the License.
 							<classpathScope>test</classpathScope>
 							<executable>${executableJava}</executable>
 							<arguments>
-								<argument>-classpath</argument>
-								<classpath/>
-								<argument>org.openjdk.jmh.Main</argument>
+								<argument>-jar</argument>
+								<argument>target/benchmarks.jar</argument>
 								<!--shouldFailOnError-->
 								<argument>-foe</argument>
 								<argument>true</argument>
