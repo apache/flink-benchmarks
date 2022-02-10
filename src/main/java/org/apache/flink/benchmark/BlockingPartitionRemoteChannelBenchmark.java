@@ -49,7 +49,15 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
     }
 
     @Benchmark
-    public void remoteFilePartition(BlockingPartitionEnvironmentContext context) throws Exception {
+    public void remoteFilePartition(RemoteFileEnvironmentContext context) throws Exception {
+        StreamGraph streamGraph =
+                StreamGraphUtils.buildGraphForBatchJob(context.env, RECORDS_PER_INVOCATION);
+        context.miniCluster.executeJobBlocking(
+                StreamingJobGraphGenerator.createJobGraph(streamGraph));
+    }
+
+    @Benchmark
+    public void remoteSortPartition(RemoteSortEnvironmentContext context) throws Exception {
         StreamGraph streamGraph =
                 StreamGraphUtils.buildGraphForBatchJob(context.env, RECORDS_PER_INVOCATION);
         context.miniCluster.executeJobBlocking(
@@ -67,13 +75,17 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
             env.setBufferTimeout(-1);
         }
 
-        @Override
-        protected Configuration createConfiguration() {
+        protected Configuration createConfiguration(boolean isSortShuffle) {
             Configuration configuration = super.createConfiguration();
 
-            configuration.setInteger(
-                    NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM,
-                    Integer.MAX_VALUE);
+            if (isSortShuffle) {
+                configuration.setInteger(
+                        NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM, 1);
+            } else {
+                configuration.setInteger(
+                        NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM,
+                        Integer.MAX_VALUE);
+            }
             configuration.setString(
                     NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, "file");
             configuration.setString(
@@ -85,6 +97,20 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
         @Override
         protected int getNumberOfVertices() {
             return NUM_VERTICES;
+        }
+    }
+
+    public static class RemoteFileEnvironmentContext extends BlockingPartitionEnvironmentContext {
+        @Override
+        protected Configuration createConfiguration() {
+            return createConfiguration(false);
+        }
+    }
+
+    public static class RemoteSortEnvironmentContext extends BlockingPartitionEnvironmentContext {
+        @Override
+        protected Configuration createConfiguration() {
+            return createConfiguration(true);
         }
     }
 }
