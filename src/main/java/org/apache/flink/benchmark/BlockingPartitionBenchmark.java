@@ -66,6 +66,16 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
         executeBenchmark(context.env);
     }
 
+    @Benchmark
+    public void compressedSortPartition(CompressedSortEnvironmentContext context) throws Exception {
+        executeBenchmark(context.env);
+    }
+
+    @Benchmark
+    public void uncompressedSortPartition(UncompressedSortEnvironmentContext context) throws Exception {
+        executeBenchmark(context.env);
+    }
+
     private void executeBenchmark(StreamExecutionEnvironment env) throws Exception {
         StreamGraph streamGraph =
                 StreamGraphUtils.buildGraphForBatchJob(env, RECORDS_PER_INVOCATION);
@@ -92,12 +102,17 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
         }
 
         protected Configuration createConfiguration(
-                boolean compressionEnabled, String subpartitionType) {
+                boolean compressionEnabled, String subpartitionType, boolean isSortShuffle) {
             Configuration configuration = super.createConfiguration();
 
-            configuration.setInteger(
-                    NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM,
-                    Integer.MAX_VALUE);
+            if (isSortShuffle) {
+                configuration.setInteger(
+                        NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM, 1);
+            } else {
+                configuration.setInteger(
+                        NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM,
+                        Integer.MAX_VALUE);
+            }
             configuration.setBoolean(
                     NettyShuffleEnvironmentOptions.BLOCKING_SHUFFLE_COMPRESSION_ENABLED,
                     compressionEnabled);
@@ -114,7 +129,7 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
             extends BlockingPartitionEnvironmentContext {
         @Override
         protected Configuration createConfiguration() {
-            return createConfiguration(false, "file");
+            return createConfiguration(false, "file", false);
         }
     }
 
@@ -122,7 +137,7 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
             extends BlockingPartitionEnvironmentContext {
         @Override
         protected Configuration createConfiguration() {
-            return createConfiguration(true, "file");
+            return createConfiguration(true, "file", false);
         }
     }
 
@@ -130,7 +145,23 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
             extends BlockingPartitionEnvironmentContext {
         @Override
         protected Configuration createConfiguration() {
-            return createConfiguration(false, "mmap");
+            return createConfiguration(false, "mmap", false);
+        }
+    }
+
+    public static class CompressedSortEnvironmentContext
+            extends BlockingPartitionEnvironmentContext {
+        @Override
+        protected Configuration createConfiguration() {
+            return createConfiguration(true, "file", true);
+        }
+    }
+
+    public static class UncompressedSortEnvironmentContext
+            extends BlockingPartitionEnvironmentContext {
+        @Override
+        protected Configuration createConfiguration() {
+            return createConfiguration(false, "file", true);
         }
     }
 }
