@@ -64,10 +64,6 @@ timestamps {
                 }
                 stage('Cleanup') {
                     sh "rm -rf ~/.m2/repository/org/apache/flink/flink-shaded*"
-                    slackSend (
-                            channel: "#flink-dev-benchmarks",
-                            message: "Build finished ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
-                    )
                 }
             }
         }
