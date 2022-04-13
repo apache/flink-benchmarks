@@ -66,7 +66,7 @@ public class RocksdbStateBackendRescalingBenchmarkExecutor extends RescalingBenc
         benchmark.setUp();
     }
 
-    @Setup(Level.Iteration)
+    @Setup(Level.Invocation)
     public void setUpPerInvocation() throws Exception {
         benchmark.prepareStateForOperator(rescaleType.getSubtaskIndex());
     }
@@ -81,7 +81,7 @@ public class RocksdbStateBackendRescalingBenchmarkExecutor extends RescalingBenc
         benchmark.rescale();
     }
 
-    @TearDown(Level.Iteration)
+    @TearDown(Level.Invocation)
     public void tearDownPerInvocation() throws Exception {
         benchmark.closeOperator();
     }
