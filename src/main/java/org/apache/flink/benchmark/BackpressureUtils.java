@@ -46,7 +46,7 @@ public class BackpressureUtils {
             throws Exception {
         RestClusterClient<StandaloneClusterId> restClient =
                 createClient(restAddress.getPort(), clientConfiguration);
-        Deadline deadline = Deadline.fromNow(Duration.ofSeconds(30));
+        Deadline deadline = Deadline.fromNow(Duration.ofSeconds(60));
         boolean allBackpressured;
         // There seems to be a race condition in some setups, between setting up REST server
         // and client being able to connect. This is handled by the retrying mechanism in

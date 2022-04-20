@@ -18,12 +18,14 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.benchmark.operators.RecordSource;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.runtime.jobgraph.JobVertexID;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.graph.StreamGraph;
+import org.apache.flink.util.Collector;
+import org.apache.flink.util.TimeUtils;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -88,9 +90,13 @@ public class CheckpointingTimeBenchmark extends BenchmarkBase {
     public static class SingleInputCheckpointEnvironmentContext
             extends CheckpointEnvironmentContext {
         public static final int NUM_OF_VERTICES = 3;
+        public static final int FLATMAP_RECORDS = 5;
 
-        @Param({"ALIGNED", "UNALIGNED", "UNALIGNED_1"})
+        @Param({"ALIGNED", "UNALIGNED", "UNALIGNED_1", "UNALIGNED_OVERDRAFT", "UNALIGNED_OVERDRAFT_1"})
         public CheckpointMode mode;
+
+        @Param({"10 ms", "1 ms", "200 µs"})
+        public String sleepTime;
 
         @Override
         protected CheckpointMode getMode() {
@@ -107,10 +113,17 @@ public class CheckpointingTimeBenchmark extends BenchmarkBase {
 
             source.slotSharingGroup("source")
                     .rebalance()
-                    .map((MapFunction<RecordSource.Record, RecordSource.Record>) value -> value)
-                    .slotSharingGroup("map")
+                    .flatMap(new FlatMapFunction<RecordSource.Record, RecordSource.Record>() {
+                        @Override
+                        public void flatMap(RecordSource.Record record, Collector<RecordSource.Record> collector) throws Exception {
+                            for (int i = 0; i < FLATMAP_RECORDS; i++) {
+                                collector.collect(record);
+                            }
+                        }
+                    })
+                    .slotSharingGroup("flatmap")
                     .rebalance()
-                    .addSink(new SlowDiscardSink<>())
+                    .addSink(new SlowDiscardSink<>(TimeUtils.parseDuration(sleepTime).toNanos()))
                     .slotSharingGroup("sink");
 
             final StreamGraph streamGraph = env.getStreamGraph(false);

@@ -21,6 +21,7 @@ package org.apache.flink.benchmark;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.MemorySize;
+import org.apache.flink.configuration.NettyShuffleEnvironmentOptions;
 import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.runtime.jobgraph.JobVertexID;
@@ -32,6 +33,7 @@ import org.apache.flink.streaming.api.graph.StreamGraph;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -101,6 +103,7 @@ public abstract class CheckpointEnvironmentContext extends FlinkEnvironmentConte
                             ExecutionCheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
                             Duration.ofMillis(0));
                     config.set(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, false);
+                    config.setInteger(NettyShuffleEnvironmentOptions.NETWORK_MAX_OVERDRAFT_BUFFERS_PER_GATE, 0);
                     return config;
                 }),
         UNALIGNED_1(
@@ -113,6 +116,33 @@ public abstract class CheckpointEnvironmentContext extends FlinkEnvironmentConte
                             ExecutionCheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
                             Duration.ofMillis(1));
                     config.set(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, false);
+                    config.setInteger(NettyShuffleEnvironmentOptions.NETWORK_MAX_OVERDRAFT_BUFFERS_PER_GATE, 0);
+                    return config;
+                }),
+        UNALIGNED_OVERDRAFT(
+                config -> {
+                    config.set(ExecutionCheckpointingOptions.ENABLE_UNALIGNED, true);
+                    config.set(
+                            TaskManagerOptions.MEMORY_SEGMENT_SIZE,
+                            CheckpointEnvironmentContext.START_MEMORY_SEGMENT_SIZE);
+                    config.set(
+                            ExecutionCheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
+                            Duration.ofMillis(0));
+                    config.set(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, false);
+                    config.setInteger(NettyShuffleEnvironmentOptions.NETWORK_MAX_OVERDRAFT_BUFFERS_PER_GATE, 10);
+                    return config;
+                }),
+        UNALIGNED_OVERDRAFT_1(
+                config -> {
+                    config.set(ExecutionCheckpointingOptions.ENABLE_UNALIGNED, true);
+                    config.set(
+                            TaskManagerOptions.MEMORY_SEGMENT_SIZE,
+                            CheckpointEnvironmentContext.START_MEMORY_SEGMENT_SIZE);
+                    config.set(
+                            ExecutionCheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
+                            Duration.ofMillis(1));
+                    config.set(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, false);
+                    config.setInteger(NettyShuffleEnvironmentOptions.NETWORK_MAX_OVERDRAFT_BUFFERS_PER_GATE, 10);
                     return config;
                 }),
         ALIGNED(
@@ -169,10 +199,20 @@ public abstract class CheckpointEnvironmentContext extends FlinkEnvironmentConte
      * pressure.
      */
     public static class SlowDiscardSink<T> implements SinkFunction<T> {
+
+        private final long sleepNs;
+
+        public SlowDiscardSink() {
+            this(TimeUnit.MICROSECONDS.toNanos(200));
+        }
+
+        public SlowDiscardSink(long sleepNs) {
+            this.sleepNs = sleepNs;
+        }
+
         @Override
-        public void invoke(T value, Context context) {
-            final long startTime = System.nanoTime();
-            while (System.nanoTime() - startTime < 200_000) {}
+        public void invoke(T value, Context context) throws Exception {
+            TimeUnit.NANOSECONDS.sleep(sleepNs);
         }
     }
 }
