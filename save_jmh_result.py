@@ -66,6 +66,7 @@ def readData(args):
         paramIndexes = map(lambda param : header.index(param), params)
         benchmarkIndex = header.index("Benchmark")
         scoreIndex = header.index("Score")
+        modeIndex = header.index("Mode")
         errorIndex = scoreIndex + 1
 
         for line in lines[1:]:
@@ -82,7 +83,7 @@ def readData(args):
                 'executable': args.executable,
                 'benchmark': name,
                 'environment': args.environment,
-                'lessisbetter': False,
+                'lessisbetter': line[modeIndex] != 'thrpt',
                 'units': 'records/ms',
                 'result_value': float(line[scoreIndex]),
 
