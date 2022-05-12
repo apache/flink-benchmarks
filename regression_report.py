@@ -93,15 +93,26 @@ def loadBenchmarkNames(codespeedUrl):
     return execToBenchmarks
 
 """
-Returns a list of benchmark results
+Returns benchmark results response as parsed JSON
 """
 def loadData(codespeedUrl, exe, benchmark, downloadSamples):
     url = codespeedUrl + 'timeline/json/?' + urllib.urlencode({'exe': exe, 'ben': benchmark, 'env': ENVIRONMENT, 'revs': downloadSamples})
     f = urllib2.urlopen(url)
     response = f.read()
     f.close()
-    result = json.loads(response)['timelines'][0]['branches']['master'][exe]
-    return [score for (date, score, deviation, commit, branch) in result]
+    return json.loads(response)
+
+"""
+Returns a list of benchmark results
+"""
+def parseResults(parsed_json):
+    return [score for (date, score, deviation, commit, branch) in parsed_json['timelines'][0]['branches']['master'][exe]]
+
+"""
+Returns whether less is better for this benchmark
+"""
+def parseLessIsBetter(parsed_json):
+    return 'less is better' in str(parsed_json['timelines'][0]['lessisbetter'])
 
 def getMedian(lst):
     lst = sorted(lst)  # Sort the list first
@@ -113,7 +124,9 @@ def getMedian(lst):
         return lst[len(lst) // 2]
 
 def checkBenchmark(args, exe, benchmark):
-    results = loadData(args.codespeed, exe, benchmark, args.downloadSamples)
+    parsed_json = loadData(args.codespeed, exe, benchmark, args.downloadSamples)
+    results = parseResults(parsed_json)
+    less_is_better = parseLessIsBetter(parsed_json)
 
     urlToBenchmark = args.codespeed + 'timeline/#/?' + urllib.urlencode({
         'ben': benchmark,
@@ -131,9 +144,12 @@ def checkBenchmark(args, exe, benchmark):
     median_trend = 0
     if median != 0:
         median_trend = recent_median * 100 / median - 100
-    if median_trend < args.medianTrendThreshold:
-        # regression detected, print warning
-        print "<%s|%s> median=%s recent_median=%s" % (urlToBenchmark, benchmark, median, recent_median)
+    if (
+            (less_is_better and median_trend > args.medianTrendThreshold) or
+            ((not less_is_better) and median_trend < args.medianTrendThreshold)
+        ):
+            # regression detected, print warning
+            print "<%s|%s> median=%s recent_median=%s" % (urlToBenchmark, benchmark, median, recent_median)
 
 if __name__ == "__main__":
     args = parser.parse_args()
