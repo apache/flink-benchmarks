@@ -34,6 +34,9 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
+import java.time.Duration;
+
+import static org.apache.flink.configuration.ResourceManagerOptions.REQUIREMENTS_CHECK_DELAY;
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
 @State(Thread)
@@ -107,6 +110,8 @@ public class FlinkEnvironmentContext {
         // It doesn't make sense to wait for the final checkpoint in benchmarks since it only prolongs
         // the test but doesn't give any advantages.
         configuration.set(ExecutionCheckpointingOptions.ENABLE_CHECKPOINTS_AFTER_TASKS_FINISH, false);
+        // TODO: remove this line after FLINK-28243 will be done
+        configuration.set(REQUIREMENTS_CHECK_DELAY, Duration.ZERO);
         return configuration;
     }
 }
