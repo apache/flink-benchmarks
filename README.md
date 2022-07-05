@@ -52,6 +52,14 @@ We also support to run each benchmark once (with only one fork and one iteration
 mvn test -P test
 ```
 
+## Jenkins
+
+These benchmarks can be managed by Jenkins and represent result by Codespeed. There are `jenkinsfile`'s in `jenkinsfiles` folder
+that contains prepared scripts for that. The scripts can be configured in Jenkins in `Pipeline` section with `Pipeline script from SCM` definition.
+Scripts can contain parameters which should be parametrized in `Jenkins` build. 
+For the detailed information take a look at the description of specific script.
+The url of the Codespeed isn't parametrized and it should be changed directly in script.  
+
 ## Parameters
 
 There are some built-in parameters to run different benchmarks, these can be shown/overridden from the command line.
