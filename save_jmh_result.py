@@ -66,6 +66,8 @@ def readData(args):
         paramIndexes = map(lambda param : header.index(param), params)
         benchmarkIndex = header.index("Benchmark")
         scoreIndex = header.index("Score")
+        modeIndex = header.index("Mode")
+        unitIndex = header.index("Unit")
         errorIndex = scoreIndex + 1
 
         for line in lines[1:]:
@@ -74,7 +76,12 @@ def readData(args):
                 for paramIndex in paramIndexes:
                     if len(line[paramIndex]) > 0:
                         name += "." + line[paramIndex]
-
+            lessIsBetter = (line[modeIndex] == "avgt" or line[modeIndex] == "ss")
+            # unitsTitle is used to distinguish different groups of benchmarks when getting changes
+            # see https://github.com/tobami/codespeed/blob/263860bc298fd970c8466b3161de386582e4f801/codespeed/models.py#L444
+            unitsTitle = "Time"
+            if lessIsBetter:
+                unitsTitle = "Times"
             results.append({
                 'commitid': args.commit,
                 'branch': args.branch,
@@ -82,8 +89,9 @@ def readData(args):
                 'executable': args.executable,
                 'benchmark': name,
                 'environment': args.environment,
-                'lessisbetter': False,
-                'units': 'records/ms',
+                'lessisbetter': lessIsBetter,
+                'units': line[unitIndex],
+                'units_title': unitsTitle,
                 'result_value': float(line[scoreIndex]),
 
                 'revision_date': str(modificationDate),

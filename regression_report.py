@@ -100,8 +100,10 @@ def loadData(codespeedUrl, exe, benchmark, downloadSamples):
     f = urllib2.urlopen(url)
     response = f.read()
     f.close()
-    result = json.loads(response)['timelines'][0]['branches']['master'][exe]
-    return [score for (date, score, deviation, commit, branch) in result]
+    timelines = json.loads(response)['timelines'][0]
+    result = timelines['branches']['master'][exe]
+    lessIsbBetter = (timelines['lessisbetter'] == " (less is better)")
+    return [score for (date, score, deviation, commit, branch) in result], lessIsbBetter
 
 def getMedian(lst):
     lst = sorted(lst)  # Sort the list first
@@ -112,8 +114,20 @@ def getMedian(lst):
         # If length is odd then get middle value
         return lst[len(lst) // 2]
 
+def isThresholdReached(threshold, baselineValue, comparedValue, lessIsbBetter):
+    ratio = 0
+    if baselineValue != 0:
+        ratio = comparedValue * 100 / baselineValue - 100
+    if lessIsbBetter:
+        if ratio > (-1 * threshold):
+            return True
+    elif ratio < threshold:
+        return True
+
+    return False
+
 def checkBenchmark(args, exe, benchmark):
-    results = loadData(args.codespeed, exe, benchmark, args.downloadSamples)
+    results, lessIsbBetter = loadData(args.codespeed, exe, benchmark, args.downloadSamples)
 
     urlToBenchmark = args.codespeed + 'timeline/#/?' + urllib.urlencode({
         'ben': benchmark,
@@ -128,11 +142,7 @@ def checkBenchmark(args, exe, benchmark):
         return
     median = getMedian(results[args.recentTrend:args.baseLine])
     recent_median = getMedian(results[:args.recentTrend])
-    median_trend = 0
-    if median != 0:
-        median_trend = recent_median * 100 / median - 100
-    if median_trend < args.medianTrendThreshold:
-        # regression detected, print warning
+    if isThresholdReached(args.medianTrendThreshold, median, recent_median, lessIsbBetter):
         print "<%s|%s> median=%s recent_median=%s" % (urlToBenchmark, benchmark, median, recent_median)
 
 if __name__ == "__main__":
