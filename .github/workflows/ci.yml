@@ -36,6 +36,10 @@ jobs:
         with:
           maven-version: 3.8.6
 
+      - name: Install prerequisites
+        run: |
+          sudo apt install libssl1.0.0
+
       - name: Compile
         # https.protocols is a workaround for https://bugs.openjdk.java.net/browse/JDK-8213202
         run: mvn install -P test -DskipTests=true -Dmaven.javadoc.skip=true -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -B -V
