@@ -39,7 +39,7 @@ jobs:
       - name: Install prerequisites
         run: |
           sudo apt-get update
-          sudo apt install libssl1.0.0
+          sudo apt install libssl1.1
 
       - name: Compile
         # https.protocols is a workaround for https://bugs.openjdk.java.net/browse/JDK-8213202
