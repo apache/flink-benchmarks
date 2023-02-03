@@ -24,7 +24,13 @@ timestamps {
                     sh './regression_report.py > regression-report'
                     def alerts = readFile "regression-report"
                     if (alerts) {
-                         slackSend (message: "Performance regression\n$alerts", channel: "#flink-dev-benchmarks")
+                         def attachments = [
+                           [
+                             text: "Performance regression\n$alerts",
+                             fallback: "Performance regression",
+                           ]
+                         ]
+                         slackSend (attachments: attachments, channel: "#flink-dev-benchmarks")
                     }
                 }
             }
