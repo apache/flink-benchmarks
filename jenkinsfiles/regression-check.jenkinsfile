@@ -21,7 +21,7 @@ timestamps {
             node('Hetzner') {
                 dir('flink-benchmarks') {
                     git url: 'https://github.com/apache/flink-benchmarks.git', branch: 'master'
-                    sh './regression_report.py > regression-report'
+                    sh './regression_report_v2.py > regression-report'
                     def alerts = readFile "regression-report"
                     if (alerts) {
                          def attachments = [
