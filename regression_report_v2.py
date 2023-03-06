@@ -29,16 +29,14 @@ This is a regression detection algorithm based on the historical maximum/minimum
 to https://docs.google.com/document/d/1Bvzvq79Ll5yxd1UtC0YzczgFbZPAgPcN3cI0MjVkIag/edit the detailed design.
 """
 
-DEFAULT_CODESPEED_URL = 'http://codespeed.dak8s.net:8000/'
 ENVIRONMENT = 2
-DEFAULT_THRESHOLD = 0.04
-DEFAULT_BASELINE = 30
 
 """
 Returns a list of benchmark results
 """
-def loadHistoryData(codespeedUrl, exe, benchmark, downloadSamples):
-    url = codespeedUrl + 'timeline/json/?' + urllib.urlencode({'exe': exe, 'ben': benchmark, 'env': ENVIRONMENT, 'revs': downloadSamples})
+def loadHistoryData(codespeedUrl, exe, benchmark, baselineSize):
+    url = codespeedUrl + 'timeline/json/?' + urllib.urlencode(
+        {'exe': exe, 'ben': benchmark, 'env': ENVIRONMENT, 'revs': baselineSize})
     f = urllib2.urlopen(url)
     response = f.read()
     f.close()
@@ -47,62 +45,61 @@ def loadHistoryData(codespeedUrl, exe, benchmark, downloadSamples):
     lessIsbBetter = (timelines['lessisbetter'] == " (less is better)")
     return result, lessIsbBetter
 
-def checkWithMax(urlToBenchmark, stds, scores, index, baselineSize):
-    sustainable_x = [min(scores[i - 2 : i + 1]) for i in range(index - baselineSize, index)]
+def detectRegression(urlToBenchmark, stds, scores, baselineSize, minRegressionRatio, minInstabilityMultiplier,
+                     direction):
+    sustainable_x = [min(scores[i - 3: i]) for i in range(3, baselineSize)]
     baseline_throughput = max(sustainable_x)
-    current_throughput = max(scores[index - 3 : index])
-    current_unstable = stds[index] / current_throughput
-    if 1 - current_throughput / baseline_throughput > max(DEFAULT_THRESHOLD, 2 * current_unstable):
-        print "<%s|%s> baseline=%s current_value=%s" % (urlToBenchmark, benchmark, baseline_throughput, current_throughput)
-
-def checkWithMin(urlToBenchmark, stds, scores, index, baselineSize):
-    sustainable_x = [max(scores[i - 2 : i + 1]) for i in range(index - baselineSize, index)]
-    baseline_throughput = min(sustainable_x)
-    current_throughput = min(scores[index - 3 : index])
-    current_unstable = stds[index] / current_throughput
-    if 1 - current_throughput / baseline_throughput < -1.0 * max(DEFAULT_THRESHOLD, 2 * current_unstable):
+    current_throughput = max(scores[-3:])
+    current_instability = stds[-1] / current_throughput
+    if direction * (1 - current_throughput / baseline_throughput) > max(minRegressionRatio, minInstabilityMultiplier * current_instability):
         print "<%s|%s> baseline=%s current_value=%s" % (urlToBenchmark, benchmark, baseline_throughput, current_throughput)
 
 def checkBenchmark(args, exe, benchmark):
-    results, lessIsbBetter = loadHistoryData(args.codespeed, exe, benchmark, args.downloadSamples)
+    results, lessIsbBetter = loadHistoryData(args.codespeedUrl, exe, benchmark, args.baselineSize + 3)
     results = list(reversed(results))
     scores = [score for (date, score, deviation, commit, branch) in results]
     stds = [deviation for (date, score, deviation, commit, branch) in results]
 
-    urlToBenchmark = args.codespeed + 'timeline/#/?' + urllib.urlencode({
+    urlToBenchmark = args.codespeedUrl + 'timeline/#/?' + urllib.urlencode({
         'ben': benchmark,
         'exe': exe,
         'env': ENVIRONMENT,
-        'revs': args.downloadSamples,
+        'revs': args.displaySamples,
         'equid': 'off',
         'quarts': 'on',
         'extr': 'on'})
 
-    if len(results) < args.baseLine:
+    if len(results) < args.baselineSize:
         return
 
+    direction = 1
     if lessIsbBetter:
-        checkWithMin(urlToBenchmark, stds, scores, len(scores) - 1,  args.baseLine)
-    else:
-        checkWithMax(urlToBenchmark, stds, scores, len(scores) - 1,  args.baseLine)
+        scores = [-1 * score for score in scores]
+        direction = -1
+    detectRegression(urlToBenchmark, stds, scores, args.baselineSize, args.minRegressionRatio,
+                     args.minInstabilityMultiplier, direction)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Regression report based on Max/Min value')
-    parser.add_argument('--base-line-size', dest='baseLine', required=False, default=DEFAULT_BASELINE, type=int,
+    parser.add_argument('--baseline-size', dest='baselineSize', required=False, default=30, type=int,
                         help='Number of samples taken as the base line.')
-    parser.add_argument('--download-samples-size', dest='downloadSamples', required=False, default=200,
+    parser.add_argument('--display-samples', dest='displaySamples', required=False, default=200,
                         type=int,
-                        help='Number of samples download from the codespeed. Not all values are '
-                             'working.')
-    parser.add_argument('--trend-threshold', dest='trendThreshold', required=False,
-                        default=DEFAULT_THRESHOLD, type=float,
-                        help="Tolerated threshold for change between baseline and recent trend value "
-                             "in percentages")
-    parser.add_argument('--codespeed', dest='codespeed', default=DEFAULT_CODESPEED_URL,
-                        help='codespeed url, default: %s' % DEFAULT_CODESPEED_URL)
+                        help='Number of samples to display in regression report for human inspection. Not all values '
+                             'are working.')
+    parser.add_argument('--min-regression-ratio', dest='minRegressionRatio', required=False,
+                        default=0.04, type=float,
+                        help='A regression should be alerted only if the ratio of change between the baseline '
+                             'throughput and the current throughput exceeds the configured value.')
+    parser.add_argument('--min-instability-multiplier', dest='minInstabilityMultiplier', required=False,
+                        default=2, type=float,
+                        help="Min instability multiplier to measure deviation.")
+    parser.add_argument('--codespeed-url', dest='codespeedUrl', default="http://codespeed.dak8s.net:8000/",
+                        help='The codespeed url.')
+
     args = parser.parse_args()
-    execToBenchmarks = loadBenchmarkNames(args.codespeed)
+    execToBenchmarks = loadBenchmarkNames(args.codespeedUrl)
     for exe, benchmarks in execToBenchmarks.items():
         for benchmark in benchmarks:
             checkBenchmark(args, exe, benchmark)
