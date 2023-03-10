@@ -25,11 +25,15 @@ import urllib2
 from regression_report import loadBenchmarkNames
 
 """
-This is a regression detection algorithm based on the historical maximum/minimum value, please refer
-to https://docs.google.com/document/d/1Bvzvq79Ll5yxd1UtC0YzczgFbZPAgPcN3cI0MjVkIag/edit the detailed design.
+The regression detection algorithm calculates the regression ratio as the ratio of change between the current
+throughput and the maximum throughput observed in the most recent numBaselineSamples samples. A regression alert is
+triggered if the regression ratio exceeds max(minRegressionRatio, minInstabilityMultiplier * lastStandardDeviation)
+
+Please refer to https://docs.google.com/document/d/1Bvzvq79Ll5yxd1UtC0YzczgFbZPAgPcN3cI0MjVkIag for more detail.
 """
 
 ENVIRONMENT = 2
+MIN_SAMPLE_SIZE_LIMIT = 5
 
 """
 Returns a list of benchmark results
@@ -51,11 +55,11 @@ def detectRegression(urlToBenchmark, stds, scores, baselineSize, minRegressionRa
     baseline_throughput = max(sustainable_x)
     current_throughput = max(scores[-3:])
     current_instability = stds[-1] / current_throughput
-    if direction * (1 - current_throughput / baseline_throughput) > max(minRegressionRatio, minInstabilityMultiplier * current_instability):
-        print "<%s|%s> baseline=%s current_value=%s" % (urlToBenchmark, benchmark, baseline_throughput, current_throughput)
+    if direction * (1 - current_throughput / baseline_throughput) > max(minRegressionRatio,  direction * minInstabilityMultiplier * current_instability):
+        print "<%s|%s> baseline=%s current_value=%s" % (urlToBenchmark, benchmark, direction * baseline_throughput, direction * current_throughput)
 
 def checkBenchmark(args, exe, benchmark):
-    results, lessIsbBetter = loadHistoryData(args.codespeedUrl, exe, benchmark, args.baselineSize + 3)
+    results, lessIsbBetter = loadHistoryData(args.codespeedUrl, exe, benchmark, args.numBaselineSamples + 3)
     results = list(reversed(results))
     scores = [score for (date, score, deviation, commit, branch) in results]
     stds = [deviation for (date, score, deviation, commit, branch) in results]
@@ -64,27 +68,28 @@ def checkBenchmark(args, exe, benchmark):
         'ben': benchmark,
         'exe': exe,
         'env': ENVIRONMENT,
-        'revs': args.displaySamples,
+        'revs': args.numDisplaySamples,
         'equid': 'off',
         'quarts': 'on',
         'extr': 'on'})
 
-    if len(results) < args.baselineSize:
+    if len(results) < MIN_SAMPLE_SIZE_LIMIT:
         return
 
     direction = 1
     if lessIsbBetter:
         scores = [-1 * score for score in scores]
         direction = -1
-    detectRegression(urlToBenchmark, stds, scores, args.baselineSize, args.minRegressionRatio,
+    detectRegression(urlToBenchmark, stds, scores, args.numBaselineSamples, args.minRegressionRatio,
                      args.minInstabilityMultiplier, direction)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Regression report based on Max/Min value')
-    parser.add_argument('--baseline-size', dest='baselineSize', required=False, default=30, type=int,
-                        help='Number of samples taken as the base line.')
-    parser.add_argument('--display-samples', dest='displaySamples', required=False, default=200,
+    parser.add_argument('--num-baseline-samples', dest='numBaselineSamples', required=False, default=30, type=int,
+                        help='The maximum number of recent samples across which the maximum achieved throughput would be '
+                        'used as the baseline for regression detection.')
+    parser.add_argument('--num-display-samples', dest='numDisplaySamples', required=False, default=200,
                         type=int,
                         help='Number of samples to display in regression report for human inspection. Not all values '
                              'are working.')
