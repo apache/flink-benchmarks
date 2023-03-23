@@ -31,6 +31,8 @@ timestamps {
                            ]
                          ]
                          slackSend (attachments: attachments, channel: "#flink-dev-benchmarks")
+                    } else {
+                         slackSend (channel: "#flink-dev-benchmarks", message: "No regression found.")
                     }
                 }
             }
