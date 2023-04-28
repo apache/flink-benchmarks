@@ -108,7 +108,6 @@ under the License.
 			<artifactId>flink-streaming-java</artifactId>
 			<version>${flink.version}</version>
 			<type>test-jar</type>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
