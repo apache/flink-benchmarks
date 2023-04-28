@@ -38,9 +38,9 @@ jobs:
 
       - name: Install prerequisites
         run: |
-          wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.11_amd64.deb
-          sudo apt install ./libssl1.0.0_1.0.2n-1ubuntu5.11_amd64.deb
-          rm libssl1.0.0_1.0.2n-1ubuntu5.11_amd64.deb
+          wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.12_amd64.deb
+          sudo apt install ./libssl1.0.0_1.0.2n-1ubuntu5.12_amd64.deb
+          rm libssl1.0.0_1.0.2n-1ubuntu5.12_amd64.deb
 
       - name: Compile
         # https.protocols is a workaround for https://bugs.openjdk.java.net/browse/JDK-8213202
