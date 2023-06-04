@@ -51,7 +51,8 @@ def loadHistoryData(codespeedUrl, exe, benchmark, baselineSize):
 
 def detectRegression(urlToBenchmark, stds, scores, baselineSize, minRegressionRatio, minInstabilityMultiplier,
                      direction):
-    sustainable_x = [min(scores[i - 3: i]) for i in range(3, baselineSize)]
+
+    sustainable_x = [min(scores[i - 3: i]) for i in range(3, min(len(scores), baselineSize))]
     baseline_throughput = max(sustainable_x)
     current_throughput = max(scores[-3:])
     current_instability = stds[-1] / current_throughput
