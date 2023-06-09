@@ -35,7 +35,7 @@ import org.openjdk.jmh.runner.RunnerException;
 public class SchedulingDownstreamTasksInBatchJobBenchmarkExecutor
         extends SchedulerBenchmarkExecutorBase {
 
-    @Param({"BATCH"})
+    @Param({"BATCH", "BATCH_HYBRID_DEFAULT", "BATCH_HYBRID_PARTIAL_FINISHED", "BATCH_HYBRID_ALL_FINISHED"})
     private JobConfiguration jobConfiguration;
 
     private SchedulingDownstreamTasksInBatchJobBenchmark benchmark;
