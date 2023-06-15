@@ -36,7 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getMapState;
+import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.getMapState;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeyCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeys;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;

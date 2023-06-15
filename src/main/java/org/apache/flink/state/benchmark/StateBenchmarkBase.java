@@ -21,7 +21,6 @@ import org.apache.flink.benchmark.BenchmarkBase;
 import org.apache.flink.config.ConfigUtil;
 import org.apache.flink.config.StateBenchmarkOptions;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils;
 import org.apache.flink.runtime.state.KeyedStateBackend;
 
 import org.openjdk.jmh.annotations.Level;
@@ -40,7 +39,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.cleanUp;
+import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.cleanUp;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeyCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeys;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapValues;
