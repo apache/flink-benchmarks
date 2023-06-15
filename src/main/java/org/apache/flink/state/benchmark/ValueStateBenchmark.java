@@ -32,7 +32,7 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getValueState;
+import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.getValueState;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
 
 /** Implementation for listValue state benchmark testing. */

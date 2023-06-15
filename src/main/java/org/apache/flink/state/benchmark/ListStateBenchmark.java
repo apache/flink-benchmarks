@@ -37,9 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.applyToAllKeys;
-import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.compactState;
-import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getListState;
+import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.applyToAllKeys;
+import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.compactState;
+import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.getListState;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.listValueCount;
 import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
 

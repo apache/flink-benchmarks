@@ -23,7 +23,7 @@ import org.apache.flink.api.common.typeinfo.PrimitiveArrayTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.benchmark.BenchmarkBase;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.contrib.streaming.state.benchmark.RescalingBenchmark;
+import org.apache.flink.state.benchmark.RescalingBenchmark;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.util.Collector;

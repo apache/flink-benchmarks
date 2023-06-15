@@ -22,7 +22,7 @@ import org.apache.flink.api.common.JobID;
 import org.apache.flink.config.ConfigUtil;
 import org.apache.flink.config.StateBenchmarkOptions;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.contrib.streaming.state.benchmark.RescalingBenchmarkBuilder;
+import org.apache.flink.state.benchmark.RescalingBenchmarkBuilder;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.runtime.state.storage.FileSystemCheckpointStorage;
 import org.openjdk.jmh.annotations.*;
