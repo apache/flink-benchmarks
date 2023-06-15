@@ -56,7 +56,7 @@ public class StateBenchmarkBase extends BenchmarkBase {
     static AtomicInteger keyIndex;
     final ThreadLocalRandom random = ThreadLocalRandom.current();
 
-    @Param({"HEAP", "ROCKSDB"})
+    @Param({"HEAP", "ROCKSDB", "ROCKSDB_CHANGELOG"})
     private StateBackendBenchmarkUtils.StateBackendType backendType;
 
     KeyedStateBackend<Long> keyedStateBackend;
