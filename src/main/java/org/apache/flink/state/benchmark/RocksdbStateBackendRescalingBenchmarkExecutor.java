@@ -48,8 +48,6 @@ public class RocksdbStateBackendRescalingBenchmarkExecutor extends RescalingBenc
     @Setup(Level.Trial)
     public void setUp() throws Exception {
         EmbeddedRocksDBStateBackend stateBackend = new EmbeddedRocksDBStateBackend(true);
-        Configuration benchMarkConfig = ConfigUtil.loadBenchMarkConf();
-        String stateDataDirPath = benchMarkConfig.getString(StateBenchmarkOptions.STATE_DATA_DIR);
         benchmark =
                 new RescalingBenchmarkBuilder<byte[]>()
                         .setMaxParallelism(128)
@@ -57,7 +55,7 @@ public class RocksdbStateBackendRescalingBenchmarkExecutor extends RescalingBenc
                         .setParallelismAfter(rescaleType.getParallelismAfter())
                         .setManagedMemorySize(512 * 1024 * 1024)
                         .setCheckpointStorageAccess(
-                                new FileSystemCheckpointStorage("file://" + stateDataDirPath)
+                                new FileSystemCheckpointStorage("file://" + prepareDirectory("rescaleDb").getAbsolutePath())
                                         .createCheckpointStorage(new JobID()))
                         .setStateBackend(stateBackend)
                         .setStreamRecordGenerator(new ByteArrayRecordGenerator(numberOfKeys, keyLen))

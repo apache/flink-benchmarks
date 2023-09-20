@@ -50,15 +50,13 @@ public class HashMapStateBackendRescalingBenchmarkExecutor extends RescalingBenc
     public void setUp() throws Exception {
         // FsStateBackend is deprecated in favor of HashMapStateBackend with setting checkpointStorage.
         HashMapStateBackend stateBackend = new HashMapStateBackend();
-        Configuration benchMarkConfig = ConfigUtil.loadBenchMarkConf();
-        String stateDataDirPath = benchMarkConfig.getString(StateBenchmarkOptions.STATE_DATA_DIR);
         benchmark =
                 new RescalingBenchmarkBuilder<byte[]>()
                         .setMaxParallelism(128)
                         .setParallelismBefore(rescaleType.getParallelismBefore())
                         .setParallelismAfter(rescaleType.getParallelismAfter())
                         .setCheckpointStorageAccess(
-                                new FileSystemCheckpointStorage(new URI("file://" + stateDataDirPath), 0)
+                                new FileSystemCheckpointStorage(new URI("file://" + prepareDirectory("rescaleDb").getAbsolutePath()), 0)
                                         .createCheckpointStorage(new JobID()))
                         .setStateBackend(stateBackend)
                         .setStreamRecordGenerator(new ByteArrayRecordGenerator(numberOfKeys, keyLen))
