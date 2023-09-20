@@ -22,6 +22,8 @@ import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.PrimitiveArrayTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.benchmark.BenchmarkBase;
+import org.apache.flink.config.ConfigUtil;
+import org.apache.flink.config.StateBenchmarkOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.state.benchmark.RescalingBenchmark;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
@@ -36,6 +38,10 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
@@ -55,6 +61,26 @@ public class RescalingBenchmarkBase extends BenchmarkBase {
                         .build();
 
         new Runner(options).run();
+    }
+
+    protected static File prepareDirectory(String prefix) throws IOException {
+        Configuration benchMarkConfig = ConfigUtil.loadBenchMarkConf();
+        String stateDataDirPath = benchMarkConfig.getString(StateBenchmarkOptions.STATE_DATA_DIR);
+        File dataDir = null;
+        if (stateDataDirPath != null) {
+            dataDir = new File(stateDataDirPath);
+            if (!dataDir.exists()) {
+                Files.createDirectories(Paths.get(stateDataDirPath));
+            }
+        }
+        File target = File.createTempFile(prefix, "", dataDir);
+        if (target.exists() && !target.delete()) {
+            throw new IOException("Target dir {" + target.getAbsolutePath() + "} exists but failed to clean it up");
+        } else if (!target.mkdirs()) {
+            throw new IOException("Failed to create target directory: " + target.getAbsolutePath());
+        } else {
+            return target;
+        }
     }
 
     @State(Scope.Thread)
