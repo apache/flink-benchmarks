@@ -97,26 +97,36 @@ public class HighAvailabilityServiceBenchmark extends BenchmarkBase {
 
 		@Override
 		public void setUp() throws Exception {
-			testingServer = new TestingServer();
-			testingServer.start();
+			if (isZookeeperHighAvailability()) {
+				testingServer = new TestingServer();
+				testingServer.start();
+			}
 
 			super.setUp();
+		}
+
+		private boolean isZookeeperHighAvailability() {
+			return highAvailabilityMode == HighAvailabilityMode.ZOOKEEPER;
 		}
 
 		@Override
 		protected Configuration createConfiguration() {
 			Configuration configuration = super.createConfiguration();
 			configuration.set(HighAvailabilityOptions.HA_MODE, highAvailabilityMode.name());
-			configuration.set(HighAvailabilityOptions.HA_ZOOKEEPER_QUORUM, testingServer.getConnectString());
 			configuration.set(HighAvailabilityOptions.HA_STORAGE_PATH, haDir.toURI().toString());
+			if (isZookeeperHighAvailability()) {
+				configuration.set(HighAvailabilityOptions.HA_ZOOKEEPER_QUORUM, testingServer.getConnectString());
+			}
 			return configuration;
 		}
 
 		@Override
 		public void tearDown() throws Exception {
 			super.tearDown();
-			testingServer.stop();
-			testingServer.close();
+			if (isZookeeperHighAvailability()) {
+				testingServer.stop();
+				testingServer.close();
+			}
 			FileUtils.deleteDirectory(haDir);
 		}
 	}
