@@ -39,6 +39,12 @@ There're mainly three ways:
     ```
     java -jar target/benchmarks.jar -rf csv "<benchmark_class>"
     ```
+   
+    When using uber jar with Java 17, you may need add arguments in command like:
+
+    ```
+    java --add-opens java.base/java.util=ALL-UNNAMED -jar target/benchmarks.jar -rf csv "<benchmark_class>"
+    ```
 
 We also support to run each benchmark once (with only one fork and one iteration) for testing, with below command:
 
