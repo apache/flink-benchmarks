@@ -392,6 +392,93 @@ under the License.
 				</plugins>
 			</build>
 		</profile>
+
+		<profile>
+			<id>benchmark-java17</id>
+			<activation>
+				<jdk>[17,)</jdk>
+				<property>
+					<name>benchmarks</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>${maven.exec.version}</version>
+						<executions>
+							<execution>
+								<id>run-benchmarks</id>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<classpathScope>test</classpathScope>
+							<executable>${executableJava}</executable>
+							<arguments>
+								<argument>--add-opens</argument>
+								<argument>java.base/java.util=ALL-UNNAMED</argument>
+								<argument>-classpath</argument>
+								<classpath/>
+								<argument>org.openjdk.jmh.Main</argument>
+								<!--shouldFailOnError-->
+								<argument>-foe</argument>
+								<argument>true</argument>
+								<argument>-e</argument>
+								<argument>${benchmarkExcludes}</argument>
+								<argument>-rf</argument>
+								<argument>csv</argument>
+								<argument>${benchmarks}</argument>
+							</arguments>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<version>3.2.0</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+								<configuration>
+									<finalName>benchmarks</finalName>
+									<transformers>
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+											<mainClass>org.openjdk.jmh.Main</mainClass>
+										</transformer>
+										<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+											<resource>reference.conf</resource>
+										</transformer>
+										<!-- The service transformer is needed to merge META-INF/services files -->
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+										<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+											<projectName>Apache Flink</projectName>
+										</transformer>
+									</transformers>
+									<filters>
+										<filter>
+											<artifact>*</artifact>
+											<excludes>
+												<exclude>META-INF/*.SF</exclude>
+												<exclude>META-INF/*.DSA</exclude>
+												<exclude>META-INF/*.RSA</exclude>
+											</excludes>
+										</filter>
+									</filters>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
 		<profile>
 			<id>custom-benchmark</id>
 			<activation>
