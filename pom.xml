@@ -63,7 +63,6 @@ under the License.
 		<chill.version>0.7.6</chill.version>
 		<thrift.version>0.13.0</thrift.version>
 		<protobuf.version>3.21.7</protobuf.version>
-		<curator.version>5.4.0</curator.version>
 		<netty-tcnative.flavor>dynamic</netty-tcnative.flavor>
 		<benchmarkExcludes>org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*,org.apache.flink.scheduler.benchmark.*</benchmarkExcludes>
 		<benchmarks>.*</benchmarks>
@@ -107,6 +106,13 @@ under the License.
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-streaming-java</artifactId>
+			<version>${flink.version}</version>
+			<type>test-jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-runtime</artifactId>
 			<version>${flink.version}</version>
 			<type>test-jar</type>
 		</dependency>
@@ -257,12 +263,6 @@ under the License.
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
 			<version>${protobuf.version}</version>
-		</dependency>
-		<!-- Curator -->
-		<dependency>
-			<groupId>org.apache.curator</groupId>
-			<artifactId>curator-test</artifactId>
-			<version>${curator.version}</version>
 		</dependency>
 	</dependencies>
 

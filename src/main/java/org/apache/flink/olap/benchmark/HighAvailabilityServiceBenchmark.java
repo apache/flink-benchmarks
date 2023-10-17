@@ -47,7 +47,13 @@ import java.util.UUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
-/** The benchmark for submitting short-lived jobs with and without high availability service. */
+/**
+ * When Flink session cluster supports shorted-lived jobs(OLAP), HA service needs to be enabled.
+ * However, after HA service is enabled, Flink needs to interact with HA service frequently when
+ * processing short-lived jobs, resulting in increased latency and decreased QPS. This benchmark
+ * mainly statist the QPS of Flink Session cluster with and without HA service for shorted-lived
+ * jobs and HA service optimization.
+ */
 @OutputTimeUnit(SECONDS)
 public class HighAvailabilityServiceBenchmark extends BenchmarkBase {
 	public static void main(String[] args) throws RunnerException {
@@ -65,13 +71,13 @@ public class HighAvailabilityServiceBenchmark extends BenchmarkBase {
 		context.miniCluster.executeJobBlocking(buildNoOpJob());
 	}
 
-	private JobGraph buildNoOpJob() {
+	private static JobGraph buildNoOpJob() {
 		JobGraph jobGraph = new JobGraph(JobID.generate(), UUID.randomUUID().toString());
 		jobGraph.addVertex(createNoOpVertex());
 		return jobGraph;
 	}
 
-	private JobVertex createNoOpVertex() {
+	private static JobVertex createNoOpVertex() {
 		JobVertex vertex = new JobVertex("v");
 		vertex.setInvokableClass(NoOpInvokable.class);
 		vertex.setParallelism(1);
@@ -102,6 +108,10 @@ public class HighAvailabilityServiceBenchmark extends BenchmarkBase {
 				testingServer.start();
 			}
 
+			// The method `super.setUp()` will call `createConfiguration()` to get Configuration and
+			// create a `MiniCluster`. We need to start TestingServer before `createConfiguration()`,
+			// then we can add zookeeper quorum in the configuration. So we can only start
+			// `TestingServer` before `super.setUp()`.
 			super.setUp();
 		}
 
