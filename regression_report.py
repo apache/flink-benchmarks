@@ -25,8 +25,9 @@ import argparse
 import json
 import re
 
-DEFAULT_CODESPEED_URL = 'http://codespeed.dak8s.net:8000/'
-ENVIRONMENT = 2
+DEFAULT_CODESPEED_URL = 'http://flink-speed.xyz/'
+ENVIRONMENT = 3
+ENVNAME='Aliyun'
 
 current_date = datetime.datetime.today()
 
@@ -68,6 +69,37 @@ def loadExecutableAndRevisions(codespeedUrl):
             if exe not in revisions:
                 revisions[exe] = rev
     return revisions
+
+"""
+Returns a dict executable id -> executable name
+"""
+def loadExecutableNames(codespeedUrl):
+    names = {}
+    url = codespeedUrl + 'reports'
+    f = urllib2.urlopen(url)
+    response = f.read()
+    f.close()
+    for line in response.split('\n'):
+        # Find urls like: /changes/?rev=b8e7fc387dd-ffcdbb4-1647231150&amp;exe=1&amp;env=Hetzner
+        # and extract rev and exe params out of it
+        reports = dict(re.findall(r'([a-z]+)=([a-z0-9\-]+)', line))
+        if "exe" in reports and "rev" in reports:
+            exe = reports["exe"]
+            name = re.findall('([A-Za-z0-9\-\ \(\)]+)\@' + ENVNAME + '\<\/td\>', line)
+            # remember only the first (latest) revision for the given executable
+            if exe not in names and len(name) > 0:
+                names[exe] = name[0]
+    return names
+
+"""
+Returns the Java version from the executable name
+"""
+def extractJavaVersion(name):
+    result = re.findall('(\Java[0-9]+)', name)
+    if len(result) > 0:
+        return result[0]
+    else:
+        return "Java8"
 
 """
 Returns a dict executable -> benchmark names 
