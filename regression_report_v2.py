@@ -22,7 +22,11 @@ import json
 import urllib
 import urllib2
 
+from regression_report import DEFAULT_CODESPEED_URL
+from regression_report import ENVIRONMENT
 from regression_report import loadBenchmarkNames
+from regression_report import loadExecutableNames
+from regression_report import extractJavaVersion
 
 """
 The regression detection algorithm calculates the regression ratio as the ratio of change between the current
@@ -32,7 +36,6 @@ triggered if the regression ratio exceeds max(minRegressionRatio, minInstability
 Please refer to https://docs.google.com/document/d/1Bvzvq79Ll5yxd1UtC0YzczgFbZPAgPcN3cI0MjVkIag for more detail.
 """
 
-ENVIRONMENT = 2
 MIN_SAMPLE_SIZE_LIMIT = 5
 
 """
@@ -50,16 +53,16 @@ def loadHistoryData(codespeedUrl, exe, benchmark, baselineSize):
     return result, lessIsbBetter
 
 def detectRegression(urlToBenchmark, stds, scores, baselineSize, minRegressionRatio, minInstabilityMultiplier,
-                     direction):
+                     direction, execName):
 
     sustainable_x = [min(scores[i - 3: i]) for i in range(3, min(len(scores), baselineSize))]
     baseline_throughput = max(sustainable_x)
     current_throughput = max(scores[-3:])
     current_instability = stds[-1] / current_throughput
     if direction * (1 - current_throughput / baseline_throughput) > max(minRegressionRatio,  direction * minInstabilityMultiplier * current_instability):
-        print "<%s|%s> baseline=%s current_value=%s" % (urlToBenchmark, benchmark, direction * baseline_throughput, direction * current_throughput)
+        print "<%s|%s(%s)> baseline=%s current_value=%s" % (urlToBenchmark, benchmark, extractJavaVersion(execName), direction * baseline_throughput, direction * current_throughput)
 
-def checkBenchmark(args, exe, benchmark):
+def checkBenchmark(args, exe, benchmark, execNames):
     results, lessIsbBetter = loadHistoryData(args.codespeedUrl, exe, benchmark, args.numBaselineSamples + 3)
     results = list(reversed(results))
     scores = [score for (date, score, deviation, commit, branch) in results]
@@ -82,7 +85,7 @@ def checkBenchmark(args, exe, benchmark):
         scores = [-1 * score for score in scores]
         direction = -1
     detectRegression(urlToBenchmark, stds, scores, args.numBaselineSamples, args.minRegressionRatio,
-                     args.minInstabilityMultiplier, direction)
+                     args.minInstabilityMultiplier, direction, execNames[exe])
 
 
 if __name__ == "__main__":
@@ -101,11 +104,12 @@ if __name__ == "__main__":
     parser.add_argument('--min-instability-multiplier', dest='minInstabilityMultiplier', required=False,
                         default=2, type=float,
                         help="Min instability multiplier to measure deviation.")
-    parser.add_argument('--codespeed-url', dest='codespeedUrl', default="http://codespeed.dak8s.net:8000/",
+    parser.add_argument('--codespeed-url', dest='codespeedUrl', default=DEFAULT_CODESPEED_URL,
                         help='The codespeed url.')
 
     args = parser.parse_args()
     execToBenchmarks = loadBenchmarkNames(args.codespeedUrl)
+    execNames = loadExecutableNames(args.codespeedUrl)
     for exe, benchmarks in execToBenchmarks.items():
         for benchmark in benchmarks:
-            checkBenchmark(args, exe, benchmark)
+            checkBenchmark(args, exe, benchmark, execNames)

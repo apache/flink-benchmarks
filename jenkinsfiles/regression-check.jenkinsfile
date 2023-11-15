@@ -18,10 +18,10 @@
 timestamps {
     try {
         timeout(time: 3, unit: 'HOURS') { // includes waiting for a machine
-            node('Hetzner') {
+            node('Aliyun') {
                 dir('flink-benchmarks') {
                     git url: 'https://github.com/apache/flink-benchmarks.git', branch: 'master'
-                    sh './regression_report_v2.py > regression-report'
+                    sh 'python2 ./regression_report_v2.py > regression-report'
                     def alerts = readFile "regression-report"
                     if (alerts) {
                          def attachments = [
