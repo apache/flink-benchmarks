@@ -16,12 +16,10 @@
  * limitations under the License.
  */
 
-package org.apache.flink.olap.benchmark;
+package org.apache.flink.benchmark;
 
 import org.apache.curator.test.TestingServer;
 import org.apache.flink.api.common.JobID;
-import org.apache.flink.benchmark.BenchmarkBase;
-import org.apache.flink.benchmark.FlinkEnvironmentContext;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.HighAvailabilityOptions;
 import org.apache.flink.runtime.jobgraph.JobGraph;
