@@ -26,22 +26,22 @@ import java.util.Random;
  * Constants for state benchmark tests. Also generates random keys/values in advance to avoid
  * possible affect of using {@link Random#nextLong()}
  */
-class StateBenchmarkConstants {
+public class StateBenchmarkConstants {
     // TODO: why all of those static fields? Those should be inside a context class
-    static final int mapKeyCount = 10;
-    static final int listValueCount = 100;
-    static final int setupKeyCount = 500_000;
-    static final String rootDirName = "benchmark";
-    static final String recoveryDirName = "localRecovery";
-    static final String dbDirName = "dbPath";
+    public static final int mapKeyCount = 10;
+    public static final int listValueCount = 100;
+    public static final int setupKeyCount = 500_000;
+    public static final String rootDirName = "benchmark";
+    public static final String recoveryDirName = "localRecovery";
+    public static final String dbDirName = "dbPath";
 
-    static final ArrayList<Long> mapKeys = new ArrayList<>(mapKeyCount);
-    static final ArrayList<Double> mapValues = new ArrayList<>(mapKeyCount);
-    static final ArrayList<Long> setupKeys = new ArrayList<>(setupKeyCount);
-    static final int newKeyCount = 500_000;
-    static final ArrayList<Long> newKeys = new ArrayList<>(newKeyCount);
-    static final int randomValueCount = 1_000_000;
-    static final ArrayList<Long> randomValues = new ArrayList<>(randomValueCount);
+    public static final ArrayList<Long> mapKeys = new ArrayList<>(mapKeyCount);
+    public static final ArrayList<Double> mapValues = new ArrayList<>(mapKeyCount);
+    public static final ArrayList<Long> setupKeys = new ArrayList<>(setupKeyCount);
+    public static final int newKeyCount = 500_000;
+    public static final ArrayList<Long> newKeys = new ArrayList<>(newKeyCount);
+    public static final int randomValueCount = 1_000_000;
+    public static final ArrayList<Long> randomValues = new ArrayList<>(randomValueCount);
 
     static {
         for (int i = 0; i < mapKeyCount; i++) {

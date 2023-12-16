@@ -53,13 +53,13 @@ import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeys
 /** Base implementation of the state benchmarks. */
 public class StateBenchmarkBase extends BenchmarkBase {
     // TODO: why AtomicInteger?
-    static AtomicInteger keyIndex;
-    final ThreadLocalRandom random = ThreadLocalRandom.current();
+    protected static AtomicInteger keyIndex;
+    protected final ThreadLocalRandom random = ThreadLocalRandom.current();
 
     @Param({"HEAP", "ROCKSDB", "ROCKSDB_CHANGELOG"})
-    private StateBackendBenchmarkUtils.StateBackendType backendType;
+    protected StateBackendBenchmarkUtils.StateBackendType backendType;
 
-    KeyedStateBackend<Long> keyedStateBackend;
+    protected KeyedStateBackend<Long> keyedStateBackend;
 
     protected KeyedStateBackend<Long> createKeyedStateBackend() throws Exception {
         Configuration benchMarkConfig = ConfigUtil.loadBenchMarkConf();
@@ -89,12 +89,12 @@ public class StateBenchmarkBase extends BenchmarkBase {
 
     @State(Scope.Thread)
     public static class KeyValue {
-        long newKey;
-        long setUpKey;
-        long mapKey;
-        double mapValue;
-        long value;
-        List<Long> listValue;
+        public long newKey;
+        public long setUpKey;
+        public long mapKey;
+        public double mapValue;
+        public long value;
+        public List<Long> listValue;
 
         @Setup(Level.Invocation)
         public void kvSetup() {
