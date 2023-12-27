@@ -46,8 +46,7 @@ import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyC
 /** Implementation for list state benchmark testing. */
 public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
     private final String STATE_NAME = "listState";
-    private final ListStateDescriptor<Long> STATE_DESC =
-            configTtl(new ListStateDescriptor<>(STATE_NAME, Long.class));
+    private ListStateDescriptor<Long> stateDesc;
     private ListState<Long> listState;
     private List<Long> dummyLists;
 
@@ -64,7 +63,8 @@ public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
     @Setup
     public void setUp() throws Exception {
         keyedStateBackend = createKeyedStateBackend();
-        listState = getListState(keyedStateBackend, STATE_DESC);
+        stateDesc = configTtl(new ListStateDescriptor<>(STATE_NAME, Long.class));
+        listState = getListState(keyedStateBackend, stateDesc);
         dummyLists = new ArrayList<>(listValueCount);
         for (int i = 0; i < listValueCount; ++i) {
             dummyLists.add(random.nextLong());
@@ -76,6 +76,7 @@ public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
     public void setUpPerIteration() throws Exception {
         for (int i = 0; i < setupKeyCount; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
+            setTtlWhenInitialization();
             listState.add(random.nextLong());
         }
         // make sure only one sst file left, so all get invocation will access this single file,
@@ -84,15 +85,16 @@ public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
         if (keyedStateBackend instanceof RocksDBKeyedStateBackend) {
             RocksDBKeyedStateBackend<Long> rocksDBKeyedStateBackend =
                     (RocksDBKeyedStateBackend<Long>) keyedStateBackend;
-            compactState(rocksDBKeyedStateBackend, STATE_DESC);
+            compactState(rocksDBKeyedStateBackend, stateDesc);
         }
+        advanceTimePerIteration();
     }
 
     @TearDown(Level.Iteration)
     public void tearDownPerIteration() throws Exception {
         applyToAllKeys(
                 keyedStateBackend,
-                STATE_DESC,
+                stateDesc,
                 (k, state) -> {
                     keyedStateBackend.setCurrentKey(k);
                     state.clear();
@@ -101,7 +103,7 @@ public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
         if (keyedStateBackend instanceof RocksDBKeyedStateBackend) {
             RocksDBKeyedStateBackend<Long> rocksDBKeyedStateBackend =
                     (RocksDBKeyedStateBackend<Long>) keyedStateBackend;
-            compactState(rocksDBKeyedStateBackend, STATE_DESC);
+            compactState(rocksDBKeyedStateBackend, stateDesc);
         } else {
             System.gc();
         }

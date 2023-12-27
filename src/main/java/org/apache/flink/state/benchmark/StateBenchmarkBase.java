@@ -23,6 +23,7 @@ import org.apache.flink.config.StateBenchmarkOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.state.KeyedStateBackend;
 
+import org.apache.flink.runtime.state.ttl.TtlTimeProvider;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
@@ -62,6 +63,10 @@ public class StateBenchmarkBase extends BenchmarkBase {
     protected KeyedStateBackend<Long> keyedStateBackend;
 
     protected KeyedStateBackend<Long> createKeyedStateBackend() throws Exception {
+        return createKeyedStateBackend(TtlTimeProvider.DEFAULT);
+    }
+
+    protected KeyedStateBackend<Long> createKeyedStateBackend(TtlTimeProvider ttlTimeProvider) throws Exception {
         Configuration benchMarkConfig = ConfigUtil.loadBenchMarkConf();
         String stateDataDirPath = benchMarkConfig.getString(StateBenchmarkOptions.STATE_DATA_DIR);
         File dataDir = null;

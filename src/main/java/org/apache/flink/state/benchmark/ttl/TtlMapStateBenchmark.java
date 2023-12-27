@@ -22,6 +22,7 @@ import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.state.benchmark.StateBenchmarkBase;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.infra.Blackhole;
@@ -70,10 +71,16 @@ public class TtlMapStateBenchmark extends TtlStateBenchmarkBase {
         for (int i = 0; i < setupKeyCount; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
             for (int j = 0; j < mapKeyCount; j++) {
+                setTtlWhenInitialization();
                 mapState.put(mapKeys.get(j), random.nextDouble());
             }
         }
         keyIndex = new AtomicInteger();
+    }
+
+    @Setup(Level.Iteration)
+    public void setUpPerIteration() throws Exception {
+        advanceTimePerIteration();
     }
 
     @Benchmark
