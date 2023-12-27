@@ -21,6 +21,7 @@ package org.apache.flink.state.benchmark.ttl;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -53,10 +54,17 @@ public class TtlValueStateBenchmark extends TtlStateBenchmarkBase {
         keyedStateBackend = createKeyedStateBackend();
         valueState = getValueState(keyedStateBackend, configTtl(new ValueStateDescriptor<>("kvState", Long.class)));
         for (int i = 0; i < setupKeyCount; ++i) {
+            setTtlWhenInitialization();
             keyedStateBackend.setCurrentKey((long) i);
             valueState.update(random.nextLong());
         }
         keyIndex = new AtomicInteger();
+        finishInitialization();
+    }
+
+    @Setup(Level.Iteration)
+    public void setUpPerIteration() throws Exception {
+        advanceTimePerIteration();
     }
 
     @Benchmark
