@@ -46,6 +46,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
+import static org.apache.flink.state.benchmark.StateBenchmarkBase.createStateDataDir;
+
 public class RescalingBenchmarkBase extends BenchmarkBase {
 
     @Param({"RESCALE_IN", "RESCALE_OUT"})
@@ -64,23 +66,7 @@ public class RescalingBenchmarkBase extends BenchmarkBase {
     }
 
     protected static File prepareDirectory(String prefix) throws IOException {
-        Configuration benchMarkConfig = ConfigUtil.loadBenchMarkConf();
-        String stateDataDirPath = benchMarkConfig.getString(StateBenchmarkOptions.STATE_DATA_DIR);
-        File dataDir = null;
-        if (stateDataDirPath != null) {
-            dataDir = new File(stateDataDirPath);
-            if (!dataDir.exists()) {
-                Files.createDirectories(Paths.get(stateDataDirPath));
-            }
-        }
-        File target = File.createTempFile(prefix, "", dataDir);
-        if (target.exists() && !target.delete()) {
-            throw new IOException("Target dir {" + target.getAbsolutePath() + "} exists but failed to clean it up");
-        } else if (!target.mkdirs()) {
-            throw new IOException("Failed to create target directory: " + target.getAbsolutePath());
-        } else {
-            return target;
-        }
+        return StateBackendBenchmarkUtils.prepareDirectory(prefix, createStateDataDir());
     }
 
     @State(Scope.Thread)

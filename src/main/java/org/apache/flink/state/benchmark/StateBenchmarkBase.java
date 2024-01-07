@@ -67,6 +67,10 @@ public class StateBenchmarkBase extends BenchmarkBase {
     }
 
     protected KeyedStateBackend<Long> createKeyedStateBackend(TtlTimeProvider ttlTimeProvider) throws Exception {
+        return StateBackendBenchmarkUtils.createKeyedStateBackend(backendType, createStateDataDir());
+    }
+
+    public static File createStateDataDir() throws IOException {
         Configuration benchMarkConfig = ConfigUtil.loadBenchMarkConf();
         String stateDataDirPath = benchMarkConfig.getString(StateBenchmarkOptions.STATE_DATA_DIR);
         File dataDir = null;
@@ -76,7 +80,7 @@ public class StateBenchmarkBase extends BenchmarkBase {
                 Files.createDirectories(Paths.get(stateDataDirPath));
             }
         }
-        return StateBackendBenchmarkUtils.createKeyedStateBackend(backendType, dataDir);
+        return dataDir;
     }
 
     private static int getCurrentIndex() {
