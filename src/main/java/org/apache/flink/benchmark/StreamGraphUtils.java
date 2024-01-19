@@ -19,6 +19,8 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.benchmark.functions.LongSource;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.runtime.jobgraph.JobType;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -34,8 +36,11 @@ public class StreamGraphUtils {
         DataStreamSource<Long> source = env.addSource(new LongSource(numRecords));
         source.addSink(new DiscardingSink<>());
 
+        Configuration config = new Configuration();
+        config.set(PipelineOptions.OPERATOR_CHAINING, false);
+        env.configure(config);
+
         StreamGraph streamGraph = env.getStreamGraph();
-        streamGraph.setChaining(false);
         streamGraph.setGlobalStreamExchangeMode(GlobalStreamExchangeMode.ALL_EDGES_BLOCKING);
         streamGraph.setJobType(JobType.BATCH);
 
