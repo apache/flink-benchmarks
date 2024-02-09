@@ -15,14 +15,118 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ /**
+ * Script for running the parametrized benchmarks in parametrized environment.
+ * If default values should be changed in Jenkins manually, then 'skip_auto_parameters' parameter should be set to true
+ * in order to avoid rewriting values from this script.
+ * It makes sense to have 3 different Jenkins builds with different defaults:
+ * - Main Flink benchmarks:
+ *  - 'jmh_benchmarks' - 'org.apache.flink.benchmark.*'
+ *  - 'jmh_benchmarks_excludes' - 'org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*,org.apache.flink.scheduler.benchmark.*'
+ *  - 'project_name' - 'Flink'
+ *  - 'executable_name' - 'Flink'
+ * - Scheduler benchmarks:
+ *  - 'jmh_benchmarks' - 'org.apache.flink.scheduler.benchmark.*'
+ *  - 'jmh_benchmarks_excludes' - '-'
+ *  - 'project_name' - 'Runtime'
+ *  - 'executable_name' - 'Scheduler'
+ * - State Backends benchmarks:
+ *  - 'jmh_benchmarks' - 'org.apache.flink.state.benchmark.*'
+ *  - 'jmh_benchmarks_excludes' - '-'
+ *  - 'project_name' - 'State Backends'
+ *  - 'executable_name' - 'State Backends'
+ */
 timestamps {
     try {
         timeout(time: 6, unit: 'HOURS') { // includes waiting for a machine
             node('Hetzner') {
+                def codespeedUrl = 'http://54.93.230.145:8000/'
                 def mvnHome = tool 'M3'
                 def compileFlink
                 def projectPrefix
 
+                stage('Setup parameters') {
+                    if(params.skip_auto_parameters == null || !params.skip_auto_parameters) {
+                        script {
+                            properties([
+                                parameters([
+                                    string(
+                                        defaultValue: 'https://github.com/apache/flink.git',
+                                        name: 'github_flink_url',
+                                        description: 'The repo URL for Flink to run the benchmarks against.',
+                                        trim: true
+                                    ),
+                                    string(
+                                        defaultValue: 'master',
+                                        name: 'github_flink_branch',
+                                        description: 'The branch, which should be benchmarked.',
+                                        trim: true
+                                    ),
+                                    string(
+                                        defaultValue: 'https://github.com/apache/flink-benchmarks.git',
+                                        name: 'github_benchmarks_url',
+                                        description: 'The repo URL for Flink-Benchmark to run the benchmarks from.',
+                                        trim: true
+                                    ),
+                                    string(
+                                        defaultValue: 'master',
+                                        name: 'github_benchmarks_branch',
+                                        description: 'The branch from which benchmarks should be started.',
+                                        trim: true
+                                    ),
+                                    string(
+                                        defaultValue: 'org.apache.flink.benchmark.*',
+                                        name: 'jmh_benchmarks',
+                                        description: """\
+                                        -Dbenchmarks parameter for jmh. For example:
+                                         org.apache.flink.benchmark.*
+                                         org.apache.flink.benchmark.SortingBoundedInputBenchmarks
+                                         org.apache.flink.state.benchmarks.*""".stripIndent(),
+                                        trim: true
+                                    ),
+                                    string(
+                                        defaultValue: 'org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*,org.apache.flink.scheduler.benchmark.*',
+                                        name: 'jmh_benchmarks_excludes',
+                                        description: """\
+                                        -DbenchmarkExcludes parameter for jmh.
+                                        It can not be empty use '-' instead.""".stripIndent(),
+                                        trim: true
+                                    ),
+                                    choice(
+                                        choices: ['openjdk8', 'openjdk11'],
+                                        name: 'java_version',
+                                        description: 'The version of java for benchmarking and compilation both flink and benchmark',
+                                    ),
+                                    choice(
+                                        choices: ['Flink', 'Runtime', 'State Backends'],
+                                        name: 'project_name',
+                                        description: 'It is the project in codespeed for result visualization.',
+                                    ),
+                                    choice(
+                                        choices: ['Flink', 'Scheduler', 'State Backends'],
+                                        name: 'executable_name',
+                                        description: 'It is the executable in codespeed for result visualization.',
+                                    ),
+                                    string(
+                                        defaultValue: 'benchmark-request',
+                                        name: 'result_branch',
+                                        description: """\
+                                        It is the branch that will be sent to codespeed for result visualization:
+                                        - master
+                                        - benchmark-request""".stripIndent(),
+                                        trim: true
+                                    ),
+                                    booleanParam(
+                                        defaultValue: false,
+                                        name: 'skip_auto_parameters',
+                                        description: "true if parameters should be managed by Jenkins rather than this script.",
+                                        trim: true
+                                    )
+                                ])
+                            ])
+                        }
+                    }
+                }
                 env.JAVA_HOME = tool name: params.java_version
                 stage('Setup java version') {
                     if(params.java_version == 'openjdk11') {
@@ -59,7 +163,7 @@ timestamps {
                 stage('Uploading results') {
                     dir('flink-benchmarks') {
                         archive 'jmh-result.csv'
-                        sh "python save_jmh_result.py --project \"${project_name}${projectPrefix}\" --exec \"${executable_name}${projectPrefix}\" --environment Hetzner --branch ${result_branch} --commit `cat ../flink-commit`-`cat ../flink-benchmarks-commit`-`date +%s` --codespeed http://54.93.230.145:8000/"
+                        sh "python save_jmh_result.py --project \"${project_name}${projectPrefix}\" --exec \"${executable_name}${projectPrefix}\" --environment Hetzner --branch ${result_branch} --commit `cat ../flink-commit`-`cat ../flink-benchmarks-commit`-`date +%s` --codespeed ${codespeedUrl}"
                     }
                 }
                 stage('Cleanup') {
