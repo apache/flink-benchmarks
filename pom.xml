@@ -45,8 +45,8 @@ under the License.
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<flink.version>1.19-SNAPSHOT</flink.version>
-		<flink.shaded.version>16.1</flink.shaded.version>
+		<flink.version>1.20-SNAPSHOT</flink.version>
+		<flink.shaded.version>17.0</flink.shaded.version>
 		<netty.tcnative.version>2.0.54.Final</netty.tcnative.version>
 		<java.version>1.8</java.version>
 		<scala.binary.version>2.12</scala.binary.version>
