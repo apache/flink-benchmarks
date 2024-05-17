@@ -167,7 +167,7 @@ public class MultipleInputBenchmark extends BenchmarkBase {
         @Override
         public SourceReader<Integer, MockSourceSplit> createReader(
                 SourceReaderContext readerContext) {
-            return new MockSourceReader(true, true) {
+            return new MockSourceReader(MockSourceReader.WaitingForSplits.WAIT_UNTIL_ALL_SPLITS_ASSIGNED, true) {
                 @Override
                 public InputStatus pollNext(ReaderOutput<Integer> sourceOutput) {
                     if (canFinish.isDone() && !canFinish.isCompletedExceptionally()) {
