@@ -54,7 +54,7 @@ under the License.
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<slf4j.version>1.7.36</slf4j.version>
 		<log4j.version>1.2.17</log4j.version>
-		<jmh.version>1.19</jmh.version>
+		<jmh.version>1.37</jmh.version>
 		<junit.version>4.13.2</junit.version>
 		<avro.version>1.11.1</avro.version>
 		<mockito.version>3.4.6</mockito.version>
@@ -67,6 +67,7 @@ under the License.
 		<benchmarkExcludes>org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*,org.apache.flink.scheduler.benchmark.*</benchmarkExcludes>
 		<benchmarks>.*</benchmarks>
 		<executableJava>java</executableJava>
+		<asyncProfilerLib>/path/to/libasyncProfiler.so or asynclibasyncProfiler.dylib</asyncProfilerLib>
 	</properties>
 
 	<repositories>
@@ -345,6 +346,8 @@ under the License.
 								<argument>-classpath</argument>
 								<classpath/>
 								<argument>org.openjdk.jmh.Main</argument>
+								<argument>-prof</argument>
+								<argument>async:libPath=${asyncProfilerLib};output=flamegraph;dir=/tmp/profile-results</argument>
 								<!--shouldFailOnError-->
 								<argument>-foe</argument>
 								<argument>true</argument>
