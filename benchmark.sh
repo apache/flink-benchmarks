@@ -21,11 +21,17 @@ while getopts ":j:c:b:e:p:a:m:h" opt; do
     e) BENCHMARK_EXCLUDES="${OPTARG:+-e ${OPTARG}}"
     ;;
     m) BENCHMARK_PATTERN="${OPTARG}"
-      echo "parsing -m"
     ;;
     h)
       1>&2 cat << EOF
-usage: TODO
+usage: $0 -c ${CLASSPATH} [-j JVM_ARG]* [-b /path/to/java] [-a JMH_ARG]* [-p <profiler>:<opt1=X;opt2=Y] [-e benchmark exclusions]
+-j JVM argument. can be used 0 - n times
+-c the classpath to use for JMH
+-b path to the java binary to use for the benchmark run
+-p Profiler argument. Accepts the value to be passed to jmh -prof option
+-a additional JMH command line argument.
+-e the regex for JMH to exclude benchmarks.
+-h this help message
 EOF
       exit 1
     ;;
