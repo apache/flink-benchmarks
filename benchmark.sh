@@ -24,12 +24,12 @@ while getopts ":j:c:b:e:p:a:m:h" opt; do
     ;;
     h)
       1>&2 cat << EOF
-usage: $0 -c ${CLASSPATH} [-j JVM_ARG]* [-b /path/to/java] [-a JMH_ARG]* [-p <profiler>:<opt1=X;opt2=Y] [-e benchmark exclusions]
--j JVM argument. can be used 0 - n times
+usage: $0 -c ${CLASSPATH} [-j JVM_ARG] [-b /path/to/java] [-a JMH_ARG] [-p <profiler>:<opt1=X;opt2=Y] [-e benchmark exclusions]
+-j JVM argument. Can be used 0 - n times
 -c the classpath to use for JMH
 -b path to the java binary to use for the benchmark run
 -p Profiler argument. Accepts the value to be passed to jmh -prof option
--a additional JMH command line argument.
+-a additional JMH command line argument. Can be used 0 - N times
 -e the regex for JMH to exclude benchmarks.
 -h this help message
 EOF
