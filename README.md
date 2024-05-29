@@ -70,7 +70,7 @@ JMH has support for enabling profilers when running benchmarks, in particular [a
 
 with maven
 ```
- java -jar target/benchmarks.jar -rf csv "<benchmark_class>" -DasyncProfilerLib=<PATH_TO_libasyncProfiler.*>
+java -jar target/benchmarks.jar -rf csv "<benchmark_class>" -DasyncProfilerLib=<PATH_TO_libasyncProfiler.*>
 ```
 
 or directly
