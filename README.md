@@ -64,6 +64,20 @@ java -jar target/benchmarks.jar "<benchmark_class>" -lp
 java -jar target/benchmarks.jar "org.apache.flink.state.benchmark.*" -p "backendType=ROCKSDB" 
 ```
 
+## Generating Flame graphs
+
+JMH has support for enabling profilers when running benchmarks, in particular [async profiler](https://github.com/async-profiler/async-profiler) which can generate flame graphs of the call stack. However, async profiler requires linking with native code which needs downloaded manually which means its location is user and architecture specific. To enable async profiler support run the benchmarks as follows:
+
+with maven
+```
+ java -jar target/benchmarks.jar -rf csv "<benchmark_class>" -DasyncProfilerLib=<PATH_TO_libasyncProfiler.*>
+```
+
+or directly
+```
+java -jar target/benchmarks.jar -prof async:libPath=<PATH_TO_libasyncProfiler.*>;output=flamegraph "<benchmark_class>" 
+```
+
 ## Configuration
 
 Besides the parameters, there is also a benchmark config file `benchmark-conf.yaml` to tune some basic parameters. 
