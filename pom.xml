@@ -354,6 +354,14 @@ under the License.
 								<classpath/>
 								<argument>-b</argument>
 								<argument>${executableJava}</argument>
+								<argument>-a</argument>
+								<argument>-r</argument>
+								<argument>-a</argument>
+								<argument>1</argument>
+								<argument>-a</argument>
+								<argument>-w</argument>
+								<argument>-a</argument>
+								<argument>1</argument>
 								<argument>-p</argument>
 								<argument>${jmhProfArgument}</argument>
 								<argument>-e</argument>
@@ -441,6 +449,14 @@ under the License.
 								<classpath/>
 								<argument>-b</argument>
 								<argument>${executableJava}</argument>
+								<argument>-a</argument>
+								<argument>-r</argument>
+								<argument>-a</argument>
+								<argument>1</argument>
+								<argument>-a</argument>
+								<argument>-w</argument>
+								<argument>-a</argument>
+								<argument>1</argument>
 								<argument>-p</argument>
 								<argument>${jmhProfArgument}</argument>
 								<argument>-e</argument>
