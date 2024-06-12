@@ -54,11 +54,11 @@ under the License.
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<slf4j.version>1.7.36</slf4j.version>
 		<log4j.version>1.2.17</log4j.version>
-		<jmh.version>1.19</jmh.version>
+		<jmh.version>1.37</jmh.version>
 		<junit.version>4.13.2</junit.version>
 		<avro.version>1.11.1</avro.version>
 		<mockito.version>3.4.6</mockito.version>
-		<maven.exec.version>1.6.0</maven.exec.version>
+		<maven.exec.version>3.3.0</maven.exec.version>
 		<maven.compiler.version>3.8.0</maven.compiler.version>
 		<chill.version>0.7.6</chill.version>
 		<thrift.version>0.13.0</thrift.version>
@@ -67,6 +67,8 @@ under the License.
 		<benchmarkExcludes>org.apache.flink.benchmark.full.*,org.apache.flink.state.benchmark.*,org.apache.flink.scheduler.benchmark.*</benchmarkExcludes>
 		<benchmarks>.*</benchmarks>
 		<executableJava>java</executableJava>
+		<jmhProfArgument> </jmhProfArgument>
+		<profilerOutputDir>${build.directory}/profile-results</profilerOutputDir>
 	</properties>
 
 	<repositories>
@@ -290,25 +292,31 @@ under the License.
 						<configuration>
 							<skip>${skipTests}</skip>
 							<classpathScope>test</classpathScope>
-							<executable>${executableJava}</executable>
+							<executable>${basedir}/benchmark.sh</executable>
 							<arguments>
-								<argument>-Xmx6g</argument>
-								<argument>-classpath</argument>
+								<argument>-c</argument>
 								<classpath/>
-								<argument>org.openjdk.jmh.Main</argument>
-								<!--shouldFailOnError-->
-								<argument>-foe</argument>
-								<argument>true</argument>
+								<argument>-b</argument>
+								<argument>${executableJava}</argument>
+								<argument>-j</argument>
+								<argument>-Xmx6g</argument>
 								<!--speed up tests-->
+								<argument>-a</argument>
 								<argument>-f</argument>
+								<argument>-a</argument>
 								<argument>1</argument>
+								<argument>-a</argument>
 								<argument>-i</argument>
+								<argument>-a</argument>
 								<argument>1</argument>
+								<argument>-a</argument>
 								<argument>-wi</argument>
+								<argument>-a</argument>
 								<argument>0</argument>
-								<argument>-rf</argument>
-								<argument>csv</argument>
-								<argument>.*</argument>
+								<argument>-e</argument>
+								<argument>${benchmarkExcludes}</argument>
+								<argument>-m</argument>
+								<argument>${benchmarks}</argument>
 							</arguments>
 						</configuration>
 					</plugin>
@@ -340,18 +348,25 @@ under the License.
 						</executions>
 						<configuration>
 							<classpathScope>test</classpathScope>
-							<executable>${executableJava}</executable>
+							<executable>${basedir}/benchmark.sh</executable>
 							<arguments>
-								<argument>-classpath</argument>
+								<argument>-c</argument>
 								<classpath/>
-								<argument>org.openjdk.jmh.Main</argument>
-								<!--shouldFailOnError-->
-								<argument>-foe</argument>
-								<argument>true</argument>
+								<argument>-b</argument>
+								<argument>${executableJava}</argument>
+								<argument>-a</argument>
+								<argument>-r</argument>
+								<argument>-a</argument>
+								<argument>1</argument>
+								<argument>-a</argument>
+								<argument>-w</argument>
+								<argument>-a</argument>
+								<argument>1</argument>
+								<argument>-p</argument>
+								<argument>${jmhProfArgument}</argument>
 								<argument>-e</argument>
 								<argument>${benchmarkExcludes}</argument>
-								<argument>-rf</argument>
-								<argument>csv</argument>
+								<argument>-m</argument>
 								<argument>${benchmarks}</argument>
 							</arguments>
 						</configuration>
@@ -424,20 +439,29 @@ under the License.
 						</executions>
 						<configuration>
 							<classpathScope>test</classpathScope>
-							<executable>${executableJava}</executable>
+							<executable>${basedir}/benchmark.sh</executable>
 							<arguments>
+								<argument>-j</argument>
 								<argument>--add-opens</argument>
+								<argument>-j</argument>
 								<argument>java.base/java.util=ALL-UNNAMED</argument>
-								<argument>-classpath</argument>
+								<argument>-c</argument>
 								<classpath/>
-								<argument>org.openjdk.jmh.Main</argument>
-								<!--shouldFailOnError-->
-								<argument>-foe</argument>
-								<argument>true</argument>
+								<argument>-b</argument>
+								<argument>${executableJava}</argument>
+								<argument>-a</argument>
+								<argument>-r</argument>
+								<argument>-a</argument>
+								<argument>1</argument>
+								<argument>-a</argument>
+								<argument>-w</argument>
+								<argument>-a</argument>
+								<argument>1</argument>
+								<argument>-p</argument>
+								<argument>${jmhProfArgument}</argument>
 								<argument>-e</argument>
 								<argument>${benchmarkExcludes}</argument>
-								<argument>-rf</argument>
-								<argument>csv</argument>
+								<argument>-m</argument>
 								<argument>${benchmarks}</argument>
 							</arguments>
 						</configuration>
@@ -535,6 +559,19 @@ under the License.
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+
+		<profile>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>asyncProfilerLib</name>
+				</property>
+			</activation>
+			<id>enable-async-profiler</id>
+			<properties>
+				<jmhProfArgument>async:libPath=${asyncProfilerLib};output=flamegraph;dir=${profilerOutputDir}</jmhProfArgument>
+			</properties>
 		</profile>
 	</profiles>
 
