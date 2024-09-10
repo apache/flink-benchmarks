@@ -112,7 +112,7 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
                 throws Exception {
             final long currTimestamp = System.currentTimeMillis();
             for (int i = 0; i < timersPerRecord; i++) {
-                context.timerService().registerProcessingTimeTimer(currTimestamp - i - 1);
+                context.timerService().registerProcessingTimeTimer(currTimestamp - timersPerRecord + i);
             }
         }
 
