@@ -26,7 +26,6 @@ import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindow
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
@@ -35,6 +34,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
+
+import java.time.Duration;
 
 @OperationsPerInvocation(value = WindowBenchmarks.RECORDS_PER_INVOCATION)
 public class WindowBenchmarks extends BenchmarkBase {
@@ -60,7 +61,7 @@ public class WindowBenchmarks extends BenchmarkBase {
     @Benchmark
     public void tumblingWindow(TimeWindowContext context) throws Exception {
         IntLongApplications.reduceWithWindow(
-                context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
+                context.source, TumblingEventTimeWindows.of(Duration.ofSeconds(10_000)));
         context.execute();
     }
 
@@ -68,14 +69,14 @@ public class WindowBenchmarks extends BenchmarkBase {
     public void slidingWindow(TimeWindowContext context) throws Exception {
         IntLongApplications.reduceWithWindow(
                 context.source,
-                SlidingEventTimeWindows.of(Time.seconds(10_000), Time.seconds(1000)));
+                SlidingEventTimeWindows.of(Duration.ofSeconds(10_000), Duration.ofSeconds(1000)));
         context.execute();
     }
 
     @Benchmark
     public void sessionWindow(TimeWindowContext context) throws Exception {
         IntLongApplications.reduceWithWindow(
-                context.source, EventTimeSessionWindows.withGap(Time.seconds(500)));
+                context.source, EventTimeSessionWindows.withGap(Duration.ofSeconds(500)));
         context.execute();
     }
 

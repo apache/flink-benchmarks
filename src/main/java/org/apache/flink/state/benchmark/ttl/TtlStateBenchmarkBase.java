@@ -20,13 +20,12 @@ package org.apache.flink.state.benchmark.ttl;
 
 import org.apache.flink.api.common.state.StateDescriptor;
 import org.apache.flink.api.common.state.StateTtlConfig;
-import org.apache.flink.api.common.time.Time;
 import org.apache.flink.runtime.state.KeyedStateBackend;
 import org.apache.flink.runtime.state.ttl.TtlTimeProvider;
 import org.apache.flink.state.benchmark.StateBenchmarkBase;
 import org.openjdk.jmh.annotations.Param;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 /** The base class for state tests with ttl. */
 public class TtlStateBenchmarkBase extends StateBenchmarkBase {
@@ -62,7 +61,7 @@ public class TtlStateBenchmarkBase extends StateBenchmarkBase {
     /** Configure the state descriptor with ttl. */
     protected <T extends StateDescriptor<?, ?>> T configTtl(T stateDescriptor) {
         StateTtlConfig ttlConfig =
-                new StateTtlConfig.Builder(Time.of(initialTime, TimeUnit.MILLISECONDS))
+                StateTtlConfig.newBuilder(Duration.ofMillis(initialTime))
                         .setUpdateType(updateType)
                         .setStateVisibility(stateVisibility)
                         .build();
