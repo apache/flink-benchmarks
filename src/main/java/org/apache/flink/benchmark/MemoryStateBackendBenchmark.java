@@ -20,7 +20,6 @@ package org.apache.flink.benchmark;
 
 import org.apache.flink.benchmark.functions.IntLongApplications;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
@@ -31,6 +30,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
+
+import java.time.Duration;
 
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
@@ -51,7 +52,7 @@ public class MemoryStateBackendBenchmark extends StateBackendBenchmarkBase {
     @Benchmark
     public void stateBackends(MemoryStateBackendContext context) throws Exception {
         IntLongApplications.reduceWithWindow(
-                context.source, TumblingEventTimeWindows.of(Time.seconds(10_000)));
+                context.source, TumblingEventTimeWindows.of(Duration.ofSeconds(10_000)));
         context.execute();
     }
 
