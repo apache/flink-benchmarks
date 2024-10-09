@@ -73,7 +73,7 @@ public class BackpressureUtils {
             int port, Configuration clientConfiguration) throws Exception {
         final Configuration clientConfig = new Configuration();
         clientConfig.addAll(clientConfiguration);
-        clientConfig.setInteger(RestOptions.PORT, port);
+        clientConfig.set(RestOptions.PORT, port);
         return new RestClusterClient<>(clientConfig, StandaloneClusterId.getInstance());
     }
 

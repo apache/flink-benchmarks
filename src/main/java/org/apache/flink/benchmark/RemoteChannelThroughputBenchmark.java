@@ -24,7 +24,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.functions.sink.legacy.DiscardingSink;
 import org.apache.flink.streaming.api.graph.StreamingJobGraphGenerator;
 
 import org.openjdk.jmh.annotations.Benchmark;
@@ -86,7 +86,7 @@ public class RemoteChannelThroughputBenchmark extends RemoteBenchmarkBase {
         protected Configuration createConfiguration() {
             Configuration configuration = super.createConfiguration();
             if (mode.equals(DEBLOAT)) {
-                configuration.setBoolean(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, true);
+                configuration.set(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, true);
             }
             return configuration;
         }

@@ -59,9 +59,9 @@ public class PojoSerializationBenchmark extends BenchmarkBase {
     ExecutionConfig config = new ExecutionConfig();
     TypeSerializer<SerializationFrameworkMiniBenchmarks.MyPojo> pojoSerializer =
             TypeInformation.of(SerializationFrameworkMiniBenchmarks.MyPojo.class)
-                    .createSerializer(config);
+                    .createSerializer(config.getSerializerConfig());
     TypeSerializer<SerializationFrameworkMiniBenchmarks.MyPojo> kryoSerializer =
-            new KryoSerializer<>(SerializationFrameworkMiniBenchmarks.MyPojo.class, config);
+            new KryoSerializer<>(SerializationFrameworkMiniBenchmarks.MyPojo.class, config.getSerializerConfig());
     TypeSerializer<org.apache.flink.benchmark.avro.MyPojo> avroSerializer =
             new AvroSerializer<>(org.apache.flink.benchmark.avro.MyPojo.class);
 

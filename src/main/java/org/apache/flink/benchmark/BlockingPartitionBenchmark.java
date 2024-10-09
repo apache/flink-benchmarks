@@ -60,22 +60,6 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
         executeBenchmark(context.env);
     }
 
-    @Benchmark
-    public void uncompressedMmapPartition(UncompressedMmapEnvironmentContext context)
-            throws Exception {
-        executeBenchmark(context.env);
-    }
-
-    @Benchmark
-    public void compressedSortPartition(CompressedSortEnvironmentContext context) throws Exception {
-        executeBenchmark(context.env);
-    }
-
-    @Benchmark
-    public void uncompressedSortPartition(UncompressedSortEnvironmentContext context) throws Exception {
-        executeBenchmark(context.env);
-    }
-
     private void executeBenchmark(StreamExecutionEnvironment env) throws Exception {
         StreamGraph streamGraph =
                 StreamGraphUtils.buildGraphForBatchJob(env, RECORDS_PER_INVOCATION);
@@ -102,23 +86,15 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
         }
 
         protected Configuration createConfiguration(
-                boolean compressionEnabled, String subpartitionType, boolean isSortShuffle) {
+                boolean compressionEnabled) {
             Configuration configuration = super.createConfiguration();
 
-            if (isSortShuffle) {
-                configuration.setInteger(
-                        NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM, 1);
-            } else {
-                configuration.setInteger(
-                        NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM,
-                        Integer.MAX_VALUE);
-            }
-            configuration.setBoolean(
-                    NettyShuffleEnvironmentOptions.BATCH_SHUFFLE_COMPRESSION_ENABLED,
-                    compressionEnabled);
-            configuration.setString(
-                    NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, subpartitionType);
-            configuration.setString(
+            configuration.set(
+                    NettyShuffleEnvironmentOptions.SHUFFLE_COMPRESSION_CODEC,
+                    compressionEnabled ?
+                            NettyShuffleEnvironmentOptions.CompressionCodec.LZ4
+                            : NettyShuffleEnvironmentOptions.CompressionCodec.NONE);
+            configuration.set(
                     CoreOptions.TMP_DIRS,
                     FileUtils.getCurrentWorkingDirectory().toAbsolutePath().toString());
             return configuration;
@@ -129,7 +105,7 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
             extends BlockingPartitionEnvironmentContext {
         @Override
         protected Configuration createConfiguration() {
-            return createConfiguration(false, "file", false);
+            return createConfiguration(false);
         }
     }
 
@@ -137,31 +113,7 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
             extends BlockingPartitionEnvironmentContext {
         @Override
         protected Configuration createConfiguration() {
-            return createConfiguration(true, "file", false);
-        }
-    }
-
-    public static class UncompressedMmapEnvironmentContext
-            extends BlockingPartitionEnvironmentContext {
-        @Override
-        protected Configuration createConfiguration() {
-            return createConfiguration(false, "mmap", false);
-        }
-    }
-
-    public static class CompressedSortEnvironmentContext
-            extends BlockingPartitionEnvironmentContext {
-        @Override
-        protected Configuration createConfiguration() {
-            return createConfiguration(true, "file", true);
-        }
-    }
-
-    public static class UncompressedSortEnvironmentContext
-            extends BlockingPartitionEnvironmentContext {
-        @Override
-        protected Configuration createConfiguration() {
-            return createConfiguration(false, "file", true);
+            return createConfiguration(true);
         }
     }
 }

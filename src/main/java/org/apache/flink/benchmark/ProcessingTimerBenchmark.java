@@ -17,14 +17,13 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.configuration.Configuration;
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.core.testutils.OneShotLatch;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
-import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
-import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
+import org.apache.flink.streaming.api.functions.sink.legacy.DiscardingSink;
+import org.apache.flink.streaming.api.functions.source.legacy.RichParallelSourceFunction;
 import org.apache.flink.util.Collector;
-
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.runner.Runner;
@@ -75,7 +74,7 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
         public SingleRecordSource() {}
 
         @Override
-        public void open(Configuration parameters) throws Exception {
+        public void open(OpenContext openContext) throws Exception {
             this.random = new Random();
         }
 
@@ -103,7 +102,7 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
         }
 
         @Override
-        public void open(Configuration parameters) throws Exception {
+        public void open(OpenContext context) throws Exception {
             this.firedTimesCount = 0;
         }
 

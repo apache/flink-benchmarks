@@ -49,14 +49,6 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
     }
 
     @Benchmark
-    public void remoteFilePartition(RemoteFileEnvironmentContext context) throws Exception {
-        StreamGraph streamGraph =
-                StreamGraphUtils.buildGraphForBatchJob(context.env, RECORDS_PER_INVOCATION);
-        context.miniCluster.executeJobBlocking(
-                StreamingJobGraphGenerator.createJobGraph(streamGraph));
-    }
-
-    @Benchmark
     public void remoteSortPartition(RemoteSortEnvironmentContext context) throws Exception {
         StreamGraph streamGraph =
                 StreamGraphUtils.buildGraphForBatchJob(context.env, RECORDS_PER_INVOCATION);
@@ -75,20 +67,10 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
             env.setBufferTimeout(-1);
         }
 
-        protected Configuration createConfiguration(boolean isSortShuffle) {
+        protected Configuration createConfiguration() {
             Configuration configuration = super.createConfiguration();
 
-            if (isSortShuffle) {
-                configuration.setInteger(
-                        NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM, 1);
-            } else {
-                configuration.setInteger(
-                        NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_PARALLELISM,
-                        Integer.MAX_VALUE);
-            }
-            configuration.setString(
-                    NettyShuffleEnvironmentOptions.NETWORK_BLOCKING_SHUFFLE_TYPE, "file");
-            configuration.setString(
+            configuration.set(
                     CoreOptions.TMP_DIRS,
                     FileUtils.getCurrentWorkingDirectory().toAbsolutePath().toString());
             return configuration;
@@ -100,17 +82,10 @@ public class BlockingPartitionRemoteChannelBenchmark extends RemoteBenchmarkBase
         }
     }
 
-    public static class RemoteFileEnvironmentContext extends BlockingPartitionEnvironmentContext {
-        @Override
-        protected Configuration createConfiguration() {
-            return createConfiguration(false);
-        }
-    }
-
     public static class RemoteSortEnvironmentContext extends BlockingPartitionEnvironmentContext {
         @Override
         protected Configuration createConfiguration() {
-            return createConfiguration(true);
+            return super.createConfiguration();
         }
     }
 }

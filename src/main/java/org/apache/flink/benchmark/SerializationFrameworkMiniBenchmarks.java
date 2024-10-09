@@ -27,7 +27,7 @@ import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.benchmark.full.StringSerializationBenchmark;
 import org.apache.flink.benchmark.functions.BaseSourceWithKeyRange;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.functions.sink.legacy.DiscardingSink;
 import org.apache.flink.types.Row;
 
 import org.openjdk.jmh.annotations.Benchmark;
@@ -67,8 +67,8 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-        executionConfig.registerPojoType(MyPojo.class);
-        executionConfig.registerPojoType(MyOperation.class);
+        executionConfig.getSerializerConfig().registerPojoType(MyPojo.class);
+        executionConfig.getSerializerConfig().registerPojoType(MyOperation.class);
 
         env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
                 .rebalance()
@@ -83,8 +83,8 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(1);
         ExecutionConfig executionConfig = env.getConfig();
-        executionConfig.registerPojoType(MyPojo.class);
-        executionConfig.registerPojoType(MyOperation.class);
+        executionConfig.getSerializerConfig().registerPojoType(MyPojo.class);
+        executionConfig.getSerializerConfig().registerPojoType(MyOperation.class);
 
         env.addSource(new LongStringSource(RECORDS_PER_INVOCATION, 12))
                 .rebalance()
@@ -112,9 +112,9 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-        executionConfig.enableForceKryo();
-        executionConfig.registerKryoType(MyPojo.class);
-        executionConfig.registerKryoType(MyOperation.class);
+        executionConfig.getSerializerConfig().setForceKryo(true);
+        executionConfig.getSerializerConfig().registerKryoType(MyPojo.class);
+        executionConfig.getSerializerConfig().registerKryoType(MyOperation.class);
 
         env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
                 .rebalance()

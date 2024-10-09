@@ -24,10 +24,9 @@ import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.benchmark.FlinkEnvironmentContext;
 import org.apache.flink.benchmark.SerializationFrameworkMiniBenchmarks;
 import org.apache.flink.benchmark.functions.BaseSourceWithKeyRange;
-import org.apache.flink.benchmark.functions.ScalaADTSource;
 import org.apache.flink.formats.avro.typeutils.GenericRecordAvroTypeInfo;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.functions.sink.legacy.DiscardingSink;
 
 import com.twitter.chill.protobuf.ProtobufSerializer;
 import com.twitter.chill.thrift.TBaseSerializer;
@@ -84,7 +83,7 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
             throws Exception {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
-        env.getConfig().enableForceKryo();
+        env.getConfig().getSerializerConfig().setForceAvro(true);
 
         env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
                 .rebalance()
@@ -98,7 +97,7 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
     public void serializerAvroReflect(FlinkEnvironmentContext context) throws Exception {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
-        env.getConfig().enableForceAvro();
+        env.getConfig().getSerializerConfig().setForceAvro(true);
 
         env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
                 .rebalance()
@@ -123,27 +122,15 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
 
     @Benchmark
     @OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
-    public void serializerScalaADT(FlinkEnvironmentContext context) throws Exception {
-        StreamExecutionEnvironment env = context.env;
-        env.setParallelism(4);
-
-        env.addSource(new ScalaADTSource(RECORDS_PER_INVOCATION), ScalaADTSource.adtTypeInfo())
-                .rebalance()
-                .addSink(new DiscardingSink<>());
-
-        env.execute();
-    }
-
-    @Benchmark
-    @OperationsPerInvocation(value = SerializationFrameworkMiniBenchmarks.RECORDS_PER_INVOCATION)
     public void serializerKryoThrift(FlinkEnvironmentContext context) throws Exception {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-        executionConfig.enableForceKryo();
-        executionConfig.addDefaultKryoSerializer(
+
+        executionConfig.getSerializerConfig().setForceKryo(true);
+        executionConfig.getSerializerConfig().addDefaultKryoSerializer(
                 org.apache.flink.benchmark.thrift.MyPojo.class, TBaseSerializer.class);
-        executionConfig.addDefaultKryoSerializer(
+        executionConfig.getSerializerConfig().addDefaultKryoSerializer(
                 org.apache.flink.benchmark.thrift.MyOperation.class, TBaseSerializer.class);
 
         env.addSource(new ThriftPojoSource(RECORDS_PER_INVOCATION, 10))
@@ -159,11 +146,11 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-        executionConfig.enableForceKryo();
-        executionConfig.registerTypeWithKryoSerializer(
+        executionConfig.getSerializerConfig().setForceKryo(true);
+        executionConfig.getSerializerConfig().registerTypeWithKryoSerializer(
                 org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo.class,
                 ProtobufSerializer.class);
-        executionConfig.registerTypeWithKryoSerializer(
+        executionConfig.getSerializerConfig().registerTypeWithKryoSerializer(
                 org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation.class,
                 ProtobufSerializer.class);
 
