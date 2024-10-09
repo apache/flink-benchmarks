@@ -18,8 +18,7 @@
 
 package org.apache.flink.benchmark.functions;
 
-import org.apache.flink.streaming.api.functions.source.ParallelSourceFunction;
-import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext;
+import org.apache.flink.streaming.api.functions.source.legacy.ParallelSourceFunction;
 
 /** Abstract base class for sources with a defined number of events and a fixed key range. */
 public abstract class BaseSourceWithKeyRange<T> implements ParallelSourceFunction<T> {

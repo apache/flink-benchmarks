@@ -65,7 +65,7 @@ public class StringSerializationBenchmark extends BenchmarkBase {
     int length;
     String input;
     ExecutionConfig config = new ExecutionConfig();
-    TypeSerializer<String> serializer = TypeInformation.of(String.class).createSerializer(config);
+    TypeSerializer<String> serializer = TypeInformation.of(String.class).createSerializer(config.getSerializerConfig());
     ByteArrayInputStream serializedBuffer;
     DataInputView serializedStream;
 

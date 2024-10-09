@@ -19,11 +19,13 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.benchmark.functions.IntegerLongSource;
-import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+import org.apache.flink.configuration.CheckpointingOptions;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.ReadableConfig;
+import org.apache.flink.configuration.StateBackendOptions;
+import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
 import org.apache.flink.runtime.state.AbstractStateBackend;
-import org.apache.flink.runtime.state.filesystem.FsStateBackend;
-import org.apache.flink.runtime.state.memory.MemoryStateBackend;
-import org.apache.flink.streaming.api.TimeCharacteristic;
+import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.util.FileUtils;
 
@@ -63,32 +65,35 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
                 e.printStackTrace();
             }
 
-            final AbstractStateBackend backend;
+
+            Configuration configuration = Configuration.fromMap(env.getConfiguration().toMap());
             String checkpointDataUri = "file://" + checkpointDir.getAbsolutePath();
             switch (stateBackend) {
                 case MEMORY:
-                    backend = new MemoryStateBackend();
+                    configuration.set(StateBackendOptions.STATE_BACKEND, "hashmap");
+                    configuration.set(CheckpointingOptions.CHECKPOINT_STORAGE, "jobmanager");
                     break;
                 case FS:
-                    backend = new FsStateBackend(checkpointDataUri, false);
-                    break;
-                case FS_ASYNC:
-                    backend = new FsStateBackend(checkpointDataUri, true);
+                    configuration.set(StateBackendOptions.STATE_BACKEND, "hashmap");
+                    configuration.set(CheckpointingOptions.CHECKPOINT_STORAGE, "filesystem");
                     break;
                 case ROCKS:
-                    backend = new RocksDBStateBackend(checkpointDataUri, false);
+                    configuration.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
+                    configuration.set(CheckpointingOptions.CHECKPOINT_STORAGE, "filesystem");
+                    configuration.set(CheckpointingOptions.INCREMENTAL_CHECKPOINTS, false);
                     break;
                 case ROCKS_INC:
-                    backend = new RocksDBStateBackend(checkpointDataUri, true);
+                    configuration.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
+                    configuration.set(CheckpointingOptions.CHECKPOINT_STORAGE, "filesystem");
+                    configuration.set(CheckpointingOptions.INCREMENTAL_CHECKPOINTS, true);
                     break;
                 default:
                     throw new UnsupportedOperationException(
                             "Unknown state backend: " + stateBackend);
             }
 
-            env.setStateBackend(backend);
-
-            env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+            // default character
+            //env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
             source = env.addSource(new IntegerLongSource(numberOfElements, recordsPerInvocation));
         }
 

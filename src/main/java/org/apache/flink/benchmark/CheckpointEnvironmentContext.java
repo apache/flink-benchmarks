@@ -19,14 +19,14 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.api.common.JobID;
+import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.runtime.jobgraph.JobVertexID;
 import org.apache.flink.runtime.testutils.CommonTestUtils;
-import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.streaming.api.functions.sink.legacy.SinkFunction;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 
 import java.time.Duration;
@@ -93,31 +93,31 @@ public abstract class CheckpointEnvironmentContext extends FlinkEnvironmentConte
     public enum CheckpointMode {
         UNALIGNED(
                 config -> {
-                    config.set(ExecutionCheckpointingOptions.ENABLE_UNALIGNED, true);
+                    config.set(CheckpointingOptions.ENABLE_UNALIGNED, true);
                     config.set(
                             TaskManagerOptions.MEMORY_SEGMENT_SIZE,
                             CheckpointEnvironmentContext.START_MEMORY_SEGMENT_SIZE);
                     config.set(
-                            ExecutionCheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
+                            CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
                             Duration.ofMillis(0));
                     config.set(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, false);
                     return config;
                 }),
         UNALIGNED_1(
                 config -> {
-                    config.set(ExecutionCheckpointingOptions.ENABLE_UNALIGNED, true);
+                    config.set(CheckpointingOptions.ENABLE_UNALIGNED, true);
                     config.set(
                             TaskManagerOptions.MEMORY_SEGMENT_SIZE,
                             CheckpointEnvironmentContext.START_MEMORY_SEGMENT_SIZE);
                     config.set(
-                            ExecutionCheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
+                            CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
                             Duration.ofMillis(1));
                     config.set(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, false);
                     return config;
                 }),
         ALIGNED(
                 config -> {
-                    config.set(ExecutionCheckpointingOptions.ENABLE_UNALIGNED, false);
+                    config.set(CheckpointingOptions.ENABLE_UNALIGNED, false);
                     config.set(
                             TaskManagerOptions.MEMORY_SEGMENT_SIZE,
                             CheckpointEnvironmentContext.START_MEMORY_SEGMENT_SIZE);

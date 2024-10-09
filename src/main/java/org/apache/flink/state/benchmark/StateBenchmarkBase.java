@@ -72,7 +72,7 @@ public class StateBenchmarkBase extends BenchmarkBase {
 
     public static File createStateDataDir() throws IOException {
         Configuration benchMarkConfig = ConfigUtil.loadBenchMarkConf();
-        String stateDataDirPath = benchMarkConfig.getString(StateBenchmarkOptions.STATE_DATA_DIR);
+        String stateDataDirPath = benchMarkConfig.get(StateBenchmarkOptions.STATE_DATA_DIR);
         File dataDir = null;
         if (stateDataDirPath != null) {
             dataDir = new File(stateDataDirPath);

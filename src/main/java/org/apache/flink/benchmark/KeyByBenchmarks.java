@@ -20,9 +20,11 @@ package org.apache.flink.benchmark;
 
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.benchmark.functions.BaseSourceWithKeyRange;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.functions.sink.legacy.DiscardingSink;
 
+import org.apache.flink.streaming.util.keys.KeySelectorUtil;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.runner.Runner;
@@ -54,7 +56,7 @@ public class KeyByBenchmarks extends BenchmarkBase {
         env.setParallelism(4);
 
         env.addSource(new IncreasingTupleSource(TUPLE_RECORDS_PER_INVOCATION, 10))
-                .keyBy(0)
+                .keyBy(e -> e.f0)
                 .addSink(new DiscardingSink<>());
 
         env.execute();
@@ -66,8 +68,8 @@ public class KeyByBenchmarks extends BenchmarkBase {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
 
-        env.addSource(new IncreasingArraySource(ARRAY_RECORDS_PER_INVOCATION, 10))
-                .keyBy(0)
+        DataStreamSource<int[]> source = env.addSource(new IncreasingArraySource(ARRAY_RECORDS_PER_INVOCATION, 10));
+        source.keyBy(KeySelectorUtil.getSelectorForArray(new int[]{0}, source.getType()))
                 .addSink(new DiscardingSink<>());
 
         env.execute();

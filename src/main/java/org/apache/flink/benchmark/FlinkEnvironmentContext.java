@@ -18,15 +18,14 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.DeploymentOptions;
-import org.apache.flink.configuration.NettyShuffleEnvironmentOptions;
 import org.apache.flink.configuration.RestOptions;
+import org.apache.flink.configuration.RestartStrategyOptions;
+import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.runtime.minicluster.MiniCluster;
 import org.apache.flink.runtime.minicluster.MiniClusterConfiguration;
-import org.apache.flink.runtime.state.memory.MemoryStateBackend;
-import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.MiniClusterPipelineExecutorServiceLoader;
 
@@ -54,6 +53,8 @@ public class FlinkEnvironmentContext {
             throw new RuntimeException("setUp was called multiple times!");
         }
         final Configuration clusterConfig = createConfiguration();
+        clusterConfig.set(RestartStrategyOptions.RESTART_STRATEGY, "none");
+        clusterConfig.set(StateBackendOptions.STATE_BACKEND, "hashmap");
         miniCluster =
                 new MiniCluster(
                         new MiniClusterConfiguration.Builder()
@@ -78,8 +79,6 @@ public class FlinkEnvironmentContext {
         if (objectReuse) {
             env.getConfig().enableObjectReuse();
         }
-        env.setRestartStrategy(RestartStrategies.noRestart());
-        env.setStateBackend(new MemoryStateBackend());
     }
 
     @TearDown
@@ -102,14 +101,15 @@ public class FlinkEnvironmentContext {
 
     protected Configuration createConfiguration() {
         final Configuration configuration = new Configuration();
-        configuration.setString(RestOptions.BIND_PORT, "0");
-        configuration.setInteger(
-                NettyShuffleEnvironmentOptions.NETWORK_NUM_BUFFERS, NUM_NETWORK_BUFFERS);
+        configuration.set(RestOptions.BIND_PORT, "0");
+        // no equivalent config available.
+        //configuration.setInteger(
+        //        NettyShuffleEnvironmentOptions.NETWORK_NUM_BUFFERS, NUM_NETWORK_BUFFERS);
         configuration.set(DeploymentOptions.TARGET, MiniClusterPipelineExecutorServiceLoader.NAME);
         configuration.set(DeploymentOptions.ATTACHED, true);
         // It doesn't make sense to wait for the final checkpoint in benchmarks since it only prolongs
         // the test but doesn't give any advantages.
-        configuration.set(ExecutionCheckpointingOptions.ENABLE_CHECKPOINTS_AFTER_TASKS_FINISH, false);
+        configuration.set(CheckpointingOptions.ENABLE_CHECKPOINTS_AFTER_TASKS_FINISH, false);
         // TODO: remove this line after FLINK-28243 will be done
         configuration.set(REQUIREMENTS_CHECK_DELAY, Duration.ZERO);
         return configuration;

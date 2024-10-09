@@ -18,7 +18,7 @@
 
 package org.apache.flink.benchmark.functions;
 
-import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
+import org.apache.flink.streaming.api.functions.source.legacy.RichParallelSourceFunction;
 
 public class IntegerLongSource extends RichParallelSourceFunction<IntegerLongSource.Record> {
     private volatile boolean running = true;

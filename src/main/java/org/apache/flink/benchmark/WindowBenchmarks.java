@@ -20,7 +20,6 @@ package org.apache.flink.benchmark;
 
 import org.apache.flink.benchmark.functions.IntLongApplications;
 import org.apache.flink.benchmark.functions.IntegerLongSource;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
@@ -89,7 +88,8 @@ public class WindowBenchmarks extends BenchmarkBase {
         public void setUp() throws Exception {
             super.setUp();
 
-            env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+            // event time is default
+            // env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
             source = env.addSource(new IntegerLongSource(numberOfElements, RECORDS_PER_INVOCATION));
         }
     }

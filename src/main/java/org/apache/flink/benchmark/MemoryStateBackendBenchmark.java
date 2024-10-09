@@ -58,7 +58,7 @@ public class MemoryStateBackendBenchmark extends StateBackendBenchmarkBase {
 
     @State(Thread)
     public static class MemoryStateBackendContext extends StateBackendContext {
-        @Param({"MEMORY", "FS", "FS_ASYNC"})
+        @Param({"MEMORY", "FS"})
         public StateBackend stateBackend = StateBackend.MEMORY;
 
         @Override

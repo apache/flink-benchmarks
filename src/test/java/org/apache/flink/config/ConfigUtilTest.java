@@ -28,7 +28,7 @@ public class ConfigUtilTest {
     @Test
     public void testLoadConf() {
         Configuration cfg = ConfigUtil.loadBenchMarkConf();
-        String dir = cfg.getString(StateBenchmarkOptions.STATE_DATA_DIR);
+        String dir = cfg.get(StateBenchmarkOptions.STATE_DATA_DIR);
         Assert.assertEquals("/tmp/data", dir);
     }
 }

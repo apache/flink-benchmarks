@@ -18,19 +18,18 @@
 package org.apache.flink.benchmark;
 
 import org.apache.flink.api.common.io.FileInputFormat;
-import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.FileInputSplit;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.core.testutils.OneShotLatch;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.streaming.api.functions.sink.legacy.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperatorFactory;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.functions.source.TimestampedFileInputSplit;
 
 import joptsimple.internal.Strings;
+import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.runner.Runner;
@@ -76,7 +75,6 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
     public void readFileSplit(FlinkEnvironmentContext context) throws Exception {
         TARGET_COUNT_REACHED_LATCH.reset();
         StreamExecutionEnvironment env = context.env;
-        env.setRestartStrategy(new RestartStrategies.NoRestartStrategyConfiguration());
         env.enableCheckpointing(100)
                 .setParallelism(1)
                 .addSource(new MockSourceFunction())

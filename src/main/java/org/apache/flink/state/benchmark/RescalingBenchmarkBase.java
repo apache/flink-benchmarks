@@ -17,6 +17,7 @@
  */
 package org.apache.flink.state.benchmark;
 
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.PrimitiveArrayTypeInfo;
@@ -156,8 +157,8 @@ public class RescalingBenchmarkBase extends BenchmarkBase {
         private final byte[] stateArray = new byte[valueLen];
 
         @Override
-        public void open(Configuration parameters) throws Exception {
-            super.open(parameters);
+        public void open(OpenContext openContext) throws Exception {
+            super.open(openContext);
             randomState =
                     this.getRuntimeContext()
                             .getState(new ValueStateDescriptor<>("RandomState", byte[].class));
