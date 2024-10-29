@@ -20,7 +20,6 @@ package org.apache.flink.state.benchmark.ttl;
 
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
-import org.apache.flink.contrib.streaming.state.RocksDBKeyedStateBackend;
 import org.apache.flink.state.benchmark.StateBenchmarkBase;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
@@ -82,11 +81,7 @@ public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
         // make sure only one sst file left, so all get invocation will access this single file,
         // to prevent the spike caused by different key distribution in multiple sst files,
         // the more access to the older sst file, the lower throughput will be.
-        if (keyedStateBackend instanceof RocksDBKeyedStateBackend) {
-            RocksDBKeyedStateBackend<Long> rocksDBKeyedStateBackend =
-                    (RocksDBKeyedStateBackend<Long>) keyedStateBackend;
-            compactState(rocksDBKeyedStateBackend, stateDesc);
-        }
+        compactState(keyedStateBackend, stateDesc);
         advanceTimePerIteration();
     }
 
@@ -100,11 +95,7 @@ public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
                     state.clear();
                 });
         // make the clearance effective, trigger compaction for RocksDB, and GC for heap.
-        if (keyedStateBackend instanceof RocksDBKeyedStateBackend) {
-            RocksDBKeyedStateBackend<Long> rocksDBKeyedStateBackend =
-                    (RocksDBKeyedStateBackend<Long>) keyedStateBackend;
-            compactState(rocksDBKeyedStateBackend, stateDesc);
-        } else {
+        if (!compactState(keyedStateBackend, stateDesc)) {
             System.gc();
         }
         // wait a while for the clearance to take effect.
