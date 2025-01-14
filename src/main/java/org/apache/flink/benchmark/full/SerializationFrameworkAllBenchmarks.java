@@ -19,6 +19,7 @@
 package org.apache.flink.benchmark.full;
 
 import org.apache.flink.api.common.ExecutionConfig;
+import org.apache.flink.api.common.serialization.SerializerConfigImpl;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.benchmark.FlinkEnvironmentContext;
@@ -83,7 +84,7 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
             throws Exception {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
-        env.getConfig().getSerializerConfig().setForceAvro(true);
+        ((SerializerConfigImpl) env.getConfig().getSerializerConfig()).setForceAvro(true);
 
         env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
                 .rebalance()
@@ -97,7 +98,7 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
     public void serializerAvroReflect(FlinkEnvironmentContext context) throws Exception {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
-        env.getConfig().getSerializerConfig().setForceAvro(true);
+        ((SerializerConfigImpl) env.getConfig().getSerializerConfig()).setForceAvro(true);
 
         env.addSource(new PojoSource(RECORDS_PER_INVOCATION, 10))
                 .rebalance()
@@ -126,11 +127,11 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-
-        executionConfig.getSerializerConfig().setForceKryo(true);
-        executionConfig.getSerializerConfig().addDefaultKryoSerializer(
+        SerializerConfigImpl serializerConfig = (SerializerConfigImpl) executionConfig.getSerializerConfig();
+        serializerConfig.setForceKryo(true);
+        serializerConfig.addDefaultKryoSerializer(
                 org.apache.flink.benchmark.thrift.MyPojo.class, TBaseSerializer.class);
-        executionConfig.getSerializerConfig().addDefaultKryoSerializer(
+        serializerConfig.addDefaultKryoSerializer(
                 org.apache.flink.benchmark.thrift.MyOperation.class, TBaseSerializer.class);
 
         env.addSource(new ThriftPojoSource(RECORDS_PER_INVOCATION, 10))
@@ -146,11 +147,12 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-        executionConfig.getSerializerConfig().setForceKryo(true);
-        executionConfig.getSerializerConfig().registerTypeWithKryoSerializer(
+        SerializerConfigImpl serializerConfig = (SerializerConfigImpl) executionConfig.getSerializerConfig();
+        serializerConfig.setForceKryo(true);
+        serializerConfig.registerTypeWithKryoSerializer(
                 org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo.class,
                 ProtobufSerializer.class);
-        executionConfig.getSerializerConfig().registerTypeWithKryoSerializer(
+        serializerConfig.registerTypeWithKryoSerializer(
                 org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyOperation.class,
                 ProtobufSerializer.class);
 
