@@ -44,7 +44,7 @@ jobs:
 
       - name: Compile
         # https.protocols is a workaround for https://bugs.openjdk.java.net/browse/JDK-8213202
-        run: mvn install -P test -DskipTests=true -Dmaven.javadoc.skip=true -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -B -V
+        run: mvn install -P test-java17 -DskipTests=true -Dmaven.javadoc.skip=true -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -B -V
 
       - name: Test
-        run: mvn test -P test -B
+        run: mvn test -P test-java17 -B
