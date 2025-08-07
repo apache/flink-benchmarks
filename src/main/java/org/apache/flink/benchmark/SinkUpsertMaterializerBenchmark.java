@@ -132,7 +132,7 @@ public class SinkUpsertMaterializerBenchmark extends BenchmarkBase {
         public int numRecordsTotal;
 
         // larger payload amplifies any inefficiencies but slows down the benchmark; mostly affects rocksdb
-        @Param({"10", "250"})
+        @Param({"20"})
         public int payloadSize;
 
         // lower retraction percentage implies longer history, making retractions even harder (unless percentage = 0)
