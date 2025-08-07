@@ -138,7 +138,7 @@ public class SinkUpsertMaterializerBenchmark extends BenchmarkBase {
         public int numRecordsTotal;
 
         // larger payload amplifies any inefficiencies but slows down the benchmark; mostly affects rocksdb
-        @Param("100")
+        @Param({"10", "100"})
         public int payloadSize;
 
         // lower retraction percentage implies longer history, making retractions even harder (unless percentage = 0)
@@ -147,9 +147,9 @@ public class SinkUpsertMaterializerBenchmark extends BenchmarkBase {
 
         // higher retraction delay leaves longer history, making retractions even harder (unless percentage = 0)
         // for automated runs, reduce the run time (and the data points) to the most common cases
-        @Param({"1", "100"})
-        // for comparison, these values might be useful
-//        @Param({"1", "10", "100", "200", "1000"})
+        @Param({"1", "1000"})
+        // for comparison, the following values might be useful:
+        // @Param({"1", "10", "100", "200", "1000"})
         public int retractDelay;
 
         // the lower the value, the closer to the end of the list is the element to retract, the harder for V1 to find the element
