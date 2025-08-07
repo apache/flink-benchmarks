@@ -105,12 +105,6 @@ public class SinkUpsertMaterializerBenchmark extends BenchmarkBase {
     public static void main(String[] args) throws RunnerException {
         new Runner(new OptionsBuilder()
                 .verbosity(VerboseMode.NORMAL)
-                // speedup
-//                .warmupIterations(1)
-//                .measurementIterations(1)
-//                .forks(1)
-//                .warmupTime(TimeValue.milliseconds(100))
-//                .measurementTime(TimeValue.seconds(1))
                 .include(".*" + SinkUpsertMaterializerBenchmark.class.getCanonicalName() + ".*")
                 .build()).run();
     }
