@@ -19,3 +19,6 @@ out/
 *.ipr
 *.iws
 jmh-result*.csv
+.bloop
+.metals
+.vscode

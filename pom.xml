@@ -69,6 +69,9 @@ under the License.
 		<executableJava>java</executableJava>
 		<jmhProfArgument> </jmhProfArgument>
 		<profilerOutputDir>${build.directory}/profile-results</profilerOutputDir>
+		<scala.version.major>3</scala.version.major>
+		<scala.version.minor>7.2</scala.version.minor>
+		<scala.version>${scala.version.major}.${scala.version.minor}</scala.version>
 	</properties>
 
 	<repositories>
@@ -260,6 +263,16 @@ under the License.
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
 			<version>${protobuf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.flinkextended</groupId>
+			<artifactId>flink-scala-api-2_${scala.version.major}</artifactId>
+			<version>1.2.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala3-library_${scala.version.major}</artifactId>
+			<version>${scala.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -639,6 +652,35 @@ under the License.
 			</extension>
 		</extensions>
 		<plugins>
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>4.8.1</version>
+				<executions>
+					<execution>
+						<id>scala-compile-first</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>scala-test-compile</id>
+						<phase>process-test-resources</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<fork>false</fork>
+					<failOnMultipleScalaVersions>false</failOnMultipleScalaVersions>
+					<args>
+						<arg>-encoding</arg>
+						<arg>UTF8</arg>
+					</args>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
