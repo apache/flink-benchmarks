@@ -32,7 +32,8 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.RunnerException;
 
 /** The benchmark of handle global failure and restarting tasks in a STREAMING/BATCH job. */
-public class HandleGlobalFailureAndRestartAllTasksBenchmarkExecutor extends SchedulerBenchmarkExecutorBase {
+public class HandleGlobalFailureAndRestartAllTasksBenchmarkExecutor
+        extends SchedulerBenchmarkExecutorBase {
 
     @Param({"BATCH", "STREAMING", "BATCH_EVENLY", "STREAMING_EVENLY"})
     private JobConfiguration jobConfiguration;

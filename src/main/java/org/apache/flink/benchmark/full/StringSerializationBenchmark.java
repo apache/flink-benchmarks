@@ -52,20 +52,24 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class StringSerializationBenchmark extends BenchmarkBase {
 
-    public static final char[] asciiChars =
+    public static final char[] ASCII_CHARS =
             "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890".toCharArray();
-    public static final char[] russianChars =
+    public static final char[] RUSSIAN_CHARS =
             "йцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ".toCharArray();
-    public static final char[] chineseChars =
+    public static final char[] CHINESE_CHARS =
             "的是不了人我在有他这为之大来以个中上们到国说和地也子要时道出而于就下得可你年生".toCharArray();
+
     @Param({"ascii", "russian", "chinese"})
     public String type;
+
     @Param({"4", "128", "16384"})
     public String lengthStr;
+
     int length;
     String input;
     ExecutionConfig config = new ExecutionConfig();
-    TypeSerializer<String> serializer = TypeInformation.of(String.class).createSerializer(config.getSerializerConfig());
+    TypeSerializer<String> serializer =
+            TypeInformation.of(String.class).createSerializer(config.getSerializerConfig());
     ByteArrayInputStream serializedBuffer;
     DataInputView serializedStream;
 
@@ -85,13 +89,13 @@ public class StringSerializationBenchmark extends BenchmarkBase {
         length = Integer.parseInt(lengthStr);
         switch (type) {
             case "ascii":
-                input = generate(asciiChars, length);
+                input = generate(ASCII_CHARS, length);
                 break;
             case "russian":
-                input = generate(russianChars, length);
+                input = generate(RUSSIAN_CHARS, length);
                 break;
             case "chinese":
-                input = generate(chineseChars, length);
+                input = generate(CHINESE_CHARS, length);
                 break;
             default:
                 throw new IllegalArgumentException(type + "charset is not supported");

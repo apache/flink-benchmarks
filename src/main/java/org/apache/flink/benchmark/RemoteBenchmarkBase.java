@@ -36,7 +36,9 @@ public abstract class RemoteBenchmarkBase extends BenchmarkBase {
             return 1;
         }
 
-        /** @return the number of vertices the respective job graph contains. */
+        /**
+         * @return the number of vertices the respective job graph contains.
+         */
         abstract int getNumberOfVertices();
     }
 }

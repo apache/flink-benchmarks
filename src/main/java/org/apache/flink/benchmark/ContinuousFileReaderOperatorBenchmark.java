@@ -27,9 +27,9 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.legacy.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperatorFactory;
 import org.apache.flink.streaming.api.functions.source.TimestampedFileInputSplit;
+import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
 
 import joptsimple.internal.Strings;
-import org.apache.flink.streaming.api.functions.source.legacy.SourceFunction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.runner.Runner;
@@ -43,19 +43,19 @@ import java.util.concurrent.TimeoutException;
 
 @OperationsPerInvocation(value = ContinuousFileReaderOperatorBenchmark.RECORDS_PER_INVOCATION)
 public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
-    private static final int SPLITS_PER_INVOCATION = 100;
-    private static final int LINES_PER_SPLIT = 175_000;
-    public static final int RECORDS_PER_INVOCATION = SPLITS_PER_INVOCATION * LINES_PER_SPLIT;
+    private static final int splitsPerInvocation = 100;
+    private static final int linesPerSplit = 175_000;
+    public static final int RECORDS_PER_INVOCATION = splitsPerInvocation * linesPerSplit;
 
-    private static final TimestampedFileInputSplit SPLIT =
+    private static final TimestampedFileInputSplit split =
             new TimestampedFileInputSplit(0, 0, new Path("."), 0, 0, new String[] {});
-    private static final String LINE = Strings.repeat('0', 10);
+    private static final String line = Strings.repeat('0', 10);
 
     // Source should wait until all elements reach sink. Otherwise, END_OF_INPUT is sent once all
     // splits are emitted.
     // Thus, all subsequent reads in ContinuousFileReaderOperator would be made in CLOSING state in
     // a simple while-true loop (MailboxExecutor.isIdle is always true).
-    private static OneShotLatch TARGET_COUNT_REACHED_LATCH = new OneShotLatch();
+    private static OneShotLatch targetCountReachedLatch = new OneShotLatch();
 
     public static void main(String[] args) throws RunnerException {
         Options options =
@@ -73,7 +73,7 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
 
     @Benchmark
     public void readFileSplit(FlinkEnvironmentContext context) throws Exception {
-        TARGET_COUNT_REACHED_LATCH.reset();
+        targetCountReachedLatch.reset();
         StreamExecutionEnvironment env = context.env;
         env.enableCheckpointing(100)
                 .setParallelism(1)
@@ -93,15 +93,15 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
 
         @Override
         public void run(SourceContext<TimestampedFileInputSplit> ctx) {
-            while (isRunning && count < SPLITS_PER_INVOCATION) {
+            while (isRunning && count < splitsPerInvocation) {
                 count++;
                 synchronized (ctx.getCheckpointLock()) {
-                    ctx.collect(SPLIT);
+                    ctx.collect(split);
                 }
             }
             while (isRunning) {
                 try {
-                    TARGET_COUNT_REACHED_LATCH.await(100, TimeUnit.MILLISECONDS);
+                    targetCountReachedLatch.await(100, TimeUnit.MILLISECONDS);
                     return;
                 } catch (InterruptedException e) {
                     if (!isRunning) {
@@ -124,13 +124,13 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
 
         @Override
         public boolean reachedEnd() {
-            return count >= ContinuousFileReaderOperatorBenchmark.LINES_PER_SPLIT;
+            return count >= ContinuousFileReaderOperatorBenchmark.linesPerSplit;
         }
 
         @Override
         public String nextRecord(String s) {
             count++;
-            return LINE;
+            return line;
         }
 
         @Override
@@ -151,7 +151,7 @@ public class ContinuousFileReaderOperatorBenchmark extends BenchmarkBase {
         @Override
         public void invoke(String value, Context context) {
             if (++count == RECORDS_PER_INVOCATION) {
-                TARGET_COUNT_REACHED_LATCH.trigger();
+                targetCountReachedLatch.trigger();
             }
         }
     }

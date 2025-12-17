@@ -21,6 +21,7 @@ package org.apache.flink.state.benchmark.ttl;
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.state.benchmark.StateBenchmarkBase;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
@@ -38,9 +39,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.getMapState;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeyCount;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeys;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.MAP_KEYS;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.MAP_KEY_COUNT;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.SETUP_KEY_COUNT;
 
 /** Implementation for map state benchmark testing. */
 public class TtlMapStateBenchmark extends TtlStateBenchmarkBase {
@@ -64,15 +65,15 @@ public class TtlMapStateBenchmark extends TtlStateBenchmarkBase {
                 getMapState(
                         keyedStateBackend,
                         configTtl(new MapStateDescriptor<>("mapState", Long.class, Double.class)));
-        dummyMaps = new HashMap<>(mapKeyCount);
-        for (int i = 0; i < mapKeyCount; ++i) {
-            dummyMaps.put(mapKeys.get(i), random.nextDouble());
+        dummyMaps = new HashMap<>(MAP_KEY_COUNT);
+        for (int i = 0; i < MAP_KEY_COUNT; ++i) {
+            dummyMaps.put(MAP_KEYS.get(i), random.nextDouble());
         }
-        for (int i = 0; i < setupKeyCount; ++i) {
+        for (int i = 0; i < SETUP_KEY_COUNT; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
-            for (int j = 0; j < mapKeyCount; j++) {
+            for (int j = 0; j < MAP_KEY_COUNT; j++) {
                 setTtlWhenInitialization();
-                mapState.put(mapKeys.get(j), random.nextDouble());
+                mapState.put(MAP_KEYS.get(j), random.nextDouble());
             }
         }
         keyIndex = new AtomicInteger();
@@ -108,7 +109,7 @@ public class TtlMapStateBenchmark extends TtlStateBenchmarkBase {
     }
 
     @Benchmark
-    @OperationsPerInvocation(mapKeyCount)
+    @OperationsPerInvocation(MAP_KEY_COUNT)
     public void mapIterator(StateBenchmarkBase.KeyValue keyValue, Blackhole bh) throws Exception {
         keyedStateBackend.setCurrentKey(keyValue.setUpKey);
         Iterator<Map.Entry<Long, Double>> iterator = mapState.iterator();

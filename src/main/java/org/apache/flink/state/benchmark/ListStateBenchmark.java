@@ -39,14 +39,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.applyToAllKeys;
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.compactState;
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.getListState;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.listValueCount;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.LIST_VALUE_COUNT;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.SETUP_KEY_COUNT;
 
 /** Implementation for list state benchmark testing. */
 public class ListStateBenchmark extends StateBenchmarkBase {
-    private final String STATE_NAME = "listState";
-    private final ListStateDescriptor<Long> STATE_DESC =
-            new ListStateDescriptor<>(STATE_NAME, Long.class);
+    private final String stateName = "listState";
+    private final ListStateDescriptor<Long> stateDesc =
+            new ListStateDescriptor<>(stateName, Long.class);
     private ListState<Long> listState;
     private List<Long> dummyLists;
 
@@ -63,9 +63,9 @@ public class ListStateBenchmark extends StateBenchmarkBase {
     @Setup
     public void setUp() throws Exception {
         keyedStateBackend = createKeyedStateBackend();
-        listState = getListState(keyedStateBackend, STATE_DESC);
-        dummyLists = new ArrayList<>(listValueCount);
-        for (int i = 0; i < listValueCount; ++i) {
+        listState = getListState(keyedStateBackend, stateDesc);
+        dummyLists = new ArrayList<>(LIST_VALUE_COUNT);
+        for (int i = 0; i < LIST_VALUE_COUNT; ++i) {
             dummyLists.add(random.nextLong());
         }
         keyIndex = new AtomicInteger();
@@ -73,27 +73,27 @@ public class ListStateBenchmark extends StateBenchmarkBase {
 
     @Setup(Level.Iteration)
     public void setUpPerIteration() throws Exception {
-        for (int i = 0; i < setupKeyCount; ++i) {
+        for (int i = 0; i < SETUP_KEY_COUNT; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
             listState.add(random.nextLong());
         }
         // make sure only one sst file left, so all get invocation will access this single file,
         // to prevent the spike caused by different key distribution in multiple sst files,
         // the more access to the older sst file, the lower throughput will be.
-        compactState(keyedStateBackend, STATE_DESC);
+        compactState(keyedStateBackend, stateDesc);
     }
 
     @TearDown(Level.Iteration)
     public void tearDownPerIteration() throws Exception {
         applyToAllKeys(
                 keyedStateBackend,
-                STATE_DESC,
+                stateDesc,
                 (k, state) -> {
                     keyedStateBackend.setCurrentKey(k);
                     state.clear();
                 });
         // make the clearance effective, trigger compaction for RocksDB, and GC for heap.
-        if (!compactState(keyedStateBackend, STATE_DESC)) {
+        if (!compactState(keyedStateBackend, stateDesc)) {
             System.gc();
         }
         // wait a while for the clearance to take effect.

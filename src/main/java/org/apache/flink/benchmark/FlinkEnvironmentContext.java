@@ -103,11 +103,12 @@ public class FlinkEnvironmentContext {
         final Configuration configuration = new Configuration();
         configuration.set(RestOptions.BIND_PORT, "0");
         // no equivalent config available.
-        //configuration.setInteger(
+        // configuration.setInteger(
         //        NettyShuffleEnvironmentOptions.NETWORK_NUM_BUFFERS, NUM_NETWORK_BUFFERS);
         configuration.set(DeploymentOptions.TARGET, MiniClusterPipelineExecutorServiceLoader.NAME);
         configuration.set(DeploymentOptions.ATTACHED, true);
-        // It doesn't make sense to wait for the final checkpoint in benchmarks since it only prolongs
+        // It doesn't make sense to wait for the final checkpoint in benchmarks since it only
+        // prolongs
         // the test but doesn't give any advantages.
         configuration.set(CheckpointingOptions.ENABLE_CHECKPOINTS_AFTER_TASKS_FINISH, false);
         // TODO: remove this line after FLINK-28243 will be done

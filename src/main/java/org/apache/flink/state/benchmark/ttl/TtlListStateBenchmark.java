@@ -21,6 +21,7 @@ package org.apache.flink.state.benchmark.ttl;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.state.benchmark.StateBenchmarkBase;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;
@@ -39,12 +40,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.applyToAllKeys;
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.compactState;
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.getListState;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.listValueCount;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.LIST_VALUE_COUNT;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.SETUP_KEY_COUNT;
 
 /** Implementation for list state benchmark testing. */
 public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
-    private final String STATE_NAME = "listState";
+    private final String stateName = "listState";
     private ListStateDescriptor<Long> stateDesc;
     private ListState<Long> listState;
     private List<Long> dummyLists;
@@ -62,10 +63,10 @@ public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
     @Setup
     public void setUp() throws Exception {
         keyedStateBackend = createKeyedStateBackend();
-        stateDesc = configTtl(new ListStateDescriptor<>(STATE_NAME, Long.class));
+        stateDesc = configTtl(new ListStateDescriptor<>(stateName, Long.class));
         listState = getListState(keyedStateBackend, stateDesc);
-        dummyLists = new ArrayList<>(listValueCount);
-        for (int i = 0; i < listValueCount; ++i) {
+        dummyLists = new ArrayList<>(LIST_VALUE_COUNT);
+        for (int i = 0; i < LIST_VALUE_COUNT; ++i) {
             dummyLists.add(random.nextLong());
         }
         keyIndex = new AtomicInteger();
@@ -73,7 +74,7 @@ public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
 
     @Setup(Level.Iteration)
     public void setUpPerIteration() throws Exception {
-        for (int i = 0; i < setupKeyCount; ++i) {
+        for (int i = 0; i < SETUP_KEY_COUNT; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
             setTtlWhenInitialization();
             listState.add(random.nextLong());
@@ -127,7 +128,8 @@ public class TtlListStateBenchmark extends TtlStateBenchmarkBase {
     }
 
     @Benchmark
-    public void listGetAndIterate(StateBenchmarkBase.KeyValue keyValue, Blackhole bh) throws Exception {
+    public void listGetAndIterate(StateBenchmarkBase.KeyValue keyValue, Blackhole bh)
+            throws Exception {
         keyedStateBackend.setCurrentKey(keyValue.setUpKey);
         Iterable<Long> iterable = listState.get();
         for (Long value : iterable) {

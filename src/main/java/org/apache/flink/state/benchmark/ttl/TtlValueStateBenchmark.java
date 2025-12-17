@@ -20,6 +20,7 @@ package org.apache.flink.state.benchmark.ttl;
 
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Setup;
@@ -33,7 +34,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.getValueState;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.SETUP_KEY_COUNT;
 
 /** Implementation for listValue state benchmark testing. */
 public class TtlValueStateBenchmark extends TtlStateBenchmarkBase {
@@ -52,8 +53,11 @@ public class TtlValueStateBenchmark extends TtlStateBenchmarkBase {
     @Setup
     public void setUp() throws Exception {
         keyedStateBackend = createKeyedStateBackend();
-        valueState = getValueState(keyedStateBackend, configTtl(new ValueStateDescriptor<>("kvState", Long.class)));
-        for (int i = 0; i < setupKeyCount; ++i) {
+        valueState =
+                getValueState(
+                        keyedStateBackend,
+                        configTtl(new ValueStateDescriptor<>("kvState", Long.class)));
+        for (int i = 0; i < SETUP_KEY_COUNT; ++i) {
             setTtlWhenInitialization();
             keyedStateBackend.setCurrentKey((long) i);
             valueState.update(random.nextLong());

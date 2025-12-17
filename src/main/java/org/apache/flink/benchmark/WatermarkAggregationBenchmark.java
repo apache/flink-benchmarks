@@ -16,15 +16,12 @@
  * limitations under the License.
  */
 
-
 package org.apache.flink.benchmark;
 
 import org.apache.flink.runtime.source.coordinator.SourceCoordinatorAlignmentBenchmark;
 
 import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.TearDown;
@@ -34,7 +31,9 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
-/** The watermark aggregation benchmark for source coordinator when enabling the watermark alignment. */
+/**
+ * The watermark aggregation benchmark for source coordinator when enabling the watermark alignment.
+ */
 public class WatermarkAggregationBenchmark extends BenchmarkBase {
 
     private static final int NUM_SUBTASKS = 5000;
@@ -47,7 +46,10 @@ public class WatermarkAggregationBenchmark extends BenchmarkBase {
         Options options =
                 new OptionsBuilder()
                         .verbosity(VerboseMode.NORMAL)
-                        .include(".*" + WatermarkAggregationBenchmark.class.getCanonicalName() + ".*")
+                        .include(
+                                ".*"
+                                        + WatermarkAggregationBenchmark.class.getCanonicalName()
+                                        + ".*")
                         .build();
 
         new Runner(options).run();
@@ -71,5 +73,4 @@ public class WatermarkAggregationBenchmark extends BenchmarkBase {
     public void teardown() throws Exception {
         benchmark.teardown();
     }
-
 }

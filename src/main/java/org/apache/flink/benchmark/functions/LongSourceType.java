@@ -54,4 +54,4 @@ public enum LongSourceType {
     public DataStreamSource<Long> source(StreamExecutionEnvironment environment, long maxValue) {
         return factory.apply(environment, maxValue);
     }
-};
+}

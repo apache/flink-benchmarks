@@ -21,11 +21,7 @@ package org.apache.flink.benchmark;
 import org.apache.flink.benchmark.functions.IntegerLongSource;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.configuration.StateBackendOptions;
-import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
-import org.apache.flink.runtime.state.AbstractStateBackend;
-import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.util.FileUtils;
 
@@ -65,7 +61,6 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
                 e.printStackTrace();
             }
 
-
             Configuration configuration = Configuration.fromMap(env.getConfiguration().toMap());
             String checkpointDataUri = "file://" + checkpointDir.getAbsolutePath();
             switch (stateBackend) {
@@ -93,7 +88,7 @@ public class StateBackendBenchmarkBase extends BenchmarkBase {
             }
 
             // default character
-            //env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+            // env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
             source = env.addSource(new IntegerLongSource(numberOfElements, recordsPerInvocation));
         }
 
