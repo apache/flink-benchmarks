@@ -69,6 +69,32 @@ under the License.
 		<executableJava>java</executableJava>
 		<jmhProfArgument> </jmhProfArgument>
 		<profilerOutputDir>${build.directory}/profile-results</profilerOutputDir>
+
+        <!-- The spotless related.-->
+        <checkstyle.version>10.18.2</checkstyle.version>
+        <spotless.skip>false</spotless.skip>
+        <spotless.version>2.43.0</spotless.version>
+        <spotless.scalafmt.version>3.4.3</spotless.scalafmt.version>
+        <spotless.delimiter>package</spotless.delimiter>
+        <spotless.license.header>
+            /*
+            * Licensed to the Apache Software Foundation (ASF) under one
+            * or more contributor license agreements.  See the NOTICE file
+            * distributed with this work for additional information
+            * regarding copyright ownership.  The ASF licenses this file
+            * to you under the Apache License, Version 2.0 (the
+            * "License"); you may not use this file except in compliance
+            * with the License.  You may obtain a copy of the License at
+            *
+            *     http://www.apache.org/licenses/LICENSE-2.0
+            *
+            * Unless required by applicable law or agreed to in writing, software
+            * distributed under the License is distributed on an "AS IS" BASIS,
+            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+            * See the License for the specific language governing permissions and
+            * limitations under the License.
+            */
+        </spotless.license.header>
 	</properties>
 
 	<repositories>
@@ -630,7 +656,82 @@ under the License.
 	</profiles>
 
 	<build>
-		<extensions>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <!-- Note: match version with docs/flinkDev/ide_setup.md -->
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
+
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <!-- Skip the packages, because the classes in the package is generated to follow thrift.-->
+                        <excludes>
+                            org/apache/flink/benchmark/thrift/**
+                        </excludes>
+                        <suppressionsLocation>/tools/maven/suppressions.xml</suppressionsLocation>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <configLocation>/tools/maven/checkstyle.xml</configLocation>
+                        <logViolationsToConsole>true</logViolationsToConsole>
+                        <failOnViolation>true</failOnViolation>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless.version}</version>
+                    <configuration>
+                        <java>
+                            <googleJavaFormat>
+                                <version>1.24.0</version>
+                                <style>AOSP</style>
+                            </googleJavaFormat>
+
+                            <!-- \# refers to the static imports -->
+                            <importOrder>
+                                <order>org.apache.flink,org.apache.flink.shaded,,javax,java,scala,\#</order>
+                            </importOrder>
+
+                            <removeUnusedImports />
+
+                            <excludes>
+                                <!-- Skip the packages, because the classes in the package is generated to follow thrift.-->
+                                <exclude>src/main/java/org/apache/flink/benchmark/thrift/**</exclude>
+                            </excludes>
+                        </java>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>spotless-check</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <extensions>
 			<!-- required for getting the correct protoc binary for protobuf -->
 			<extension>
 				<groupId>kr.motd.maven</groupId>
@@ -754,6 +855,14 @@ under the License.
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
 		</plugins>
 	</build>
 </project>
