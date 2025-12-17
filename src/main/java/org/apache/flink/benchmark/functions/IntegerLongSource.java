@@ -24,6 +24,7 @@ public class IntegerLongSource extends RichParallelSourceFunction<IntegerLongSou
     private volatile boolean running = true;
     private int numberOfKeys;
     private long numberOfElements;
+
     public IntegerLongSource(int numberOfKeys, long numberOfElements) {
         this.numberOfKeys = numberOfKeys;
         this.numberOfElements = numberOfElements;

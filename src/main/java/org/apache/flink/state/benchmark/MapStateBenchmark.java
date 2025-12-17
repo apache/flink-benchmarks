@@ -37,9 +37,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.getMapState;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeyCount;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.mapKeys;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.MAP_KEYS;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.MAP_KEY_COUNT;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.SETUP_KEY_COUNT;
 
 /** Implementation for map state benchmark testing. */
 public class MapStateBenchmark extends StateBenchmarkBase {
@@ -63,14 +63,14 @@ public class MapStateBenchmark extends StateBenchmarkBase {
                 getMapState(
                         keyedStateBackend,
                         new MapStateDescriptor<>("mapState", Long.class, Double.class));
-        dummyMaps = new HashMap<>(mapKeyCount);
-        for (int i = 0; i < mapKeyCount; ++i) {
-            dummyMaps.put(mapKeys.get(i), random.nextDouble());
+        dummyMaps = new HashMap<>(MAP_KEY_COUNT);
+        for (int i = 0; i < MAP_KEY_COUNT; ++i) {
+            dummyMaps.put(MAP_KEYS.get(i), random.nextDouble());
         }
-        for (int i = 0; i < setupKeyCount; ++i) {
+        for (int i = 0; i < SETUP_KEY_COUNT; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
-            for (int j = 0; j < mapKeyCount; j++) {
-                mapState.put(mapKeys.get(j), random.nextDouble());
+            for (int j = 0; j < MAP_KEY_COUNT; j++) {
+                mapState.put(MAP_KEYS.get(j), random.nextDouble());
             }
         }
         keyIndex = new AtomicInteger();
@@ -107,7 +107,7 @@ public class MapStateBenchmark extends StateBenchmarkBase {
     }
 
     @Benchmark
-    @OperationsPerInvocation(mapKeyCount)
+    @OperationsPerInvocation(MAP_KEY_COUNT)
     public void mapKeys(KeyValue keyValue, Blackhole bh) throws Exception {
         keyedStateBackend.setCurrentKey(keyValue.setUpKey);
         for (Long key : mapState.keys()) {
@@ -116,7 +116,7 @@ public class MapStateBenchmark extends StateBenchmarkBase {
     }
 
     @Benchmark
-    @OperationsPerInvocation(mapKeyCount)
+    @OperationsPerInvocation(MAP_KEY_COUNT)
     public void mapValues(KeyValue keyValue, Blackhole bh) throws Exception {
         keyedStateBackend.setCurrentKey(keyValue.setUpKey);
         for (Double value : mapState.values()) {
@@ -125,7 +125,7 @@ public class MapStateBenchmark extends StateBenchmarkBase {
     }
 
     @Benchmark
-    @OperationsPerInvocation(mapKeyCount)
+    @OperationsPerInvocation(MAP_KEY_COUNT)
     public void mapEntries(KeyValue keyValue, Blackhole bh) throws Exception {
         keyedStateBackend.setCurrentKey(keyValue.setUpKey);
         Iterable<Map.Entry<Long, Double>> iterable = mapState.entries();
@@ -138,7 +138,7 @@ public class MapStateBenchmark extends StateBenchmarkBase {
     }
 
     @Benchmark
-    @OperationsPerInvocation(mapKeyCount)
+    @OperationsPerInvocation(MAP_KEY_COUNT)
     public void mapIterator(KeyValue keyValue, Blackhole bh) throws Exception {
         keyedStateBackend.setCurrentKey(keyValue.setUpKey);
         Iterator<Map.Entry<Long, Double>> iterator = mapState.iterator();

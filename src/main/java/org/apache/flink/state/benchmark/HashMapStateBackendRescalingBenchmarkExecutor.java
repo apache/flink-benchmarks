@@ -19,13 +19,16 @@
 package org.apache.flink.state.benchmark;
 
 import org.apache.flink.api.common.JobID;
-import org.apache.flink.config.ConfigUtil;
-import org.apache.flink.config.StateBenchmarkOptions;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.state.benchmark.RescalingBenchmarkBuilder;
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.runtime.state.storage.FileSystemCheckpointStorage;
-import org.openjdk.jmh.annotations.*;
+
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.RunnerException;
 
 import java.io.IOException;
@@ -48,7 +51,8 @@ public class HashMapStateBackendRescalingBenchmarkExecutor extends RescalingBenc
 
     @Setup(Level.Trial)
     public void setUp() throws Exception {
-        // FsStateBackend is deprecated in favor of HashMapStateBackend with setting checkpointStorage.
+        // FsStateBackend is deprecated in favor of HashMapStateBackend with setting
+        // checkpointStorage.
         HashMapStateBackend stateBackend = new HashMapStateBackend();
         benchmark =
                 new RescalingBenchmarkBuilder<byte[]>()
@@ -56,10 +60,16 @@ public class HashMapStateBackendRescalingBenchmarkExecutor extends RescalingBenc
                         .setParallelismBefore(rescaleType.getParallelismBefore())
                         .setParallelismAfter(rescaleType.getParallelismAfter())
                         .setCheckpointStorageAccess(
-                                new FileSystemCheckpointStorage(new URI("file://" + prepareDirectory("rescaleDb").getAbsolutePath()), 0)
+                                new FileSystemCheckpointStorage(
+                                                new URI(
+                                                        "file://"
+                                                                + prepareDirectory("rescaleDb")
+                                                                        .getAbsolutePath()),
+                                                0)
                                         .createCheckpointStorage(new JobID()))
                         .setStateBackend(stateBackend)
-                        .setStreamRecordGenerator(new ByteArrayRecordGenerator(numberOfKeys, keyLen))
+                        .setStreamRecordGenerator(
+                                new ByteArrayRecordGenerator(numberOfKeys, keyLen))
                         .setStateProcessFunctionSupplier(TestKeyedFunction::new)
                         .build();
         benchmark.setUp();

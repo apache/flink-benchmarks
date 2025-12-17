@@ -23,6 +23,7 @@ import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.runtime.state.KeyedStateBackend;
 import org.apache.flink.runtime.state.ttl.TtlTimeProvider;
 import org.apache.flink.state.benchmark.StateBenchmarkBase;
+
 import org.openjdk.jmh.annotations.Param;
 
 import java.time.Duration;
@@ -42,6 +43,7 @@ public class TtlStateBenchmarkBase extends StateBenchmarkBase {
         NeverExpired(0);
 
         public long advanceTimePerIteration;
+
         ExpiredTimeOptions(int expirePercentPerIteration) {
             this.advanceTimePerIteration = initialTime * expirePercentPerIteration / 100;
         }

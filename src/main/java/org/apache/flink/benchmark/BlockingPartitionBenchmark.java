@@ -85,14 +85,13 @@ public class BlockingPartitionBenchmark extends BenchmarkBase {
             env.setBufferTimeout(-1);
         }
 
-        protected Configuration createConfiguration(
-                boolean compressionEnabled) {
+        protected Configuration createConfiguration(boolean compressionEnabled) {
             Configuration configuration = super.createConfiguration();
 
             configuration.set(
                     NettyShuffleEnvironmentOptions.SHUFFLE_COMPRESSION_CODEC,
-                    compressionEnabled ?
-                            NettyShuffleEnvironmentOptions.CompressionCodec.LZ4
+                    compressionEnabled
+                            ? NettyShuffleEnvironmentOptions.CompressionCodec.LZ4
                             : NettyShuffleEnvironmentOptions.CompressionCodec.NONE);
             configuration.set(
                     CoreOptions.TMP_DIRS,

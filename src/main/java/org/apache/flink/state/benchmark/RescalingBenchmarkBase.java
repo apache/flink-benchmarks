@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.flink.state.benchmark;
 
 import org.apache.flink.api.common.functions.OpenContext;
@@ -23,13 +24,10 @@ import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.PrimitiveArrayTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.benchmark.BenchmarkBase;
-import org.apache.flink.config.ConfigUtil;
-import org.apache.flink.config.StateBenchmarkOptions;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.state.benchmark.RescalingBenchmark;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.util.Collector;
+
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -41,8 +39,6 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
@@ -105,9 +101,7 @@ public class RescalingBenchmarkBase extends BenchmarkBase {
         private final byte[] fatArray;
         private int count = 0;
 
-
-        protected ByteArrayRecordGenerator(final int numberOfKeys,
-                                           final int keyLen) {
+        protected ByteArrayRecordGenerator(final int numberOfKeys, final int keyLen) {
             this.numberOfKeys = numberOfKeys;
             fatArray = new byte[keyLen];
         }

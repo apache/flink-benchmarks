@@ -28,54 +28,54 @@ import java.util.Random;
  */
 public class StateBenchmarkConstants {
     // TODO: why all of those static fields? Those should be inside a context class
-    public static final int mapKeyCount = 10;
-    public static final int listValueCount = 100;
-    public static final int setupKeyCount = 500_000;
-    public static final String rootDirName = "benchmark";
-    public static final String recoveryDirName = "localRecovery";
-    public static final String dbDirName = "dbPath";
+    public static final int MAP_KEY_COUNT = 10;
+    public static final int LIST_VALUE_COUNT = 100;
+    public static final int SETUP_KEY_COUNT = 500_000;
+    public static final String ROOT_DIR_NAME = "benchmark";
+    public static final String RECOVERY_DIR_NAME = "localRecovery";
+    public static final String DB_PATH = "dbPath";
 
-    public static final ArrayList<Long> mapKeys = new ArrayList<>(mapKeyCount);
-    public static final ArrayList<Double> mapValues = new ArrayList<>(mapKeyCount);
-    public static final ArrayList<Long> setupKeys = new ArrayList<>(setupKeyCount);
-    public static final int newKeyCount = 500_000;
-    public static final ArrayList<Long> newKeys = new ArrayList<>(newKeyCount);
-    public static final int randomValueCount = 1_000_000;
-    public static final ArrayList<Long> randomValues = new ArrayList<>(randomValueCount);
+    public static final ArrayList<Long> MAP_KEYS = new ArrayList<>(MAP_KEY_COUNT);
+    public static final ArrayList<Double> MAP_VALUES = new ArrayList<>(MAP_KEY_COUNT);
+    public static final ArrayList<Long> SETUP_KEYS = new ArrayList<>(SETUP_KEY_COUNT);
+    public static final int NEW_KEY_COUNT = 500_000;
+    public static final ArrayList<Long> NEW_KEYS = new ArrayList<>(NEW_KEY_COUNT);
+    public static final int RANDOM_VALUE_COUNT = 1_000_000;
+    public static final ArrayList<Long> RANDOM_VALUES = new ArrayList<>(RANDOM_VALUE_COUNT);
 
     static {
-        for (int i = 0; i < mapKeyCount; i++) {
-            mapKeys.add((long) i);
+        for (int i = 0; i < MAP_KEY_COUNT; i++) {
+            MAP_KEYS.add((long) i);
         }
-        Collections.shuffle(mapKeys);
+        Collections.shuffle(MAP_KEYS);
     }
 
     static {
         Random random = new Random();
-        for (int i = 0; i < mapKeyCount; i++) {
-            mapValues.add(random.nextDouble());
+        for (int i = 0; i < MAP_KEY_COUNT; i++) {
+            MAP_VALUES.add(random.nextDouble());
         }
-        Collections.shuffle(mapValues);
+        Collections.shuffle(MAP_VALUES);
     }
 
     static {
-        for (long i = 0; i < setupKeyCount; i++) {
-            setupKeys.add(i);
+        for (long i = 0; i < SETUP_KEY_COUNT; i++) {
+            SETUP_KEYS.add(i);
         }
-        Collections.shuffle(setupKeys);
+        Collections.shuffle(SETUP_KEYS);
     }
 
     static {
-        for (long i = 0; i < newKeyCount; i++) {
-            newKeys.add(i + setupKeyCount);
+        for (long i = 0; i < NEW_KEY_COUNT; i++) {
+            NEW_KEYS.add(i + SETUP_KEY_COUNT);
         }
-        Collections.shuffle(newKeys);
+        Collections.shuffle(NEW_KEYS);
     }
 
     static {
-        for (long i = 0; i < randomValueCount; i++) {
-            randomValues.add(i);
+        for (long i = 0; i < RANDOM_VALUE_COUNT; i++) {
+            RANDOM_VALUES.add(i);
         }
-        Collections.shuffle(randomValues);
+        Collections.shuffle(RANDOM_VALUES);
     }
 }

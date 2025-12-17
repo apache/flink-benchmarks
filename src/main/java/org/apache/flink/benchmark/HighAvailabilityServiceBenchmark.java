@@ -18,7 +18,6 @@
 
 package org.apache.flink.benchmark;
 
-import org.apache.curator.test.TestingServer;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.HighAvailabilityOptions;
@@ -27,6 +26,8 @@ import org.apache.flink.runtime.jobgraph.JobVertex;
 import org.apache.flink.runtime.jobmanager.HighAvailabilityMode;
 import org.apache.flink.runtime.testtasks.NoOpInvokable;
 import org.apache.flink.util.FileUtils;
+
+import org.apache.curator.test.TestingServer;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
@@ -54,88 +55,94 @@ import static org.openjdk.jmh.annotations.Scope.Thread;
  */
 @OutputTimeUnit(SECONDS)
 public class HighAvailabilityServiceBenchmark extends BenchmarkBase {
-	public static void main(String[] args) throws RunnerException {
-		Options options =
-				new OptionsBuilder()
-						.verbosity(VerboseMode.NORMAL)
-						.include(".*" + HighAvailabilityServiceBenchmark.class.getCanonicalName() + ".*")
-						.build();
+    public static void main(String[] args) throws RunnerException {
+        Options options =
+                new OptionsBuilder()
+                        .verbosity(VerboseMode.NORMAL)
+                        .include(
+                                ".*"
+                                        + HighAvailabilityServiceBenchmark.class.getCanonicalName()
+                                        + ".*")
+                        .build();
 
-		new Runner(options).run();
-	}
+        new Runner(options).run();
+    }
 
-	@Benchmark
-	public void submitJobThroughput(HighAvailabilityContext context) throws Exception {
-		context.miniCluster.executeJobBlocking(buildNoOpJob());
-	}
+    @Benchmark
+    public void submitJobThroughput(HighAvailabilityContext context) throws Exception {
+        context.miniCluster.executeJobBlocking(buildNoOpJob());
+    }
 
-	private static JobGraph buildNoOpJob() {
-		JobGraph jobGraph = new JobGraph(JobID.generate(), UUID.randomUUID().toString());
-		jobGraph.addVertex(createNoOpVertex());
-		return jobGraph;
-	}
+    private static JobGraph buildNoOpJob() {
+        JobGraph jobGraph = new JobGraph(JobID.generate(), UUID.randomUUID().toString());
+        jobGraph.addVertex(createNoOpVertex());
+        return jobGraph;
+    }
 
-	private static JobVertex createNoOpVertex() {
-		JobVertex vertex = new JobVertex("v");
-		vertex.setInvokableClass(NoOpInvokable.class);
-		vertex.setParallelism(1);
-		vertex.setMaxParallelism(1);
-		return vertex;
-	}
+    private static JobVertex createNoOpVertex() {
+        JobVertex vertex = new JobVertex("v");
+        vertex.setInvokableClass(NoOpInvokable.class);
+        vertex.setParallelism(1);
+        vertex.setMaxParallelism(1);
+        return vertex;
+    }
 
-	@State(Thread)
-	public static class HighAvailabilityContext extends FlinkEnvironmentContext {
-		private TestingServer testingServer;
-		public final File haDir;
+    @State(Thread)
+    public static class HighAvailabilityContext extends FlinkEnvironmentContext {
+        private TestingServer testingServer;
+        public final File haDir;
 
-		@Param({"ZOOKEEPER", "NONE"})
-		public HighAvailabilityMode highAvailabilityMode;
+        @Param({"ZOOKEEPER", "NONE"})
+        public HighAvailabilityMode highAvailabilityMode;
 
-		public HighAvailabilityContext() {
-			try {
-				haDir = Files.createTempDirectory("bench-ha-").toFile();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+        public HighAvailabilityContext() {
+            try {
+                haDir = Files.createTempDirectory("bench-ha-").toFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-		@Override
-		public void setUp() throws Exception {
-			if (isZookeeperHighAvailability()) {
-				testingServer = new TestingServer();
-				testingServer.start();
-			}
+        @Override
+        public void setUp() throws Exception {
+            if (isZookeeperHighAvailability()) {
+                testingServer = new TestingServer();
+                testingServer.start();
+            }
 
-			// The method `super.setUp()` will call `createConfiguration()` to get Configuration and
-			// create a `MiniCluster`. We need to start TestingServer before `createConfiguration()`,
-			// then we can add zookeeper quorum in the configuration. So we can only start
-			// `TestingServer` before `super.setUp()`.
-			super.setUp();
-		}
+            // The method `super.setUp()` will call `createConfiguration()` to get Configuration and
+            // create a `MiniCluster`. We need to start TestingServer before
+            // `createConfiguration()`,
+            // then we can add zookeeper quorum in the configuration. So we can only start
+            // `TestingServer` before `super.setUp()`.
+            super.setUp();
+        }
 
-		private boolean isZookeeperHighAvailability() {
-			return highAvailabilityMode == HighAvailabilityMode.ZOOKEEPER;
-		}
+        private boolean isZookeeperHighAvailability() {
+            return highAvailabilityMode == HighAvailabilityMode.ZOOKEEPER;
+        }
 
-		@Override
-		protected Configuration createConfiguration() {
-			Configuration configuration = super.createConfiguration();
-			configuration.set(HighAvailabilityOptions.HA_MODE, highAvailabilityMode.name());
-			configuration.set(HighAvailabilityOptions.HA_STORAGE_PATH, haDir.toURI().toString());
-			if (isZookeeperHighAvailability()) {
-				configuration.set(HighAvailabilityOptions.HA_ZOOKEEPER_QUORUM, testingServer.getConnectString());
-			}
-			return configuration;
-		}
+        @Override
+        protected Configuration createConfiguration() {
+            Configuration configuration = super.createConfiguration();
+            configuration.set(HighAvailabilityOptions.HA_MODE, highAvailabilityMode.name());
+            configuration.set(HighAvailabilityOptions.HA_STORAGE_PATH, haDir.toURI().toString());
+            if (isZookeeperHighAvailability()) {
+                configuration.set(
+                        HighAvailabilityOptions.HA_ZOOKEEPER_QUORUM,
+                        testingServer.getConnectString());
+            }
+            return configuration;
+        }
 
-		@Override
-		public void tearDown() throws Exception {
-			super.tearDown();
-			if (isZookeeperHighAvailability()) {
-				testingServer.stop();
-				testingServer.close();
-			}
-			FileUtils.deleteDirectory(haDir);
-		}
-	}
+        @Override
+        public void tearDown() throws Exception {
+            super.tearDown();
+            if (isZookeeperHighAvailability()) {
+                testingServer.stop();
+                testingServer.close();
+            }
+            FileUtils.deleteDirectory(haDir);
+        }
+    }
 }

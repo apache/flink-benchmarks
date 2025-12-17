@@ -98,8 +98,7 @@ public abstract class CheckpointEnvironmentContext extends FlinkEnvironmentConte
                             TaskManagerOptions.MEMORY_SEGMENT_SIZE,
                             CheckpointEnvironmentContext.START_MEMORY_SEGMENT_SIZE);
                     config.set(
-                            CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
-                            Duration.ofMillis(0));
+                            CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT, Duration.ofMillis(0));
                     config.set(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, false);
                     return config;
                 }),
@@ -110,8 +109,7 @@ public abstract class CheckpointEnvironmentContext extends FlinkEnvironmentConte
                             TaskManagerOptions.MEMORY_SEGMENT_SIZE,
                             CheckpointEnvironmentContext.START_MEMORY_SEGMENT_SIZE);
                     config.set(
-                            CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT,
-                            Duration.ofMillis(1));
+                            CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT, Duration.ofMillis(1));
                     config.set(TaskManagerOptions.BUFFER_DEBLOAT_ENABLED, false);
                     return config;
                 }),

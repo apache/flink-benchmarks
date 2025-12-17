@@ -15,17 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.flink.state.benchmark;
 
 import org.apache.flink.api.common.JobID;
-import org.apache.flink.config.ConfigUtil;
-import org.apache.flink.config.StateBenchmarkOptions;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
-import org.apache.flink.state.benchmark.RescalingBenchmarkBuilder;
 import org.apache.flink.runtime.state.storage.FileSystemCheckpointStorage;
 
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.RunnerException;
 
 import java.io.IOException;
@@ -55,10 +58,14 @@ public class RocksdbStateBackendRescalingBenchmarkExecutor extends RescalingBenc
                         .setParallelismAfter(rescaleType.getParallelismAfter())
                         .setManagedMemorySize(512 * 1024 * 1024)
                         .setCheckpointStorageAccess(
-                                new FileSystemCheckpointStorage("file://" + prepareDirectory("rescaleDb").getAbsolutePath())
+                                new FileSystemCheckpointStorage(
+                                                "file://"
+                                                        + prepareDirectory("rescaleDb")
+                                                                .getAbsolutePath())
                                         .createCheckpointStorage(new JobID()))
                         .setStateBackend(stateBackend)
-                        .setStreamRecordGenerator(new ByteArrayRecordGenerator(numberOfKeys, keyLen))
+                        .setStreamRecordGenerator(
+                                new ByteArrayRecordGenerator(numberOfKeys, keyLen))
                         .setStateProcessFunctionSupplier(TestKeyedFunction::new)
                         .build();
         benchmark.setUp();

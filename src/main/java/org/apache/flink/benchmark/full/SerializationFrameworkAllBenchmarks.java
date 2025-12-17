@@ -127,7 +127,8 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-        SerializerConfigImpl serializerConfig = (SerializerConfigImpl) executionConfig.getSerializerConfig();
+        SerializerConfigImpl serializerConfig =
+                (SerializerConfigImpl) executionConfig.getSerializerConfig();
         serializerConfig.setForceKryo(true);
         serializerConfig.addDefaultKryoSerializer(
                 org.apache.flink.benchmark.thrift.MyPojo.class, TBaseSerializer.class);
@@ -147,7 +148,8 @@ public class SerializationFrameworkAllBenchmarks extends SerializationFrameworkM
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-        SerializerConfigImpl serializerConfig = (SerializerConfigImpl) executionConfig.getSerializerConfig();
+        SerializerConfigImpl serializerConfig =
+                (SerializerConfigImpl) executionConfig.getSerializerConfig();
         serializerConfig.setForceKryo(true);
         serializerConfig.registerTypeWithKryoSerializer(
                 org.apache.flink.benchmark.protobuf.MyPojoOuterClass.MyPojo.class,

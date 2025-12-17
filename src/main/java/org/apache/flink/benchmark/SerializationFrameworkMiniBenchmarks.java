@@ -68,7 +68,8 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-        SerializerConfigImpl serializerConfig = (SerializerConfigImpl) executionConfig.getSerializerConfig();
+        SerializerConfigImpl serializerConfig =
+                (SerializerConfigImpl) executionConfig.getSerializerConfig();
         serializerConfig.registerPojoType(MyPojo.class);
         serializerConfig.registerPojoType(MyOperation.class);
 
@@ -85,7 +86,8 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(1);
         ExecutionConfig executionConfig = env.getConfig();
-        SerializerConfigImpl serializerConfig = (SerializerConfigImpl) executionConfig.getSerializerConfig();
+        SerializerConfigImpl serializerConfig =
+                (SerializerConfigImpl) executionConfig.getSerializerConfig();
         serializerConfig.registerPojoType(MyPojo.class);
         serializerConfig.registerPojoType(MyOperation.class);
 
@@ -115,7 +117,8 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(4);
         ExecutionConfig executionConfig = env.getConfig();
-        SerializerConfigImpl serializerConfig = (SerializerConfigImpl) executionConfig.getSerializerConfig();
+        SerializerConfigImpl serializerConfig =
+                (SerializerConfigImpl) executionConfig.getSerializerConfig();
         serializerConfig.setForceKryo(true);
         serializerConfig.registerKryoType(MyPojo.class);
         serializerConfig.registerKryoType(MyOperation.class);
@@ -167,9 +170,9 @@ public class SerializationFrameworkMiniBenchmarks extends BenchmarkBase {
             super.init();
             templates =
                     new String[] {
-                        makeString(StringSerializationBenchmark.asciiChars, 1024),
-                        makeString(StringSerializationBenchmark.russianChars, 1024),
-                        makeString(StringSerializationBenchmark.chineseChars, 1024)
+                        makeString(StringSerializationBenchmark.ASCII_CHARS, 1024),
+                        makeString(StringSerializationBenchmark.RUSSIAN_CHARS, 1024),
+                        makeString(StringSerializationBenchmark.CHINESE_CHARS, 1024)
                     };
         }
 

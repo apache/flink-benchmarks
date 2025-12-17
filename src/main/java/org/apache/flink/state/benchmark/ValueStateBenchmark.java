@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.flink.state.benchmark.StateBackendBenchmarkUtils.getValueState;
-import static org.apache.flink.state.benchmark.StateBenchmarkConstants.setupKeyCount;
+import static org.apache.flink.state.benchmark.StateBenchmarkConstants.SETUP_KEY_COUNT;
 
 /** Implementation for listValue state benchmark testing. */
 public class ValueStateBenchmark extends StateBenchmarkBase {
@@ -54,7 +54,7 @@ public class ValueStateBenchmark extends StateBenchmarkBase {
         keyedStateBackend = createKeyedStateBackend();
         valueState =
                 getValueState(keyedStateBackend, new ValueStateDescriptor<>("kvState", Long.class));
-        for (int i = 0; i < setupKeyCount; ++i) {
+        for (int i = 0; i < SETUP_KEY_COUNT; ++i) {
             keyedStateBackend.setCurrentKey((long) i);
             valueState.update(random.nextLong());
         }

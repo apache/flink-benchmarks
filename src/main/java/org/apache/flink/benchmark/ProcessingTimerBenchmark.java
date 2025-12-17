@@ -24,6 +24,7 @@ import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.sink.legacy.DiscardingSink;
 import org.apache.flink.streaming.api.functions.source.legacy.RichParallelSourceFunction;
 import org.apache.flink.util.Collector;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.runner.Runner;
@@ -41,7 +42,7 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
 
     private static final int PARALLELISM = 1;
 
-    private static OneShotLatch LATCH = new OneShotLatch();
+    private static OneShotLatch latch = new OneShotLatch();
 
     public static void main(String[] args) throws RunnerException {
         Options options =
@@ -55,7 +56,7 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
 
     @Benchmark
     public void fireProcessingTimers(FlinkEnvironmentContext context) throws Exception {
-        LATCH.reset();
+        latch.reset();
         StreamExecutionEnvironment env = context.env;
         env.setParallelism(PARALLELISM);
 
@@ -84,7 +85,7 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
                 sourceContext.collect(String.valueOf(random.nextLong()));
             }
 
-            LATCH.await();
+            latch.await();
         }
 
         @Override
@@ -111,7 +112,8 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
                 throws Exception {
             final long currTimestamp = System.currentTimeMillis();
             for (int i = 0; i < timersPerRecord; i++) {
-                context.timerService().registerProcessingTimeTimer(currTimestamp - timersPerRecord + i);
+                context.timerService()
+                        .registerProcessingTimeTimer(currTimestamp - timersPerRecord + i);
             }
         }
 
@@ -119,7 +121,7 @@ public class ProcessingTimerBenchmark extends BenchmarkBase {
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
             if (++firedTimesCount == timersPerRecord) {
-                LATCH.trigger();
+                latch.trigger();
             }
         }
     }
