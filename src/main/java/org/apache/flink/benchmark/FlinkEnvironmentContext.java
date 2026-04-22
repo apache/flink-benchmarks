@@ -35,6 +35,7 @@ import org.openjdk.jmh.annotations.TearDown;
 
 import java.time.Duration;
 
+import static org.apache.flink.configuration.NettyShuffleEnvironmentOptions.DATA_SSL_ENABLED;
 import static org.apache.flink.configuration.ResourceManagerOptions.REQUIREMENTS_CHECK_DELAY;
 import static org.openjdk.jmh.annotations.Scope.Thread;
 
@@ -53,6 +54,7 @@ public class FlinkEnvironmentContext {
             throw new RuntimeException("setUp was called multiple times!");
         }
         final Configuration clusterConfig = createConfiguration();
+        clusterConfig.set(DATA_SSL_ENABLED, false);
         clusterConfig.set(RestartStrategyOptions.RESTART_STRATEGY, "none");
         clusterConfig.set(StateBackendOptions.STATE_BACKEND, "hashmap");
         miniCluster =
