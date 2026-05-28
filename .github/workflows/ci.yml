@@ -24,6 +24,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # FLINK-39787: GitHub-hosted Azure runners assign a VM hostname whose
+      # reverse DNS returns an internal cloudapp.net FQDN. The SSL benchmarks
+      # rely on flink-runtime's local127.keystore, whose SAN list only contains
+      # 'localhost', '127.0.0.1', and '::1'. Map the runner hostname to the
+      # loopback interface so InetAddress.getLocalHost() (used to bind the
+      # benchmark NettyServer) returns 127.0.0.1 and the SSL handshake matches
+      # the certificate. The real fix belongs in apache/flink's
+      # StreamNetworkBenchmarkEnvironment (use getLoopbackAddress instead of
+      # getLocalHost); track separately.
+      - name: Map runner hostname to loopback
+        run: |
+          sudo sed -i "/$(hostname)/d" /etc/hosts
+          echo "127.0.0.1 localhost $(hostname -f) $(hostname)" | sudo tee -a /etc/hosts
+          echo "After shim:"
+          getent hosts "$(hostname)"
+          getent hosts 127.0.0.1
+
       - name: Set JDK
         uses: actions/setup-java@v3
         with:
