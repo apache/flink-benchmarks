@@ -76,9 +76,9 @@ public class AdaptivePartitionThroughputBenchmark extends BenchmarkBase {
         DataStreamSource<Long> source = sourceType.source(env, RECORDS_PER_INVOCATION);
         source.map(new MultiplyByTwo())
                 .rebalance()
-                .map(new SkewableHigherMultiply(1, 0, 5))
+                .map(new SkewableHigherMultiply(1, 100, 0, 5))
                 .rescale()
-                .map(new SkewableHigherMultiply(1, 0, 5))
+                .map(new SkewableHigherMultiply(1, 100, 0, 5))
                 .sinkTo(new DiscardingSink<>());
 
         env.execute();
