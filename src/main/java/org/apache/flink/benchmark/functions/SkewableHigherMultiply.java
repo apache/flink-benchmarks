@@ -26,12 +26,17 @@ import java.util.Set;
 
 public class SkewableHigherMultiply extends RichMapFunction<Long, Long> {
 
-    private final int additionalCostMillisPerRecord;
+    private final int additionalCostMillisPerBatch;
+    private final int recordsPerBatch;
+    private int numRecordsForCurrentBatch;
     private final Set<Integer> expectedSkewedSubTasksIndexes;
 
     public SkewableHigherMultiply(
-            int additionalCostMillisPerRecord, Integer... expectedSkewedSubTasksIndexes) {
-        this.additionalCostMillisPerRecord = additionalCostMillisPerRecord;
+            int additionalCostMillisPerBatch,
+            int recordsPerBatch,
+            Integer... expectedSkewedSubTasksIndexes) {
+        this.additionalCostMillisPerBatch = additionalCostMillisPerBatch;
+        this.recordsPerBatch = recordsPerBatch;
         this.expectedSkewedSubTasksIndexes =
                 new HashSet<>(Arrays.asList(expectedSkewedSubTasksIndexes));
     }
@@ -39,12 +44,15 @@ public class SkewableHigherMultiply extends RichMapFunction<Long, Long> {
     @Override
     public Long map(Long value) throws Exception {
         double base = value * 2.0d;
-        if (additionalCostMillisPerRecord <= 0) {
+        if (additionalCostMillisPerBatch <= 0) {
             return (long) base;
         } else {
             if (expectedSkewedSubTasksIndexes.contains(
                     getRuntimeContext().getTaskInfo().getIndexOfThisSubtask())) {
-                Thread.sleep(additionalCostMillisPerRecord);
+                if (++numRecordsForCurrentBatch == recordsPerBatch) {
+                    numRecordsForCurrentBatch = 0;
+                    Thread.sleep(additionalCostMillisPerBatch);
+                }
             }
             return (long) base;
         }
