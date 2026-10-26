@@ -28,16 +28,39 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.v2.DiscardingSink;
 
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.openjdk.jmh.annotations.Mode.Throughput;
+import static org.openjdk.jmh.annotations.Scope.Thread;
+
+@State(Thread)
+@OutputTimeUnit(MILLISECONDS)
+@BenchmarkMode(Throughput)
+@Fork(
+        value = 2,
+        jvmArgsAppend = {
+            "-Djava.rmi.server.hostname=127.0.0.1",
+            "-Dcom.sun.management.jmxremote.authenticate=false",
+            "-Dcom.sun.management.jmxremote.ssl=false",
+            "-Dcom.sun.management.jmxremote.ssl"
+        })
+@Warmup(iterations = 4)
+@Measurement(iterations = 8)
 @OperationsPerInvocation(value = AdaptivePartitionThroughputBenchmark.RECORDS_PER_INVOCATION)
-public class AdaptivePartitionThroughputBenchmark extends BenchmarkBase {
+public class AdaptivePartitionThroughputBenchmark {
     public static final int RECORDS_PER_INVOCATION = 150_000;
     private static final long CHECKPOINT_INTERVAL_MS = 100;
 
@@ -76,9 +99,9 @@ public class AdaptivePartitionThroughputBenchmark extends BenchmarkBase {
         DataStreamSource<Long> source = sourceType.source(env, RECORDS_PER_INVOCATION);
         source.map(new MultiplyByTwo())
                 .rebalance()
-                .map(new SkewableHigherMultiply(1, 100, 0, 5))
+                .map(new SkewableHigherMultiply(1, 300, 0, 5))
                 .rescale()
-                .map(new SkewableHigherMultiply(1, 100, 0, 5))
+                .map(new SkewableHigherMultiply(1, 300, 0, 5))
                 .sinkTo(new DiscardingSink<>());
 
         env.execute();
@@ -92,8 +115,8 @@ public class AdaptivePartitionThroughputBenchmark extends BenchmarkBase {
                 NettyShuffleEnvironmentOptions.ADAPTIVE_PARTITIONER_MAX_TRAVERSE_SIZE,
                 adaptivePartitionerMaxTraverseSize);
         config.setString("restart-strategy", "fixed-delay");
-        config.setString("restart-strategy.fixed-delay.attempts", "15000000");
-        config.setString("restart-strategy.fixed-delay.delay", "3s");
+        config.setString("restart-strategy.fixed-delay.attempts", "150");
+        config.setString("restart-strategy.fixed-delay.delay", "2s");
         env.configure(config);
     }
 
