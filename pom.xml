@@ -308,38 +308,38 @@ under the License.
 								<goals>
 									<goal>exec</goal>
 								</goals>
+								<configuration combine.self="override">
+									<skip>${skipTests}</skip>
+									<classpathScope>test</classpathScope>
+									<executable>${basedir}/benchmark.sh</executable>
+									<arguments>
+										<argument>-c</argument>
+										<classpath/>
+										<argument>-b</argument>
+										<argument>${executableJava}</argument>
+										<argument>-j</argument>
+										<argument>-Xmx6g</argument>
+										<!--speed up tests-->
+										<argument>-a</argument>
+										<argument>-f</argument>
+										<argument>-a</argument>
+										<argument>1</argument>
+										<argument>-a</argument>
+										<argument>-i</argument>
+										<argument>-a</argument>
+										<argument>1</argument>
+										<argument>-a</argument>
+										<argument>-wi</argument>
+										<argument>-a</argument>
+										<argument>0</argument>
+										<argument>-e</argument>
+										<argument>${benchmarkExcludes}</argument>
+										<argument>-m</argument>
+										<argument>${benchmarks}</argument>
+									</arguments>
+								</configuration>
 							</execution>
 						</executions>
-						<configuration>
-							<skip>${skipTests}</skip>
-							<classpathScope>test</classpathScope>
-							<executable>${basedir}/benchmark.sh</executable>
-							<arguments>
-								<argument>-c</argument>
-								<classpath/>
-								<argument>-b</argument>
-								<argument>${executableJava}</argument>
-								<argument>-j</argument>
-								<argument>-Xmx6g</argument>
-								<!--speed up tests-->
-								<argument>-a</argument>
-								<argument>-f</argument>
-								<argument>-a</argument>
-								<argument>1</argument>
-								<argument>-a</argument>
-								<argument>-i</argument>
-								<argument>-a</argument>
-								<argument>1</argument>
-								<argument>-a</argument>
-								<argument>-wi</argument>
-								<argument>-a</argument>
-								<argument>0</argument>
-								<argument>-e</argument>
-								<argument>${benchmarkExcludes}</argument>
-								<argument>-m</argument>
-								<argument>${benchmarks}</argument>
-							</arguments>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
@@ -363,42 +363,42 @@ under the License.
 								<goals>
 									<goal>exec</goal>
 								</goals>
+								<configuration combine.self="override">
+									<skip>${skipTests}</skip>
+									<classpathScope>test</classpathScope>
+									<executable>${basedir}/benchmark.sh</executable>
+									<arguments>
+										<argument>-c</argument>
+										<classpath/>
+										<argument>-b</argument>
+										<argument>${executableJava}</argument>
+										<argument>-j</argument>
+										<argument>-Xmx6g</argument>
+										<argument>-j</argument>
+										<argument>--add-opens</argument>
+										<argument>-j</argument>
+										<argument>java.base/java.util=ALL-UNNAMED</argument>
+										<!--speed up tests-->
+										<argument>-a</argument>
+										<argument>-f</argument>
+										<argument>-a</argument>
+										<argument>1</argument>
+										<argument>-a</argument>
+										<argument>-i</argument>
+										<argument>-a</argument>
+										<argument>1</argument>
+										<argument>-a</argument>
+										<argument>-wi</argument>
+										<argument>-a</argument>
+										<argument>0</argument>
+										<argument>-e</argument>
+										<argument>${benchmarkExcludes}</argument>
+										<argument>-m</argument>
+										<argument>${benchmarks}</argument>
+									</arguments>
+								</configuration>
 							</execution>
 						</executions>
-						<configuration>
-							<skip>${skipTests}</skip>
-							<classpathScope>test</classpathScope>
-							<executable>${basedir}/benchmark.sh</executable>
-							<arguments>
-								<argument>-c</argument>
-								<classpath/>
-								<argument>-b</argument>
-								<argument>${executableJava}</argument>
-								<argument>-j</argument>
-								<argument>-Xmx6g</argument>
-								<argument>-j</argument>
-								<argument>--add-opens</argument>
-								<argument>-j</argument>
-								<argument>java.base/java.util=ALL-UNNAMED</argument>
-								<!--speed up tests-->
-								<argument>-a</argument>
-								<argument>-f</argument>
-								<argument>-a</argument>
-								<argument>1</argument>
-								<argument>-a</argument>
-								<argument>-i</argument>
-								<argument>-a</argument>
-								<argument>1</argument>
-								<argument>-a</argument>
-								<argument>-wi</argument>
-								<argument>-a</argument>
-								<argument>0</argument>
-								<argument>-e</argument>
-								<argument>${benchmarkExcludes}</argument>
-								<argument>-m</argument>
-								<argument>${benchmarks}</argument>
-							</arguments>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
