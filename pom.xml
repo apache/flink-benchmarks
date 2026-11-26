@@ -68,7 +68,7 @@ under the License.
 		<benchmarks>.*</benchmarks>
 		<executableJava>java</executableJava>
 		<jmhProfArgument> </jmhProfArgument>
-		<profilerOutputDir>${build.directory}/profile-results</profilerOutputDir>
+		<profilerOutputDir>${project.build.directory}/profile-results</profilerOutputDir>
 
         <!-- The spotless related.-->
         <checkstyle.version>10.18.2</checkstyle.version>
